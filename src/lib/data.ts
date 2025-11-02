@@ -53,29 +53,63 @@ export function getNews(): NewsArticle[] {
   ];
 }
 
-const generateChartData = (base: number, points: number, volatility: number): ChartDataPoint[] => {
-    let lastValue = base;
-    const data = [];
-    for (let i = 0; i < points; i++) {
-        const change = (Math.random() - 0.5) * volatility;
-        lastValue += change;
-        data.push({ date: `T-${points - i}`, value: parseFloat(lastValue.toFixed(2)) });
+const generateChartData = (base: number, points: number, volatility: number, period: string): ChartDataPoint[] => {
+  let lastValue = base;
+  const data: ChartDataPoint[] = [];
+  const today = new Date();
+
+  for (let i = 0; i < points; i++) {
+    const change = (Math.random() - 0.49) * volatility * lastValue / 100;
+    lastValue += change;
+    
+    let date: Date;
+    switch(period) {
+      case '1D':
+        date = new Date(today.getTime() - (points - 1 - i) * 5 * 60 * 1000); // 5 minute intervals
+        break;
+      case '5D':
+        date = new Date(today.getTime() - (points - 1 - i) * 60 * 60 * 1000); // Hourly intervals
+        break;
+      case '1M':
+        date = new Date(today);
+        date.setDate(today.getDate() - (points - 1 - i));
+        break;
+      case '6M':
+        date = new Date(today);
+        date.setDate(today.getDate() - (points - 1 - i) * 7);
+        break;
+      case '1Y':
+        date = new Date(today);
+        date.setDate(today.getDate() - (points - 1 - i) * 7);
+        break;
+      default:
+        date = new Date();
     }
-    return data.reverse();
+
+    data.push({ date: date.toISOString(), value: parseFloat(lastValue.toFixed(2)) });
+  }
+  return data;
 };
 
+
 export function getVixChartData(): ChartDataPoint[] {
-    return generateChartData(14, 30, 0.5);
+    return generateChartData(14, 30, 2, '1M');
 }
 
-export function getMainChartData(): MainChartData {
-    return {
-        '1D': generateChartData(23500, 96, 50), // ~8 hours of 5-min intervals
-        '5D': generateChartData(23300, 60, 100), // 5 days of hourly data
-        '1M': generateChartData(23000, 30, 150), // 1 month of daily data
-        '6M': generateChartData(21000, 26, 300), // 6 months of weekly data
-        '1Y': generateChartData(19000, 52, 500), // 1 year of weekly data
-    };
+export function getMainChartData(symbol: string): MainChartData {
+  // In a real app, you'd fetch data based on the symbol.
+  // Here, we'll generate random data for demonstration.
+  const allTickers = getAllTickers();
+  const ticker = allTickers.find(t => t.symbol === symbol) || { price: 23500 };
+  const basePrice = ticker.price;
+
+  return {
+      '1D': generateChartData(basePrice, 96, 0.5, '1D'), // ~8 hours of 5-min intervals
+      '5D': generateChartData(basePrice, 60, 1, '5D'), // 5 days of hourly data
+      '1M': generateChartData(basePrice, 30, 2, '1M'), // 1 month of daily data
+      '6M': generateChartData(basePrice, 26, 5, '6M'), // 6 months of weekly data
+      '1Y': generateChartData(basePrice, 52, 8, '1Y'), // 1 year of weekly data
+  };
 }
 
 export function getAllTickers(): Ticker[] {

@@ -8,7 +8,7 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
-export default function StockSearch({ onSelect }: { onSelect?: () => void }) {
+export default function StockSearch({ onSelect }: { onSelect: (ticker: Ticker) => void }) {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 200);
   const [results, setResults] = useState<Ticker[]>([]);
@@ -23,13 +23,14 @@ export default function StockSearch({ onSelect }: { onSelect?: () => void }) {
       );
       setResults(filtered.slice(0, 10)); // Limit results for performance
     } else {
-      setResults([]);
+      // Show top 5 tickers by default if query is empty
+      setResults(allTickers.slice(0, 5));
     }
   }, [debouncedQuery, allTickers]);
 
-  const handleSelect = () => {
+  const handleSelect = (ticker: Ticker) => {
     setQuery('');
-    onSelect?.();
+    onSelect(ticker);
   };
 
   return (
@@ -42,9 +43,9 @@ export default function StockSearch({ onSelect }: { onSelect?: () => void }) {
       />
       <CommandList>
         {results.length > 0 && (
-          <CommandGroup heading="Results">
+          <CommandGroup heading={debouncedQuery ? "Results" : "Popular"}>
             {results.map((ticker) => (
-              <CommandItem key={ticker.symbol} onSelect={handleSelect} value={`${ticker.symbol} ${ticker.name}`}>
+              <CommandItem key={ticker.symbol} onSelect={() => handleSelect(ticker)} value={`${ticker.symbol} ${ticker.name}`}>
                 <div className="flex w-full cursor-pointer items-center justify-between">
                   <div className="flex flex-col">
                     <span className="font-semibold">{ticker.symbol}</span>

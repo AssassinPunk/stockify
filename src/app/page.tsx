@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Header from '@/components/dashboard/header';
 import IndexCard from '@/components/dashboard/index-card';
 import VixCard from '@/components/dashboard/vix-card';
@@ -7,23 +10,40 @@ import TrendingTickers from '@/components/dashboard/trending-tickers';
 import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
 import { getIndices, getVixData, getSectors, getTrendingTickers, getNews, getVixChartData, getMainChartData } from '@/lib/data';
+import type { Ticker } from '@/lib/types';
+
+const nifty50Ticker: Ticker = {
+  symbol: 'NIFTY 50',
+  name: 'NIFTY 50',
+  price: 23516.00,
+  change: 48.50,
+  percentChange: 0.21,
+};
 
 export default function Home() {
+  // Mock data fetching
   const indices = getIndices();
   const vixData = getVixData();
   const sectors = getSectors();
   const trending = getTrendingTickers();
   const news = getNews();
   const vixChartData = getVixChartData();
-  const mainChartData = getMainChartData();
+
+  const [selectedTicker, setSelectedTicker] = useState<Ticker>(nifty50Ticker);
+
+  const mainChartData = getMainChartData(selectedTicker.symbol);
 
   const nifty50 = indices.find(i => i.symbol === 'NIFTY 50');
   const sensex = indices.find(i => i.symbol === 'SENSEX');
   const bankNifty = indices.find(i => i.symbol === 'BANK NIFTY');
+  
+  const handleStockSelect = (ticker: Ticker) => {
+    setSelectedTicker(ticker);
+  };
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
-      <Header />
+      <Header onStockSelect={handleStockSelect} />
       <main className="flex-1 space-y-6 p-4 md:p-6">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {nifty50 && <IndexCard index={nifty50} />}
@@ -34,7 +54,7 @@ export default function Home() {
         
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <div className="lg:col-span-8">
-            <MainChart chartData={mainChartData} />
+            <MainChart ticker={selectedTicker} chartData={mainChartData} />
           </div>
           <div className="lg:col-span-4">
             <SectorHeatmap sectors={sectors} />
