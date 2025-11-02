@@ -30,25 +30,35 @@ export default function StockSearch({ onSelect }: { onSelect: () => void }) {
     }
   }, [debouncedQuery, allTickers]);
 
-  const handleSelect = (ticker: Ticker) => {
-    setQuery('');
-    onSelect();
-    router.push(`/stock/${ticker.symbol}`);
+  const handleSelect = (value: string) => {
+    const ticker = allTickers.find(t => `${t.symbol.toLowerCase()} ${t.name.toLowerCase()}` === value.toLowerCase());
+    if (ticker) {
+        setQuery('');
+        onSelect();
+        router.push(`/stock/${ticker.symbol}`);
+    }
   };
 
   return (
-    <Command shouldFilter={false} className="bg-secondary">
+    <Command shouldFilter={false} className="bg-secondary" onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+            const firstResult = document.querySelector('[cmdk-item][aria-selected="true"]');
+            if(firstResult){
+                firstResult.dispatchEvent(new MouseEvent('click', {bubbles: true}))
+            }
+        }
+    }}>
       <CommandInput
         placeholder="Search stocks..."
         value={query}
-        onValueChange={setQuery}
+        onValueValueChange={setQuery}
         className="h-11 border-0 bg-secondary ring-offset-0 focus:ring-0"
       />
       <CommandList>
         {results.length > 0 && (
           <CommandGroup heading={debouncedQuery ? "Results" : "Popular"}>
             {results.map((ticker) => (
-              <CommandItem key={ticker.symbol} onSelect={() => handleSelect(ticker)} value={`${ticker.symbol} ${ticker.name}`}>
+              <CommandItem key={ticker.symbol} onSelect={handleSelect} value={`${ticker.symbol} ${ticker.name}`}>
                 <div className="flex w-full cursor-pointer items-center justify-between">
                   <div className="flex flex-col">
                     <span className="font-semibold">{ticker.symbol}</span>
