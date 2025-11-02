@@ -1,7 +1,7 @@
 'use client';
 
-import { AreaChart } from 'lucide-react';
-import { useState } from 'react';
+import { AreaChart, Settings, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import StockSearch from './stock-search';
 import { Input } from '../ui/input';
@@ -9,16 +9,117 @@ import { Search } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog"
+import { Button } from '../ui/button';
+import { getAllTickers } from '@/lib/data';
+import type { Ticker } from '@/lib/types';
+import { Checkbox } from '../ui/checkbox';
+import { useToast } from '@/hooks/use-toast';
+import { ScrollArea } from '../ui/scroll-area';
+import { Label } from '../ui/label';
 
-const famousStocks = [
-    { symbol: 'RELIANCE', name: 'Reliance' },
-    { symbol: 'TCS', name: 'TCS' },
-    { symbol: 'HDFCBANK', name: 'HDFC Bank' },
-];
+const MAX_PINNED_STOCKS = 3;
+
+function EditPinnedStocksDialog({ pinnedStocks, onSave }: { pinnedStocks: Ticker[], onSave: (newPinned: Ticker[]) => void }) {
+  const allTickers = getAllTickers();
+  const [selected, setSelected] = useState<string[]>(pinnedStocks.map(s => s.symbol));
+  const { toast } = useToast();
+
+  const handleCheckedChange = (checked: boolean | 'indeterminate', symbol: string) => {
+    if (checked) {
+      if (selected.length >= MAX_PINNED_STOCKS) {
+        toast({
+          variant: "destructive",
+          title: "Limit Reached",
+          description: `You can only pin up to ${MAX_PINNED_STOCKS} stocks.`,
+        });
+        return;
+      }
+      setSelected([...selected, symbol]);
+    } else {
+      setSelected(selected.filter(s => s !== symbol));
+    }
+  };
+
+  const handleSave = () => {
+    const newPinned = allTickers.filter(t => selected.includes(t.symbol));
+    onSave(newPinned);
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-7 w-7">
+          <Settings />
+          <span className="sr-only">Edit Pinned Stocks</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit Pinned Stocks</DialogTitle>
+          <DialogDescription>
+            Select up to {MAX_PINNED_STOCKS} stocks to display in the header for quick access.
+          </DialogDescription>
+        </DialogHeader>
+        <ScrollArea className="h-72">
+            <div className="grid gap-4 py-4 pr-6">
+            {allTickers.map(ticker => (
+                <div key={ticker.symbol} className="flex items-center space-x-2">
+                    <Checkbox
+                        id={ticker.symbol}
+                        checked={selected.includes(ticker.symbol)}
+                        onCheckedChange={(checked) => handleCheckedChange(checked, ticker.symbol)}
+                    />
+                    <Label htmlFor={ticker.symbol} className="flex-1 cursor-pointer">
+                        {ticker.name} ({ticker.symbol})
+                    </Label>
+                </div>
+            ))}
+            </div>
+        </ScrollArea>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button onClick={handleSave}>Save changes</Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const [pinnedStocks, setPinnedStocks] = useState<Ticker[]>([]);
   const pathname = usePathname();
+
+  useEffect(() => {
+    try {
+        const item = window.localStorage.getItem('pinnedStocks');
+        const defaultStocks = getAllTickers().filter(t => ['RELIANCE', 'TCS', 'HDFCBANK'].includes(t.symbol));
+        setPinnedStocks(item ? JSON.parse(item) : defaultStocks);
+    } catch (error) {
+        const defaultStocks = getAllTickers().filter(t => ['RELIANCE', 'TCS', 'HDFCBANK'].includes(t.symbol));
+        setPinnedStocks(defaultStocks);
+    }
+  }, []);
+
+  const handleSavePinnedStocks = (newPinned: Ticker[]) => {
+    setPinnedStocks(newPinned);
+     try {
+        window.localStorage.setItem('pinnedStocks', JSON.stringify(newPinned));
+    } catch (error) {
+        console.error("Could not save pinned stocks to local storage", error);
+    }
+  };
 
   const getLinkClass = (href: string) => {
     return cn(
@@ -37,11 +138,12 @@ export default function Header() {
 
         <div className="flex items-center gap-2">
             <Link href="/" className={getLinkClass('/')}>Home</Link>
-            {famousStocks.map(stock => (
+            {pinnedStocks.map(stock => (
                 <Link key={stock.symbol} href={`/stock/${stock.symbol}`} className={getLinkClass(`/stock/${stock.symbol}`)}>
                     {stock.name}
                 </Link>
             ))}
+             <EditPinnedStocksDialog pinnedStocks={pinnedStocks} onSave={handleSavePinnedStocks} />
         </div>
 
         <div className="relative ml-auto flex-1 md:grow-0">
