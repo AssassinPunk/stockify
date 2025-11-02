@@ -4,8 +4,16 @@ import { useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { MainChartData } from "@/lib/types";
+import { ChartConfig } from "@/components/ui/chart"
+
+const chartConfig = {
+  value: {
+    label: "NIFTY 50",
+    color: "hsl(var(--primary))",
+  },
+} satisfies ChartConfig
 
 export default function MainChart({ chartData }: { chartData: MainChartData }) {
   const [timeframe, setTimeframe] = useState<keyof MainChartData>("1M");
@@ -29,9 +37,8 @@ export default function MainChart({ chartData }: { chartData: MainChartData }) {
           </TabsList>
         </Tabs>
       </CardHeader>
-      <CardContent>
-        <div className="h-[350px]">
-          <ResponsiveContainer width="100%" height="100%">
+      <CardContent className="h-[350px]">
+        <ChartContainer config={chartConfig} className="h-full w-full">
             <AreaChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="mainChartGradient" x1="0" y1="0" x2="0" y2="1">
@@ -42,7 +49,7 @@ export default function MainChart({ chartData }: { chartData: MainChartData }) {
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} orientation="right" domain={['dataMin - 100', 'dataMax + 100']} />
-              <Tooltip
+              <ChartTooltip
                 cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1, strokeDasharray: "3 3" }}
                 content={<ChartTooltipContent
                   indicator="dot"
@@ -52,8 +59,7 @@ export default function MainChart({ chartData }: { chartData: MainChartData }) {
               />
               <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#mainChartGradient)" dot={false} />
             </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        </ChartContainer>
       </CardContent>
     </Card>
   );
