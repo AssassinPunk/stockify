@@ -1,4 +1,4 @@
-import type { IndexData, VixData, SectorData, TrendingData, NewsArticle, MainChartData, ChartDataPoint } from './types';
+import type { IndexData, VixData, SectorData, TrendingData, NewsArticle, MainChartData, ChartDataPoint, Ticker } from './types';
 
 export function getIndices(): IndexData[] {
   return [
@@ -29,16 +29,16 @@ export function getSectors(): SectorData[] {
 export function getTrendingTickers(): TrendingData {
   return {
     gainers: [
-      { symbol: 'TATAMOTORS', price: 985.50, change: 45.20, percentChange: 4.81 },
-      { symbol: 'WIPRO', price: 490.15, change: 18.50, percentChange: 3.92 },
-      { symbol: 'ADANIPORTS', price: 1450.70, change: 52.30, percentChange: 3.75 },
-      { symbol: 'INFY', price: 1530.00, change: 44.10, percentChange: 2.97 },
+      { symbol: 'TATAMOTORS', name: 'Tata Motors', price: 985.50, change: 45.20, percentChange: 4.81 },
+      { symbol: 'WIPRO', name: 'Wipro', price: 490.15, change: 18.50, percentChange: 3.92 },
+      { symbol: 'ADANIPORTS', name: 'Adani Ports', price: 1450.70, change: 52.30, percentChange: 3.75 },
+      { symbol: 'INFY', name: 'Infosys', price: 1530.00, change: 44.10, percentChange: 2.97 },
     ],
     losers: [
-      { symbol: 'HDFCBANK', price: 1658.90, change: -45.80, percentChange: -2.69 },
-      { symbol: 'RELIANCE', price: 2880.25, change: -60.55, percentChange: -2.06 },
-      { symbol: 'ICICIBANK', price: 1115.60, change: -15.20, percentChange: -1.34 },
-      { symbol: 'LT', price: 3540.00, change: -40.10, percentChange: -1.12 },
+      { symbol: 'HDFCBANK', name: 'HDFC Bank', price: 1658.90, change: -45.80, percentChange: -2.69 },
+      { symbol: 'RELIANCE', name: 'Reliance Industries', price: 2880.25, change: -60.55, percentChange: -2.06 },
+      { symbol: 'ICICIBANK', name: 'ICICI Bank', price: 1115.60, change: -15.20, percentChange: -1.34 },
+      { symbol: 'LT', name: 'Larsen & Toubro', price: 3540.00, change: -40.10, percentChange: -1.12 },
     ],
   };
 }
@@ -76,4 +76,34 @@ export function getMainChartData(): MainChartData {
         '6M': generateChartData(21000, 26, 300), // 6 months of weekly data
         '1Y': generateChartData(19000, 52, 500), // 1 year of weekly data
     };
+}
+
+export function getAllTickers(): Ticker[] {
+  return [
+    { symbol: 'RELIANCE', name: 'Reliance Industries', price: 2880.25, change: -60.55, percentChange: -2.06 },
+    { symbol: 'TCS', name: 'Tata Consultancy Services', price: 3816.00, change: 15.25, percentChange: 0.40 },
+    { symbol: 'HDFCBANK', name: 'HDFC Bank', price: 1658.90, change: -45.80, percentChange: -2.69 },
+    { symbol: 'INFY', name: 'Infosys', price: 1530.00, change: 44.10, percentChange: 2.97 },
+    { symbol: 'ICICIBANK', name: 'ICICI Bank', price: 1115.60, change: -15.20, percentChange: -1.34 },
+    { symbol: 'HINDUNILVR', name: 'Hindustan Unilever', price: 2545.00, change: 5.00, percentChange: 0.20 },
+    { symbol: 'BHARTIARTL', name: 'Bharti Airtel', price: 1205.50, change: 10.10, percentChange: 0.84 },
+    { symbol: 'SBIN', name: 'State Bank of India', price: 760.80, change: 8.30, percentChange: 1.10 },
+    { symbol: 'LICI', name: 'Life Insurance Corporation of India', price: 975.00, change: -2.50, percentChange: -0.26 },
+    { symbol: 'ITC', name: 'ITC Limited', price: 430.25, change: 1.15, percentChange: 0.27 },
+    { symbol: 'KOTAKBANK', name: 'Kotak Mahindra Bank', price: 1770.00, change: -20.50, percentChange: -1.14 },
+    { symbol: 'HCLTECH', name: 'HCL Technologies', price: 1445.00, change: 25.00, percentChange: 1.76 },
+    { symbol: 'LT', name: 'Larsen & Toubro', price: 3540.00, change: -40.10, percentChange: -1.12 },
+    { symbol: 'AXISBANK', name: 'Axis Bank', price: 1160.70, change: 12.00, percentChange: 1.04 },
+    { symbol: 'BAJFINANCE', name: 'Bajaj Finance', price: 7250.00, change: -50.00, percentChange: -0.68 },
+    { symbol: 'WIPRO', name: 'Wipro', price: 490.15, change: 18.50, percentChange: 3.92 },
+    { symbol: 'MARUTI', name: 'Maruti Suzuki India', price: 12800.00, change: 150.00, percentChange: 1.19 },
+    { symbol: 'SUNPHARMA', name: 'Sun Pharmaceutical Industries', price: 1502.00, change: 8.00, percentChange: 0.54 },
+    { symbol: 'ADANIENT', name: 'Adani Enterprises', price: 3250.00, change: -30.00, percentChange: -0.91 },
+    { symbol: 'TATAMOTORS', name: 'Tata Motors', price: 985.50, change: 45.20, percentChange: 4.81 },
+    { symbol: 'NTPC', name: 'NTPC Limited', price: 360.50, change: 2.00, percentChange: 0.56 },
+    { symbol: 'ONGC', name: 'Oil & Natural Gas Corporation', price: 270.00, change: -1.50, percentChange: -0.55 },
+    { symbol: 'POWERGRID', name: 'Power Grid Corporation of India', price: 310.00, change: 5.00, percentChange: 1.64 },
+    { symbol: 'COALINDIA', name: 'Coal India', price: 470.00, change: -3.00, percentChange: -0.63 },
+    { symbol: 'ADANIPORTS', name: 'Adani Ports & SEZ', price: 1450.70, change: 52.30, percentChange: 3.75 },
+  ];
 }

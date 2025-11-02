@@ -18,6 +18,7 @@ export type SectorData = {
 
 export type Ticker = {
   symbol: string;
+  name: string;
   price: number;
   change: number;
   percentChange: number;
