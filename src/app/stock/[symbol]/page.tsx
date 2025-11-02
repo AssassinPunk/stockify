@@ -17,8 +17,10 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
   const allTickers = getAllTickers();
   const news = getNews();
   const trending = getTrendingTickers();
+  const decodedSymbol = decodeURIComponent(params.symbol);
 
-  const ticker = allTickers.find(t => t.symbol.toLowerCase() === params.symbol.toLowerCase());
+
+  const ticker = allTickers.find(t => t.symbol.toLowerCase() === decodedSymbol.toLowerCase());
 
   if (!ticker) {
     return (
@@ -26,7 +28,7 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
         <Header />
         <main className="flex-1 p-4 text-center md:p-6">
           <h1 className="text-2xl font-bold">Stock not found</h1>
-          <p>The stock with symbol {params.symbol.toUpperCase()} could not be found.</p>
+          <p>The stock with symbol {decodedSymbol.toUpperCase()} could not be found.</p>
         </main>
         <Disclaimer />
       </div>
