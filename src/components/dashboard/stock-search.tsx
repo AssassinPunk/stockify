@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { getAllTickers } from '@/lib/data';
 import type { Ticker } from '@/lib/types';
@@ -8,11 +9,12 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
-export default function StockSearch({ onSelect }: { onSelect: (ticker: Ticker) => void }) {
+export default function StockSearch({ onSelect }: { onSelect: () => void }) {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 200);
   const [results, setResults] = useState<Ticker[]>([]);
   const allTickers = useMemo(() => getAllTickers(), []);
+  const router = useRouter();
 
   useEffect(() => {
     if (debouncedQuery) {
@@ -30,7 +32,8 @@ export default function StockSearch({ onSelect }: { onSelect: (ticker: Ticker) =
 
   const handleSelect = (ticker: Ticker) => {
     setQuery('');
-    onSelect(ticker);
+    onSelect();
+    router.push(`/stock/${ticker.symbol}`);
   };
 
   return (

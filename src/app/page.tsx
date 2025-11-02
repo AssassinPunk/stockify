@@ -29,21 +29,15 @@ export default function Home() {
   const news = getNews();
   const vixChartData = getVixChartData();
 
-  const [selectedTicker, setSelectedTicker] = useState<Ticker>(nifty50Ticker);
-
-  const mainChartData = getMainChartData(selectedTicker.symbol);
+  const mainChartData = getMainChartData(nifty50Ticker.symbol);
 
   const nifty50 = indices.find(i => i.symbol === 'NIFTY 50');
   const sensex = indices.find(i => i.symbol === 'SENSEX');
   const bankNifty = indices.find(i => i.symbol === 'BANK NIFTY');
   
-  const handleStockSelect = (ticker: Ticker) => {
-    setSelectedTicker(ticker);
-  };
-
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
-      <Header onStockSelect={handleStockSelect} />
+      <Header />
       <main className="flex-1 space-y-6 p-4 md:p-6">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {nifty50 && <IndexCard index={nifty50} />}
@@ -54,7 +48,7 @@ export default function Home() {
         
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <div className="lg:col-span-8">
-            <MainChart ticker={selectedTicker} chartData={mainChartData} />
+            <MainChart ticker={nifty50Ticker} chartData={mainChartData} />
           </div>
           <div className="lg:col-span-4">
             <SectorHeatmap sectors={sectors} />
