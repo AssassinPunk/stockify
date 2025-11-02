@@ -1,5 +1,3 @@
-'use client';
-
 import Header from '@/components/dashboard/header';
 import MainChart from '@/components/dashboard/main-chart';
 import NewsFeed from '@/components/dashboard/news-feed';
