@@ -19,7 +19,7 @@ const TickerTable = ({ tickers, type }: { tickers: Ticker[], type: 'gainer' | 'l
         {tickers.map((ticker) => (
           <TableRow key={ticker.symbol}>
             <TableCell className="font-medium">{ticker.symbol}</TableCell>
-            <TableCell className="text-right font-code">{formatNumber(ticker.price, {style: 'currency', currency: 'INR', minimumFractionDigits: 2})}</TableCell>
+            <TableCell className="text-right font-code">{formatNumber(ticker.price, {style: 'currency', currency: ticker.currency || 'INR', minimumFractionDigits: 2})}</TableCell>
             <TableCell className={cn("text-right font-code", type === 'gainer' ? 'text-up' : 'text-down')}>
               {ticker.percentChange > 0 ? '+' : ''}{ticker.percentChange.toFixed(2)}%
             </TableCell>

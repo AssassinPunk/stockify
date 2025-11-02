@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Header from '@/components/dashboard/header';
 import IndexCard from '@/components/dashboard/index-card';
 import VixCard from '@/components/dashboard/vix-card';
@@ -9,16 +8,8 @@ import SectorHeatmap from '@/components/dashboard/sector-heatmap';
 import TrendingTickers from '@/components/dashboard/trending-tickers';
 import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
-import { getIndices, getVixData, getSectors, getTrendingTickers, getNews, getVixChartData, getMainChartData } from '@/lib/data';
+import { getIndices, getVixData, getSectors, getTrendingTickers, getNews, getVixChartData, getMainChartData, getAllTickers } from '@/lib/data';
 import type { Ticker } from '@/lib/types';
-
-const nifty50Ticker: Ticker = {
-  symbol: 'NIFTY 50',
-  name: 'NIFTY 50',
-  price: 23516.00,
-  change: 48.50,
-  percentChange: 0.21,
-};
 
 export default function Home() {
   // Mock data fetching
@@ -28,6 +19,13 @@ export default function Home() {
   const trending = getTrendingTickers();
   const news = getNews();
   const vixChartData = getVixChartData();
+  const allTickers = getAllTickers();
+
+  const nifty50Ticker = allTickers.find(t => t.symbol === 'NIFTY 50');
+
+  if (!nifty50Ticker) {
+    return <div>Loading...</div>; // or some error state
+  }
 
   const mainChartData = getMainChartData(nifty50Ticker.symbol);
 

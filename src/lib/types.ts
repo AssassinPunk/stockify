@@ -22,6 +22,8 @@ export type Ticker = {
   price: number;
   change: number;
   percentChange: number;
+  currency?: 'INR' | 'USD' | 'GBP';
+  isIndex?: boolean;
 };
 
 export type TrendingData = {

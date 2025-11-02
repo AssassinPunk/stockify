@@ -26,11 +26,12 @@ import { Checkbox } from '../ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
+import { Separator } from '../ui/separator';
 
 const MAX_PINNED_STOCKS = 3;
 
 function EditPinnedStocksDialog({ pinnedStocks, onSave }: { pinnedStocks: Ticker[], onSave: (newPinned: Ticker[]) => void }) {
-  const allTickers = getAllTickers();
+  const allTickers = getAllTickers().filter(t => !t.isIndex); // Filter out indices
   const [selected, setSelected] = useState<string[]>(pinnedStocks.map(s => s.symbol));
   const { toast } = useToast();
 
@@ -51,7 +52,7 @@ function EditPinnedStocksDialog({ pinnedStocks, onSave }: { pinnedStocks: Ticker
   };
 
   const handleSave = () => {
-    const newPinned = allTickers.filter(t => selected.includes(t.symbol));
+    const newPinned = getAllTickers().filter(t => selected.includes(t.symbol));
     onSave(newPinned);
   };
 
@@ -104,10 +105,14 @@ export default function Header() {
   useEffect(() => {
     try {
         const item = window.localStorage.getItem('pinnedStocks');
-        const defaultStocks = getAllTickers().filter(t => ['RELIANCE', 'TCS', 'HDFCBANK'].includes(t.symbol));
+        const defaultSymbols = ['RELIANCE', 'TCS', 'HDFCBANK'];
+        const allTickers = getAllTickers();
+        const defaultStocks = allTickers.filter(t => defaultSymbols.includes(t.symbol));
         setPinnedStocks(item ? JSON.parse(item) : defaultStocks);
     } catch (error) {
-        const defaultStocks = getAllTickers().filter(t => ['RELIANCE', 'TCS', 'HDFCBANK'].includes(t.symbol));
+        const defaultSymbols = ['RELIANCE', 'TCS', 'HDFCBANK'];
+        const allTickers = getAllTickers();
+        const defaultStocks = allTickers.filter(t => defaultSymbols.includes(t.symbol));
         setPinnedStocks(defaultStocks);
     }
   }, []);
@@ -133,11 +138,13 @@ export default function Header() {
       <nav className="flex w-full items-center gap-6">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <AreaChart className="h-6 w-6 text-primary" />
-          <span className="text-lg hidden sm:inline-block">India Markets Radar</span>
+          <span className="text-lg hidden sm:inline-block">Markets Radar</span>
         </Link>
 
         <div className="flex items-center gap-2">
-            <Link href="/" className={getLinkClass('/')}>Home</Link>
+            <Link href="/" className={getLinkClass('/')}>India</Link>
+            <Link href="/international" className={getLinkClass('/international')}>International</Link>
+            <Separator orientation="vertical" className="h-6 mx-2" />
             {pinnedStocks.map(stock => (
                 <Link key={stock.symbol} href={`/stock/${stock.symbol}`} className={getLinkClass(`/stock/${stock.symbol}`)}>
                     {stock.name}

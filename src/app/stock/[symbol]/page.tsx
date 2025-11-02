@@ -2,19 +2,22 @@ import Header from '@/components/dashboard/header';
 import MainChart from '@/components/dashboard/main-chart';
 import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
-import { getAllTickers, getNews, getMainChartData } from '@/lib/data';
+import { getAllTickers, getNews, getMainChartData, getInternationalNews } from '@/lib/data';
 import type { Ticker } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { formatChange, formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import TrendingTickers from '@/components/dashboard/trending-tickers';
-import { getTrendingTickers } from '@/lib/data';
+import { getTrendingTickers, getInternationalTrendingTickers } from '@/lib/data';
 
 export default function StockPage({ params }: { params: { symbol: string } }) {
   const allTickers = getAllTickers();
-  const news = getNews();
-  const trending = getTrendingTickers();
+  const indianNews = getNews();
+  const internationalNews = getInternationalNews();
+  const indianTrending = getTrendingTickers();
+  const internationalTrending = getInternationalTrendingTickers();
+
   const decodedSymbol = decodeURIComponent(params.symbol);
 
 
@@ -32,6 +35,11 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
       </div>
     );
   }
+
+  const isIndianTicker = ticker.currency === 'INR';
+  const news = isIndianTicker ? indianNews : internationalNews;
+  const trending = isIndianTicker ? indianTrending : internationalTrending;
+
 
   const mainChartData = getMainChartData(ticker.symbol);
   const isPositive = ticker.change >= 0;
@@ -65,7 +73,7 @@ export default function StockPage({ params }: { params: { symbol: string } }) {
           </CardHeader>
           <CardContent>
             <div className="font-code text-3xl font-bold">
-              {formatNumber(ticker.price, {style: 'currency', currency: 'INR', minimumFractionDigits: 2})}
+              {formatNumber(ticker.price, {style: 'currency', currency: ticker.currency || 'INR', minimumFractionDigits: 2})}
             </div>
             <p className={cn("font-code text-lg", isPositive ? 'text-up' : 'text-down')}>
               {formatChange(ticker.change, ticker.percentChange)}
