@@ -21,7 +21,7 @@ export default function StockSearch({ onSelect }: { onSelect?: () => void }) {
           ticker.symbol.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
           ticker.name.toLowerCase().includes(debouncedQuery.toLowerCase())
       );
-      setResults(filtered);
+      setResults(filtered.slice(0, 10)); // Limit results for performance
     } else {
       setResults([]);
     }
@@ -33,12 +33,12 @@ export default function StockSearch({ onSelect }: { onSelect?: () => void }) {
   };
 
   return (
-    <Command shouldFilter={false}>
+    <Command shouldFilter={false} className="bg-secondary">
       <CommandInput
         placeholder="Search stocks..."
         value={query}
         onValueChange={setQuery}
-        className="h-10 border-0 bg-secondary ring-offset-0 focus:ring-0 focus-visible:ring-0"
+        className="h-11 border-0 bg-secondary ring-offset-0 focus:ring-0"
       />
       <CommandList>
         {results.length > 0 && (

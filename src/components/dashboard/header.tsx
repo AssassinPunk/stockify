@@ -1,7 +1,7 @@
 'use client';
 
 import { AreaChart, Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import StockSearch from './stock-search';
@@ -19,18 +19,16 @@ export default function Header() {
         <div className="relative ml-auto flex-1 md:grow-0">
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search stocks..."
-                  className="w-full rounded-lg bg-secondary pl-8 md:w-[200px] lg:w-[320px]"
-                  onFocus={() => setOpen(true)}
-                />
-              </div>
+              <Button
+                variant="outline"
+                className="w-full justify-start rounded-lg bg-secondary text-muted-foreground md:w-[200px] lg:w-[320px]"
+              >
+                <Search className="mr-2 h-4 w-4" />
+                <span>Search stocks...</span>
+              </Button>
             </PopoverTrigger>
             <PopoverContent
-              className="w-[200px] rounded-lg bg-secondary p-0 lg:w-[320px]"
+              className="w-[208px] rounded-lg bg-secondary p-0 md:w-[200px] lg:w-[320px]"
               align="start"
             >
               <StockSearch onSelect={() => setOpen(false)} />
