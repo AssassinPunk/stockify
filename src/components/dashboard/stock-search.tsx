@@ -51,7 +51,7 @@ export default function StockSearch({ onSelect }: { onSelect: () => void }) {
       <CommandInput
         placeholder="Search stocks..."
         value={query}
-        onValueValueChange={setQuery}
+        onValueChange={setQuery}
         className="h-11 border-0 bg-secondary ring-offset-0 focus:ring-0"
       />
       <CommandList>
