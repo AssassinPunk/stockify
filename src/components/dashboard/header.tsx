@@ -138,7 +138,7 @@ export default function Header() {
       <nav className="flex w-full items-center gap-6">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <AreaChart className="h-6 w-6 text-primary" />
-          <span className="text-lg hidden sm:inline-block">Markets Radar</span>
+          <span className="text-lg hidden sm:inline-block">Stockify</span>
         </Link>
 
         <div className="flex items-center gap-2">

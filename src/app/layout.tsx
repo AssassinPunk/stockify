@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Markets Radar',
+  title: 'Stockify',
   description: 'Real-time market trends and analysis',
 };
 
