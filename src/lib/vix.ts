@@ -14,3 +14,9 @@ export function calculateVixMoves(vixValue: number) {
     yearly,
   };
 }
+
+export function getRiskLevel(vixValue: number): { level: 'Low' | 'Medium' | 'High'; color: string } {
+  if (vixValue < 15) return { level: 'Low', color: 'text-up' };
+  if (vixValue < 25) return { level: 'Medium', color: 'text-yellow-500' };
+  return { level: 'High', color: 'text-down' };
+}

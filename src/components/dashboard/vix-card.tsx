@@ -4,16 +4,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatNumber } from "@/lib/format";
 import type { VixData, ChartDataPoint } from "@/lib/types";
-import { calculateVixMoves } from "@/lib/vix";
-import { Info } from "lucide-react";
+import { calculateVixMoves, getRiskLevel } from "@/lib/vix";
+import { Info, ShieldAlert } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export default function VixCard({ vixData, chartData }: { vixData: VixData; chartData: ChartDataPoint[] }) {
   const moves = calculateVixMoves(vixData.value);
+  const risk = getRiskLevel(vixData.value);
 
   return (
     <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 transition-all hover:shadow-black/20 hover:-translate-y-1">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">INDIA VIX</CardTitle>
+        <div className="flex flex-col gap-1">
+          <CardTitle className="text-sm font-medium text-muted-foreground">INDIA VIX</CardTitle>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className={cn("text-[10px] h-5", risk.color)}>
+              <ShieldAlert className="mr-1 h-3 w-3" />
+              {risk.level} Risk
+            </Badge>
+          </div>
+        </div>
         <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
