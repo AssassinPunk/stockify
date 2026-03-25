@@ -1,49 +1,17 @@
 'use client';
-import { useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatNumber } from "@/lib/format";
 import type { VixData, ChartDataPoint } from "@/lib/types";
 import { calculateVixMoves, getRiskLevel } from "@/lib/vix";
-import { Info, ShieldAlert, Sparkles, Loader2 } from "lucide-react";
+import { Info, ShieldAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { explainIndiaVIX, ExplainIndiaVIXOutput } from "@/ai/flows/explain-india-vix-insights";
 
 export default function VixCard({ vixData, chartData }: { vixData: VixData; chartData: ChartDataPoint[] }) {
   const moves = calculateVixMoves(vixData.value);
   const risk = getRiskLevel(vixData.value);
-  const [explanation, setExplanation] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleExplain = async () => {
-    if (explanation) return;
-    setIsLoading(true);
-    try {
-      const result = await explainIndiaVIX({
-        vixValue: vixData.value,
-        dailyMove: moves.daily,
-        weeklyMove: moves.weekly,
-        monthlyMove: moves.monthly,
-        yearlyMove: moves.yearly,
-      });
-      setExplanation(result.explanation);
-    } catch (error) {
-      console.error("Failed to fetch VIX explanation:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 transition-all hover:shadow-black/20 hover:-translate-y-1">
@@ -69,42 +37,6 @@ export default function VixCard({ vixData, chartData }: { vixData: VixData; char
             </Badge>
           </div>
         </div>
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" onClick={handleExplain}>
-              <Sparkles className="h-4 w-4" />
-              <span className="sr-only">AI Insight</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                VIX Analysis
-              </DialogTitle>
-              <DialogDescription>
-                AI-generated insight for the current market volatility.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-8 gap-4">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <p className="text-sm text-muted-foreground">Analyzing market moves...</p>
-                </div>
-              ) : (
-                <div className="prose prose-sm dark:prose-invert">
-                  {explanation ? (
-                    <p className="text-sm leading-relaxed">{explanation}</p>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Click the button to generate a beginner-friendly analysis.</p>
-                  )}
-                </div>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
       </CardHeader>
       <CardContent>
         <TooltipProvider>
