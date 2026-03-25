@@ -1,0 +1,113 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * India Markets Radar Security Rules
+     *
+     * CORE PHILOSOPHY:
+     * This ruleset enforces a strict user-ownership model. Every piece of user-specific data is 
+     * stored within a path-based hierarchy starting at /users/{userId}. This structure ensures 
+     * that authorization is tightly coupled with the document path, providing a high degree 
+     * of security and performance.
+     *
+     * DATA STRUCTURE:
+     * - /users/{userId}: The root profile for an authenticated user.
+     * - /users/{userId}/preferences/settings: A singleton document for application settings.
+     * - /users/{userId}/watchlists/{watchlistId}: Custom stock collections owned by the user.
+     * - /users/{userId}/watchlists/{watchlistId}/entries/{entryId}: Individual stocks within a watchlist.
+     *
+     * KEY SECURITY DECISIONS:
+     * - Authorization Independence: We rely on both the path parameters ({userId}) and denormalized 
+     *   fields within documents (userId) to authorize requests. This eliminates the need for 
+     *   expensive and slow get() calls during rule execution.
+     * - Ownership Enforcement: All write operations (create, update, delete) and list operations 
+     *   are strictly restricted to the user whose UID matches the document's path and internal 
+     *   ownership fields.
+     * - Prototyping Flexibility: While authorization is strictly enforced, these rules do not 
+     *   validate the specific schema of non-authorization data fields, allowing for rapid 
+     *   iteration of the data model.
+     */
+
+    // --- Helper Functions ---
+
+    /**
+     * @description Checks if the request is made by an authenticated user.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the authenticated user's UID matches the provided userId.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the user is the owner and the document exists (for updates/deletes).
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for the User profile document.
+     * @path /users/{userId}
+     * @allow (create) User 'abc' creates document '/users/abc' where data.id == 'abc'.
+     * @deny (create) User 'abc' attempts to create document '/users/xyz'.
+     * @principle Enforces self-creation and strict ownership of the root user profile.
+     */
+    match /users/{userId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Rules for user-specific application preferences.
+       * @path /users/{userId}/preferences/settings
+       * @allow (get) User 'abc' reads their own settings document.
+       * @deny (update) User 'abc' attempts to change the 'userId' field in their settings.
+       * @principle Restricts preference management to the account owner and ensures relational integrity.
+       */
+      match /preferences/settings {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+      }
+
+      /**
+       * @description Rules for custom stock watchlists.
+       * @path /users/{userId}/watchlists/{watchlistId}
+       * @allow (list) User 'abc' queries all their watchlists.
+       * @deny (list) User 'abc' attempts to list watchlists for user 'xyz'.
+       * @principle Implements path-based access control and enforces denormalized ownership fields.
+       */
+      match /watchlists/{watchlistId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+
+        /**
+         * @description Rules for individual entries within a watchlist.
+         * @path /users/{userId}/watchlists/{watchlistId}/entries/{entryId}
+         * @allow (create) User 'abc' adds a stock to their own watchlist.
+         * @deny (delete) User 'abc' attempts to delete an entry from user 'xyz's watchlist.
+         * @principle Deeply nested ownership enforcement using denormalized 'userId' for high performance.
+         */
+        match /entries/{entryId} {
+          allow get, list: if isOwner(userId);
+          allow create: if isOwner(userId) && request.resource.data.userId == userId;
+          allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+          allow delete: if isExistingOwner(userId);
+        }
+      }
+    }
+  }
+}

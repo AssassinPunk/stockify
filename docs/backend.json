@@ -1,0 +1,267 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents an authenticated user within the application, storing application-specific data. Assumes an external authentication system for credentials.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity, typically provided by the external authentication system."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "name": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "name",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserPreference": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserPreference",
+      "type": "object",
+      "description": "Stores application-wide settings and preferences for a specific user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserPreference entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:1 UserPreference)"
+        },
+        "theme": {
+          "type": "string",
+          "description": "The user's preferred application theme (e.g., 'dark', 'light')."
+        },
+        "defaultChartTimeframe": {
+          "type": "string",
+          "description": "The default timeframe selected for charts (e.g., '1D', '1M', '1Y')."
+        },
+        "enableEmailNotifications": {
+          "type": "boolean",
+          "description": "A boolean indicating if the user has enabled email notifications."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user preference record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user preference record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "theme",
+        "defaultChartTimeframe",
+        "enableEmailNotifications",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Watchlist": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Watchlist",
+      "type": "object",
+      "description": "A collection of stock tickers saved by a user for monitoring.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Watchlist entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the watchlist (e.g., 'My Favorites', 'Tech Stocks')."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Watchlist)"
+        },
+        "description": {
+          "type": "string",
+          "description": "An optional description for the watchlist."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the watchlist was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the watchlist was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "userId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "WatchlistEntry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "WatchlistEntry",
+      "type": "object",
+      "description": "Represents a single stock ticker included in a user's watchlist, along with its specific settings.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the WatchlistEntry entity."
+        },
+        "watchlistId": {
+          "type": "string",
+          "description": "Reference to Watchlist. (Relationship: Watchlist 1:N WatchlistEntry)"
+        },
+        "symbol": {
+          "type": "string",
+          "description": "The ticker symbol of the stock (e.g., 'RELIANCE.NS')."
+        },
+        "alertEnabled": {
+          "type": "boolean",
+          "description": "A boolean indicating if alerts are enabled for this specific ticker."
+        },
+        "alertPriceTarget": {
+          "type": "number",
+          "description": "An optional price target for triggering an alert for this ticker."
+        },
+        "order": {
+          "type": "number",
+          "description": "An optional numerical value to define the user-defined order of the entry within the watchlist."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the watchlist entry was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the watchlist entry was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "watchlistId",
+        "symbol",
+        "alertEnabled",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores individual user profile information. The document ID for each user matches their Firebase Authentication UID. Access is restricted to the owning user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier (UID) of the authenticated user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/preferences/settings",
+        "definition": {
+          "entityName": "UserPreference",
+          "schema": {
+            "$ref": "#/backend/entities/UserPreference"
+          },
+          "description": "Stores application-wide settings and preferences for a specific user. This is a single document per user, named 'settings'. Access is restricted to the owning user. Includes denormalized 'userId' (from path) for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier (UID) of the authenticated user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/watchlists/{watchlistId}",
+        "definition": {
+          "entityName": "Watchlist",
+          "schema": {
+            "$ref": "#/backend/entities/Watchlist"
+          },
+          "description": "Stores custom watchlists created by a user. Access is restricted to the owning user. Includes denormalized 'userId' (from path and schema) for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier (UID) of the authenticated user who owns this watchlist."
+            },
+            {
+              "name": "watchlistId",
+              "description": "The unique identifier for a specific watchlist."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/watchlists/{watchlistId}/entries/{entryId}",
+        "definition": {
+          "entityName": "WatchlistEntry",
+          "schema": {
+            "$ref": "#/backend/entities/WatchlistEntry"
+          },
+          "description": "Stores individual stock tickers and their settings within a specific watchlist. Access is restricted to the owning user of the parent watchlist. **This document must include a denormalized 'userId' field (matching the path) for Authorization Independence and QAPs.**",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier (UID) of the authenticated user who owns the parent watchlist."
+            },
+            {
+              "name": "watchlistId",
+              "description": "The unique identifier of the parent watchlist to which this entry belongs."
+            },
+            {
+              "name": "entryId",
+              "description": "The unique identifier for a specific watchlist entry."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed following the core principles of Authorization Independence, Structural Segregation, and Access Modeling, specifically tailored for secure, scalable, and debuggable user-specific data.\n\n**1. Authorization Independence (Denormalization Strategy):**\n    *   **User and UserPreference:** User documents (`/users/{userId}`) and their preferences (`/users/{userId}/preferences/settings`) inherently achieve authorization independence because the `userId` is part of their document path. Access rules can directly compare `request.auth.uid` with the `{userId}` wildcard in the path, ensuring only the owning user can access their data without requiring additional lookups.\n    *   **Watchlist:** Similarly, Watchlist documents (`/users/{userId}/watchlists/{watchlistId}`) are structured under the user's path, and the `Watchlist` entity schema includes `userId`. This allows rules to verify ownership directly (`request.auth.uid == userId` from the path and `resource.data.userId == request.auth.uid`), eliminating `get()` calls.\n    *   **WatchlistEntry (CRITICAL Denormalization):** To ensure Authorization Independence for `WatchlistEntry` documents (`/users/{userId}/watchlists/{watchlistId}/entries/{entryId}`), the `userId` of the owning user *must be denormalized* and included directly within each `WatchlistEntry` document. Although the `watchlistId` is present, relying on it to `get()` the parent `Watchlist` document to check ownership would violate Authorization Independence. By including `userId` directly in the `WatchlistEntry` document, security rules can atomically verify `request.auth.uid == userId` (from the path) and `resource.data.userId == request.auth.uid` without any `get()` operations, simplifying rules and improving performance.\n\n**2. QAPs (Rules are not Filters) and Structural Segregation:**\n    *   All user-specific data (`User`, `UserPreference`, `Watchlist`, `WatchlistEntry`) is strictly segregated under dedicated user-owned paths, `/users/{userId}/...`. This ensures that `list` operations (queries) for any subcollection, such as `/users/{userId}/watchlists` or `/users/{userId}/watchlists/{watchlistId}/entries`, will automatically respect security rules. Because the `userId` is present in the path or denormalized in the document, rules can enforce that `request.auth.uid` matches the `userId` in the path segment or the document's `userId` field. This prevents users from querying data outside their own `/users/{userId}/` namespace and inherently supports QAPs by ensuring that any `list` operation issued by `request.auth.uid` will only return data where `resource.data.userId` matches `request.auth.uid`, effectively pre-filtering at the rule level rather than relying on client-side filtering.\n    *   Public data (market indices, VIX, news, trending tickers, sector heatmaps) are not stored in Firestore, as per the application requirements. Instead, they are fetched from external APIs via Next.js API routes, cached server-side, and then served to the client, simplifying the Firestore security model to focus solely on user-owned private data.\n\nThis structure ensures a robust, secure, and performant backend for India Markets Radar's user-specific features, with highly explicit and debuggable security rules."
+  }
+}
