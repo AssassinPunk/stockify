@@ -9,14 +9,12 @@ import {
   ReferenceLine,
   XAxis,
   YAxis,
-  Label as RechartsLabel,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from '@/components/ui/chart';
 import { MainChartData, Ticker, ChartDataPoint } from '@/lib/types';
 import { ChartConfig } from '@/components/ui/chart';
@@ -27,6 +25,7 @@ import { Label } from '@/components/ui/label';
 import { getMainChartData } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatNumber } from '@/lib/format';
 
 const chartConfig = {
   value: {
@@ -77,6 +76,46 @@ const calculateRSI = (data: ChartDataPoint[], period: number = 14) => {
   });
 };
 
+const CustomTooltip = ({ active, payload, label, ticker }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const firstPoint = payload[0].chartData?.[0]?.value || data.value;
+    const percentChange = ((data.value - firstPoint) / firstPoint) * 100;
+    const isPositive = percentChange >= 0;
+
+    return (
+      <div className="rounded-xl border border-border/50 bg-background/95 p-3 shadow-xl backdrop-blur-sm">
+        <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          {new Date(label).toLocaleString()}
+        </p>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-8">
+            <span className="text-xs text-muted-foreground">Price</span>
+            <span className="font-code text-xs font-bold">
+              {formatNumber(data.value, { style: 'currency', currency: ticker.currency || 'INR' })}
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-8">
+            <span className="text-xs text-muted-foreground">% Change</span>
+            <span className={cn("font-code text-xs font-bold", isPositive ? 'text-up' : 'text-down')}>
+              {isPositive ? '+' : ''}{percentChange.toFixed(2)}%
+            </span>
+          </div>
+          {data.volume && (
+            <div className="flex items-center justify-between gap-8">
+              <span className="text-xs text-muted-foreground">Volume</span>
+              <span className="font-code text-xs font-bold">
+                {formatNumber(data.volume, { notation: 'compact' })}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function MainChart({
   ticker,
   chartData,
@@ -90,17 +129,14 @@ export default function MainChart({
   const [showRSI, setShowRSI] = useState(false);
   const [compareWith, setCompareWith] = useState<string[]>([]);
 
-  // Derived data based on timeframe and indicators
   const baseData = chartData[timeframe];
   
   const processedData = useMemo(() => {
     let data = [...baseData];
     
-    // Add Indicators
     if (showMA) data = calculateMA(data);
     if (showRSI) data = calculateRSI(data);
     
-    // Add Comparison Data
     compareWith.forEach(symbol => {
       const compData = getMainChartData(symbol)[timeframe];
       data = data.map((d, i) => ({
@@ -179,7 +215,6 @@ export default function MainChart({
           </div>
         </div>
 
-        {/* Visual Controls Panel */}
         <div className="flex flex-wrap items-center gap-6 rounded-xl bg-secondary/30 p-3 text-xs">
           <div className="flex items-center gap-4 border-r pr-4 border-border/50">
             <span className="flex items-center gap-1.5 font-semibold text-muted-foreground">
@@ -297,15 +332,9 @@ export default function MainChart({
 
             <ChartTooltip
               cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1, strokeDasharray: '3 3' }}
-              content={
-                <ChartTooltipContent
-                  indicator="dot"
-                  className="rounded-xl border-border/50 bg-background/95 backdrop-blur-sm"
-                />
-              }
+              content={<CustomTooltip ticker={ticker} />}
             />
 
-            {/* Main Area */}
             <Area
               yId="price"
               type="monotone"
@@ -318,7 +347,6 @@ export default function MainChart({
               dot={false}
             />
 
-            {/* Indicator: Moving Average */}
             {showMA && (
               <Line
                 yId="price"
@@ -331,7 +359,6 @@ export default function MainChart({
               />
             )}
 
-            {/* Indicator: RSI */}
             {showRSI && (
               <Line
                 yId="rsi"
@@ -343,7 +370,6 @@ export default function MainChart({
               />
             )}
 
-            {/* Comparison Lines */}
             {compareWith.map(symbol => (
               <Line
                 key={symbol}
@@ -356,7 +382,6 @@ export default function MainChart({
               />
             ))}
 
-            {/* User Custom Markers */}
             {markers.map(marker => (
               <ReferenceLine
                 key={marker}
@@ -367,7 +392,6 @@ export default function MainChart({
               />
             ))}
 
-            {/* Auto Annotations */}
             {annotations.map((ann, idx) => (
               <ReferenceLine
                 key={idx}

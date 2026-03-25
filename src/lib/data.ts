@@ -96,6 +96,7 @@ const generateChartData = (base: number, points: number, volatility: number, per
   for (let i = 0; i < points; i++) {
     const change = (Math.random() - 0.49) * volatility * lastValue / 100;
     lastValue += change;
+    const volume = Math.floor(Math.random() * 1000000) + 500000;
     
     let date: Date;
     switch(period) {
@@ -121,7 +122,11 @@ const generateChartData = (base: number, points: number, volatility: number, per
         date = new Date();
     }
 
-    data.push({ date: date.toISOString(), value: parseFloat(lastValue.toFixed(2)) });
+    data.push({ 
+      date: date.toISOString(), 
+      value: parseFloat(lastValue.toFixed(2)),
+      volume 
+    });
   }
   return data;
 };
@@ -132,8 +137,6 @@ export function getVixChartData(): ChartDataPoint[] {
 }
 
 export function getMainChartData(symbol: string): MainChartData {
-  // In a real app, you'd fetch data based on the symbol.
-  // Here, we'll generate random data for demonstration.
   const allTickers = getAllTickers();
   const ticker = allTickers.find(t => t.symbol === symbol) || { price: 23500 };
   const basePrice = ticker.price;
