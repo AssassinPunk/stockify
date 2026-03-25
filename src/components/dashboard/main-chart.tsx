@@ -26,6 +26,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { getMainChartData } from '@/lib/data';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const chartConfig = {
   value: {
@@ -111,7 +112,6 @@ export default function MainChart({
     return data;
   }, [baseData, showMA, showRSI, compareWith, timeframe]);
 
-  // Predefined Annotations for mock visualization
   const annotations = useMemo(() => {
     if (timeframe === '1M' || timeframe === '6M' || timeframe === '1Y') {
       const midPoint = Math.floor(processedData.length / 3);
@@ -184,6 +184,16 @@ export default function MainChart({
           <div className="flex items-center gap-4 border-r pr-4 border-border/50">
             <span className="flex items-center gap-1.5 font-semibold text-muted-foreground">
               <Layers className="h-3.5 w-3.5" /> Compare:
+              <TooltipProvider>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Info className="h-3 w-3 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Compare this stock's performance with major market indices.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </span>
             <div className="flex gap-3">
               {['SENSEX', 'BANK NIFTY'].map(s => (
@@ -202,6 +212,16 @@ export default function MainChart({
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 font-semibold text-muted-foreground">
               <Activity className="h-3.5 w-3.5" /> Indicators:
+              <TooltipProvider>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Info className="h-3 w-3 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Technical overlays to help identify trends (MA) and momentum (RSI).</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </span>
             <div className="flex gap-3">
               <div className="flex items-center space-x-2">
@@ -311,7 +331,7 @@ export default function MainChart({
               />
             )}
 
-            {/* Indicator: RSI (Simple mapping to main area for "simple version") */}
+            {/* Indicator: RSI */}
             {showRSI && (
               <Line
                 yId="rsi"
