@@ -1,6 +1,7 @@
+
 'use client';
 
-import { AreaChart, Settings, Search, LogOut, User as UserIcon } from 'lucide-react';
+import { AreaChart, Settings, Search, LogOut, User as UserIcon, Menu } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import StockSearch from './stock-search';
@@ -29,6 +30,7 @@ import { Separator } from '../ui/separator';
 import { useUser, useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -166,17 +168,17 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur-sm md:px-6">
-      <nav className="flex w-full items-center gap-4 md:gap-6">
-        <Link href="/" className="flex items-center gap-2 font-semibold flex-shrink-0">
+      <div className="flex items-center gap-4">
+        <SidebarTrigger />
+        <Separator orientation="vertical" className="h-6" />
+        <Link href="/" className="flex items-center gap-2 font-semibold flex-shrink-0 md:hidden">
           <AreaChart className="h-6 w-6 text-primary" />
-          <span className="text-lg hidden sm:inline-block">Stockify</span>
         </Link>
+      </div>
 
-        <div className="flex items-center gap-1 md:gap-2 overflow-x-auto no-scrollbar">
-            <Link href="/" className={getLinkClass('/')}>India</Link>
-            <Link href="/international" className={getLinkClass('/international')}>International</Link>
-            <Separator orientation="vertical" className="h-6 mx-2 hidden md:block" />
-            <div className="hidden lg:flex items-center gap-1 md:gap-2">
+      <nav className="flex flex-1 items-center gap-4 md:gap-6">
+        <div className="hidden md:flex items-center gap-1 md:gap-2 overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-1 md:gap-2">
               {pinnedStocks.map(stock => (
                   <Link key={stock.symbol} href={`/stock/${stock.symbol}`} className={getLinkClass(`/stock/${stock.symbol}`)}>
                       {stock.symbol}
@@ -187,14 +189,14 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
-          <div className="relative hidden md:flex items-center">
+          <div className="relative flex items-center">
             <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search stocks..."
-                    className="w-full rounded-lg bg-secondary pl-10 md:w-[180px] lg:w-[300px]"
+                    className="w-[120px] rounded-lg bg-secondary pl-10 sm:w-[200px] md:w-[200px] lg:w-[300px]"
                     onFocus={() => setOpen(true)}
                   />
                 </div>
