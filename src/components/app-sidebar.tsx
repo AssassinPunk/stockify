@@ -9,6 +9,7 @@ import {
   Newspaper,
   Globe,
   Flag,
+  GraduationCap,
 } from 'lucide-react';
 
 import {
@@ -66,6 +67,11 @@ const data = {
       title: 'News',
       url: '/news',
       icon: Newspaper,
+    },
+    {
+      title: 'Education',
+      url: '/education',
+      icon: GraduationCap,
     },
   ],
 };
