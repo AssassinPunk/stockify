@@ -43,6 +43,10 @@ export type NewsArticle = {
 export type ChartDataPoint = {
     date: string;
     value: number;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
     volume?: number;
 };
 

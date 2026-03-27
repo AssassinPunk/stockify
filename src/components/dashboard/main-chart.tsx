@@ -4,7 +4,9 @@ import { useState, useMemo } from 'react';
 import {
   Area,
   AreaChart,
+  Bar,
   CartesianGrid,
+  ComposedChart,
   Line,
   ReferenceLine,
   XAxis,
@@ -19,7 +21,7 @@ import {
 import { MainChartData, Ticker, ChartDataPoint } from '@/lib/types';
 import { ChartConfig } from '@/components/ui/chart';
 import { Button } from '../ui/button';
-import { XIcon, Activity, Layers, Info } from 'lucide-react';
+import { XIcon, Activity, Layers, Info, CandlestickChart, AreaChart as AreaChartIcon } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { getMainChartData } from '@/lib/data';
@@ -76,7 +78,7 @@ const calculateRSI = (data: ChartDataPoint[], period: number = 14) => {
   });
 };
 
-const CustomTooltip = ({ active, payload, label, ticker }: any) => {
+const CustomTooltip = ({ active, payload, label, ticker, chartType }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const firstPoint = payload[0].chartData?.[0]?.value || data.value;
@@ -89,12 +91,33 @@ const CustomTooltip = ({ active, payload, label, ticker }: any) => {
           {new Date(label).toLocaleString()}
         </p>
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between gap-8">
-            <span className="text-xs text-muted-foreground">Price</span>
-            <span className="font-code text-xs font-bold">
-              {formatNumber(data.value, { style: 'currency', currency: ticker.currency || 'INR' })}
-            </span>
-          </div>
+          {chartType === 'area' ? (
+            <div className="flex items-center justify-between gap-8">
+              <span className="text-xs text-muted-foreground">Price</span>
+              <span className="font-code text-xs font-bold">
+                {formatNumber(data.value, { style: 'currency', currency: ticker.currency || 'INR' })}
+              </span>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between gap-8">
+                <span className="text-xs text-muted-foreground">Open</span>
+                <span className="font-code text-xs font-bold">{formatNumber(data.open)}</span>
+              </div>
+              <div className="flex items-center justify-between gap-8">
+                <span className="text-xs text-muted-foreground">High</span>
+                <span className="font-code text-xs font-bold">{formatNumber(data.high)}</span>
+              </div>
+              <div className="flex items-center justify-between gap-8">
+                <span className="text-xs text-muted-foreground">Low</span>
+                <span className="font-code text-xs font-bold">{formatNumber(data.low)}</span>
+              </div>
+              <div className="flex items-center justify-between gap-8 border-t pt-1 border-border/50">
+                <span className="text-xs text-muted-foreground">Close</span>
+                <span className="font-code text-xs font-bold">{formatNumber(data.close)}</span>
+              </div>
+            </>
+          )}
           <div className="flex items-center justify-between gap-8">
             <span className="text-xs text-muted-foreground">% Change</span>
             <span className={cn("font-code text-xs font-bold", isPositive ? 'text-up' : 'text-down')}>
@@ -116,6 +139,42 @@ const CustomTooltip = ({ active, payload, label, ticker }: any) => {
   return null;
 };
 
+// Custom Candlestick Component for Recharts
+const Candlestick = (props: any) => {
+  const { x, y, width, height, low, high, open, close } = props;
+  const isUp = close >= open;
+  const color = isUp ? 'var(--up)' : 'var(--down)';
+
+  const ratio = height / Math.abs(open - close);
+  const candleY = Math.min(y, y + height);
+  const candleHeight = Math.abs(height);
+
+  // Calculate wick positions
+  const wickX = x + width / 2;
+  const wickTop = props.yIdPriceScale(high);
+  const wickBottom = props.yIdPriceScale(low);
+
+  return (
+    <g>
+      <line
+        x1={wickX}
+        y1={wickTop}
+        x2={wickX}
+        y2={wickBottom}
+        stroke={color}
+        strokeWidth={1}
+      />
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={Math.max(1, candleHeight)}
+        fill={color}
+      />
+    </g>
+  );
+};
+
 export default function MainChart({
   ticker,
   chartData,
@@ -124,6 +183,7 @@ export default function MainChart({
   chartData: MainChartData;
 }) {
   const [timeframe, setTimeframe] = useState<keyof MainChartData>('1M');
+  const [chartType, setChartType] = useState<'area' | 'candle'>('area');
   const [markers, setMarkers] = useState<string[]>([]);
   const [showMA, setShowMA] = useState(false);
   const [showRSI, setShowRSI] = useState(false);
@@ -162,11 +222,15 @@ export default function MainChart({
 
   const yDomain = useMemo(() => {
     const values = processedData.flatMap(d => [
-      d.value, 
+      d.value,
+      d.high,
+      d.low,
       ...(showMA && d.ma ? [d.ma] : []),
       ...compareWith.map(s => d[s] as number).filter(v => v !== null)
     ]);
-    return [Math.min(...values) * 0.95, Math.max(...values) * 1.05];
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    return [min * 0.98, max * 1.02];
   }, [processedData, showMA, compareWith]);
 
   const handleChartClick = (e: any) => {
@@ -194,10 +258,30 @@ export default function MainChart({
             <CardDescription>{ticker.name}</CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            <div className="flex items-center rounded-lg bg-secondary/50 p-1 mr-2">
+                <Button 
+                    variant={chartType === 'area' ? 'secondary' : 'ghost'} 
+                    size="sm" 
+                    className="h-7 px-2"
+                    onClick={() => setChartType('area')}
+                >
+                    <AreaChartIcon className="h-4 w-4 mr-1" />
+                    Area
+                </Button>
+                <Button 
+                    variant={chartType === 'candle' ? 'secondary' : 'ghost'} 
+                    size="sm" 
+                    className="h-7 px-2"
+                    onClick={() => setChartType('candle')}
+                >
+                    <CandlestickChart className="h-4 w-4 mr-1" />
+                    Candle
+                </Button>
+            </div>
             {markers.length > 0 && (
               <Button variant="outline" size="sm" onClick={clearMarkers}>
                 <XIcon className="mr-2 h-4 w-4" />
-                Clear Markers
+                Clear
               </Button>
             )}
             <Tabs
@@ -225,7 +309,7 @@ export default function MainChart({
                     <Info className="h-3 w-3 cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Compare this stock's performance with major market indices.</p>
+                    <p>Compare performance with indices.</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -253,7 +337,7 @@ export default function MainChart({
                     <Info className="h-3 w-3 cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Technical overlays to help identify trends (MA) and momentum (RSI).</p>
+                    <p>Technical overlays for trend analysis.</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -285,7 +369,7 @@ export default function MainChart({
           config={chartConfig}
           className="h-full w-full"
         >
-          <AreaChart
+          <ComposedChart
             data={processedData}
             margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
             onClick={handleChartClick}
@@ -332,20 +416,36 @@ export default function MainChart({
 
             <ChartTooltip
               cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1, strokeDasharray: '3 3' }}
-              content={<CustomTooltip ticker={ticker} />}
+              content={<CustomTooltip ticker={ticker} chartType={chartType} />}
             />
 
-            <Area
-              yId="price"
-              type="monotone"
-              dataKey="value"
-              name={ticker.symbol}
-              stroke="hsl(var(--primary))"
-              strokeWidth={2}
-              fillOpacity={1}
-              fill="url(#mainChartGradient)"
-              dot={false}
-            />
+            {chartType === 'area' ? (
+              <Area
+                yId="price"
+                type="monotone"
+                dataKey="value"
+                name={ticker.symbol}
+                stroke="hsl(var(--primary))"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#mainChartGradient)"
+                dot={false}
+              />
+            ) : (
+              <Bar
+                yId="price"
+                dataKey="close"
+                name={ticker.symbol}
+                shape={<Candlestick yIdPriceScale={(val: number) => {
+                    // This is a bit of a hack to get the Y-axis scale inside the custom shape
+                    // In a real app, you'd use the provided 'y' prop which Recharts maps for you.
+                    // But we need Open/Close mapping.
+                    const range = yDomain[1] - yDomain[0];
+                    const chartHeight = 400 - 20 - 40; // Approx based on container height
+                    return 20 + (1 - (val - yDomain[0]) / range) * chartHeight;
+                }} />}
+              />
+            )}
 
             {showMA && (
               <Line
@@ -389,6 +489,7 @@ export default function MainChart({
                 stroke="hsl(var(--foreground))"
                 strokeWidth={1}
                 strokeDasharray="4 4"
+                yId="price"
               />
             ))}
 
@@ -399,6 +500,7 @@ export default function MainChart({
                 stroke="hsl(var(--muted-foreground))"
                 strokeOpacity={0.5}
                 strokeWidth={1}
+                yId="price"
                 label={{
                   position: 'top',
                   value: ann.label,
@@ -409,7 +511,7 @@ export default function MainChart({
                 }}
               />
             ))}
-          </AreaChart>
+          </ComposedChart>
         </ChartContainer>
       </CardContent>
     </Card>

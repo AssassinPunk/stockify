@@ -94,8 +94,15 @@ const generateChartData = (base: number, points: number, volatility: number, per
   const today = new Date();
 
   for (let i = 0; i < points; i++) {
+    const open = lastValue;
     const change = (Math.random() - 0.49) * volatility * lastValue / 100;
-    lastValue += change;
+    const close = open + change;
+    
+    // High and Low generation for candles
+    const high = Math.max(open, close) + (Math.random() * (volatility / 2) * lastValue / 100);
+    const low = Math.min(open, close) - (Math.random() * (volatility / 2) * lastValue / 100);
+
+    lastValue = close;
     const volume = Math.floor(Math.random() * 1000000) + 500000;
     
     let date: Date;
@@ -124,7 +131,11 @@ const generateChartData = (base: number, points: number, volatility: number, per
 
     data.push({ 
       date: date.toISOString(), 
-      value: parseFloat(lastValue.toFixed(2)),
+      value: parseFloat(close.toFixed(2)),
+      open: parseFloat(open.toFixed(2)),
+      high: parseFloat(high.toFixed(2)),
+      low: parseFloat(low.toFixed(2)),
+      close: parseFloat(close.toFixed(2)),
       volume 
     });
   }
