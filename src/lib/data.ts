@@ -17,7 +17,7 @@ export function getInternationalIndices(): IndexData[] {
 }
 
 export function getVixData(): VixData {
-  return { value: 14.35, lastUpdated: '2 min ago' };
+  return { value: 26.80, lastUpdated: '27 Mar, 3:35 pm IST' };
 }
 
 export function getSectors(): SectorData[] {
@@ -143,7 +143,7 @@ const generateChartData = (base: number, points: number, volatility: number, per
 
 
 export function getVixChartData(): ChartDataPoint[] {
-    return generateChartData(14, 30, 2, '1M');
+    return generateChartData(26.80, 30, 2, '1M');
 }
 
 export function getMainChartData(symbol: string): MainChartData {
