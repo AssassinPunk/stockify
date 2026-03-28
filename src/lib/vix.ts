@@ -15,8 +15,9 @@ export function calculateVixMoves(vixValue: number) {
   };
 }
 
-export function getRiskLevel(vixValue: number): { level: 'Low' | 'Medium' | 'High'; color: string } {
-  if (vixValue < 15) return { level: 'Low', color: 'text-up' };
-  if (vixValue < 25) return { level: 'Medium', color: 'text-yellow-500' };
-  return { level: 'High', color: 'text-down' };
+export function getRiskLevel(vixValue: number): { level: 'Low' | 'Moderate' | 'High' | 'Extreme'; color: string } {
+  if (vixValue < 13) return { level: 'Low', color: 'text-up' };
+  if (vixValue < 18) return { level: 'Moderate', color: 'text-yellow-500' };
+  if (vixValue < 25) return { level: 'High', color: 'text-orange-500' };
+  return { level: 'Extreme', color: 'text-down' };
 }

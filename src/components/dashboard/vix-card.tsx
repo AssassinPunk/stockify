@@ -33,7 +33,7 @@ export default function VixCard({ vixData, chartData }: { vixData: VixData; char
           <div className="flex items-center gap-2">
             <Badge variant="outline" className={cn("text-[10px] h-5", risk.color)}>
               <ShieldAlert className="mr-1 h-3 w-3" />
-              {risk.level} Risk
+              {risk.level} Zone
             </Badge>
           </div>
         </div>
@@ -47,7 +47,7 @@ export default function VixCard({ vixData, chartData }: { vixData: VixData; char
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{vixData.value < 15 ? "Low VIX = Stable market environment" : "Elevated VIX = Expect wider price swings"}</p>
+              <p>{vixData.value < 13 ? "Low VIX = Stable market environment" : vixData.value >= 25 ? "Extreme Volatility = Panic selling likely" : "Elevated VIX = Expect wider price swings"}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
