@@ -70,20 +70,20 @@ export function getInternationalTrendingTickers(): TrendingData {
 
 export function getNews(): NewsArticle[] {
   return [
-    { id: '1', title: 'Sensex, Nifty trade flat amid volatility; IT stocks gain', source: 'MoneyControl', timestamp: '10 min ago', url: '#', category: 'Indices' },
-    { id: '2', title: 'RBI announces new measures to control inflation', source: 'Livemint', timestamp: '30 min ago', url: '#', category: 'Macro' },
-    { id: '3', title: 'Tata Motors shares jump 5% on strong JLR sales data', source: 'Economic Times', timestamp: '1 hour ago', url: '#', category: 'Stocks' },
-    { id: '4', title: 'SEBI plans to introduce T+0 settlement by next year', source: 'Reuters', timestamp: '2 hours ago', url: '#', category: 'Macro' },
-    { id: '5', title: 'FIIs turn net buyers in Indian market after a week', source: 'Business Standard', timestamp: '3 hours ago', url: '#', category: 'Indices' },
+    { id: '1', title: 'NIFTY 50 crosses 23,500 led by strong IT stocks', source: 'MarketWire', timestamp: '2 hours ago', url: '#', category: 'Indices' },
+    { id: '2', title: 'SENSEX dips as banking sector sees profit booking', source: 'Financial Express', timestamp: '3 hours ago', url: '#', category: 'Stocks' },
+    { id: '3', title: 'Markets cautious ahead of RBI decision', source: 'Livemint', timestamp: '5 hours ago', url: '#', category: 'Macro' },
+    { id: '4', title: 'FIIs turn net buyers in Indian market after a week', source: 'Business Standard', timestamp: '3 hours ago', url: '#', category: 'Indices' },
+    { id: '5', title: 'Tata Motors shares jump 5% on strong JLR sales data', source: 'Economic Times', timestamp: '1 hour ago', url: '#', category: 'Stocks' },
   ];
 }
 
 export function getInternationalNews(): NewsArticle[] {
     return [
-      { id: '6', title: 'Fed holds interest rates steady, signals one cut in 2024', source: 'Wall Street Journal', timestamp: '15 min ago', url: '#', category: 'Macro' },
-      { id: '7', title: 'NVIDIA stock continues to rally on AI optimism', source: 'Bloomberg', timestamp: '45 min ago', url: '#', category: 'Stocks' },
+      { id: '6', title: 'Dow Jones declines after Fed signals rate hikes', source: 'Reuters', timestamp: '1 hour ago', url: '#', category: 'Macro' },
+      { id: '7', title: 'Nasdaq surges driven by AI stocks', source: 'Bloomberg', timestamp: '2 hours ago', url: '#', category: 'Indices' },
       { id: '8', title: 'European markets dip on French political uncertainty', source: 'Financial Times', timestamp: '1.5 hours ago', url: '#', category: 'Indices' },
-      { id: '9', title: 'US jobless claims unexpectedly rise, hinting at cooling labor market', source: 'CNBC', timestamp: '2 hours ago', url: '#', category: 'Macro' },
+      { id: '9', title: 'NVIDIA stock continues to rally on AI optimism', source: 'Wall Street Journal', timestamp: '45 min ago', url: '#', category: 'Stocks' },
       { id: '10', title: 'Apple unveils new AI features for iPhone at WWDC', source: 'The Verge', timestamp: '4 hours ago', url: '#', category: 'Stocks' },
     ];
 }
@@ -98,7 +98,6 @@ const generateChartData = (base: number, points: number, volatility: number, per
     const change = (Math.random() - 0.49) * volatility * lastValue / 100;
     const close = open + change;
     
-    // High and Low generation for candles
     const high = Math.max(open, close) + (Math.random() * (volatility / 2) * lastValue / 100);
     const low = Math.min(open, close) - (Math.random() * (volatility / 2) * lastValue / 100);
 
@@ -108,10 +107,10 @@ const generateChartData = (base: number, points: number, volatility: number, per
     let date: Date;
     switch(period) {
       case '1D':
-        date = new Date(today.getTime() - (points - 1 - i) * 5 * 60 * 1000); // 5 minute intervals
+        date = new Date(today.getTime() - (points - 1 - i) * 5 * 60 * 1000); 
         break;
       case '5D':
-        date = new Date(today.getTime() - (points - 1 - i) * 60 * 60 * 1000); // Hourly intervals
+        date = new Date(today.getTime() - (points - 1 - i) * 60 * 60 * 1000); 
         break;
       case '1M':
         date = new Date(today);
@@ -153,11 +152,11 @@ export function getMainChartData(symbol: string): MainChartData {
   const basePrice = ticker.price;
 
   return {
-      '1D': generateChartData(basePrice, 96, 0.5, '1D'), // ~8 hours of 5-min intervals
-      '5D': generateChartData(basePrice, 60, 1, '5D'), // 5 days of hourly data
-      '1M': generateChartData(basePrice, 30, 2, '1M'), // 1 month of daily data
-      '6M': generateChartData(basePrice, 26, 5, '6M'), // 6 months of weekly data
-      '1Y': generateChartData(basePrice, 52, 8, '1Y'), // 1 year of weekly data
+      '1D': generateChartData(basePrice, 96, 0.5, '1D'), 
+      '5D': generateChartData(basePrice, 60, 1, '5D'), 
+      '1M': generateChartData(basePrice, 30, 2, '1M'), 
+      '6M': generateChartData(basePrice, 26, 5, '6M'), 
+      '1Y': generateChartData(basePrice, 52, 8, '1Y'), 
   };
 }
 
@@ -189,7 +188,6 @@ export function getAllTickers(): Ticker[] {
     { symbol: 'COALINDIA', name: 'Coal India', price: 470.00, change: -3.00, percentChange: -0.63, currency: 'INR' },
     { symbol: 'ADANIPORTS', name: 'Adani Ports & SEZ', price: 1450.70, change: 52.30, percentChange: 3.75, currency: 'INR' },
     
-    // International Tickers
     { symbol: 'AAPL', name: 'Apple Inc', price: 208.14, change: -2.51, percentChange: -1.19, currency: 'USD' },
     { symbol: 'MSFT', name: 'Microsoft Corp', price: 447.67, change: -3.42, percentChange: -0.76, currency: 'USD' },
     { symbol: 'GOOGL', name: 'Alphabet Inc Class A', price: 179.22, change: -0.42, percentChange: -0.23, currency: 'USD' },
@@ -199,11 +197,9 @@ export function getAllTickers(): Ticker[] {
     { symbol: 'META', name: 'Meta Platforms Inc', price: 505.78, change: 6.21, percentChange: 1.24, currency: 'USD' },
     { symbol: 'JPM', name: 'JPMorgan Chase & Co', price: 197.88, change: -0.98, percentChange: -0.49, currency: 'USD' },
 
-    // International Indices (for charting)
     { symbol: 'S&P 500', name: 'S&P 500', price: 5477.90, change: 4.60, percentChange: 0.08, currency: 'USD', isIndex: true },
     { symbol: 'NASDAQ', name: 'NASDAQ Composite', price: 17721.59, change: -32.23, percentChange: -0.18, currency: 'USD', isIndex: true },
     { symbol: 'FTSE 100', name: 'FTSE 100', price: 8237.72, change: -43.83, percentChange: -0.53, currency: 'GBP', isIndex: true },
-    // Indian Indices (for charting)
     { symbol: 'NIFTY 50', name: 'NIFTY 50', price: 23516.00, change: 48.50, percentChange: 0.21, currency: 'INR', isIndex: true },
   ];
 }
