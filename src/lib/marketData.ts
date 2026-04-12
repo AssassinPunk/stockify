@@ -1,52 +1,74 @@
-
 import { Quote } from "@/types/market";
-
-const baseValues: Record<string, number> = {
-  "NIFTY 50": 23516.00,
-  "SENSEX": 77241.59,
-  "BANK NIFTY": 51703.95,
-  "INDIA VIX": 26.80,
-};
-
-// Simulated server-side persistence for drift effect
-let lastQuotes: Quote[] = [];
+import { SYMBOL_MAP } from "./constants";
 
 /**
- * Generates mock market quotes with realistic random fluctuations.
- * In production, replace this logic with a real market API call.
+ * Parses a string to a number safely, defaulting to 0 if invalid.
+ */
+function parseSafeFloat(value: string | undefined | null): number {
+  if (!value) return 0;
+  const parsed = parseFloat(value);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+/**
+ * Fetches real-time market quotes from Twelve Data API.
+ * Uses server-side environment variable for the API key.
  */
 export async function getQuotes(): Promise<Quote[]> {
+  const apiKey = process.env.TWELVE_DATA_API_KEY;
   const now = Date.now();
-  
-  const quotes: Quote[] = Object.entries(baseValues).map(([symbol, basePrice]) => {
-    // Find last price to create a continuous drift, or use base
-    const prevQuote = lastQuotes.find(q => q.symbol === symbol);
-    const startPrice = prevQuote ? prevQuote.price : basePrice;
-    
-    // Calculate random drift
-    let drift = 0;
-    if (symbol === "INDIA VIX") {
-      // VIX moves in smaller absolute increments
-      drift = (Math.random() - 0.5) * 0.15; 
-    } else {
-      // Indices move by small percentages (0.01% - 0.03%)
-      const volatility = 0.0003; 
-      drift = startPrice * (Math.random() - 0.5) * volatility;
+
+  if (!apiKey) {
+    console.error("Market Data Error: TWELVE_DATA_API_KEY is not configured in environment variables.");
+    return [];
+  }
+
+  // Map our display symbols to Twelve Data symbols
+  const apiSymbols = Object.values(SYMBOL_MAP).join(",");
+  const url = `https://api.twelvedata.com/quote?symbol=${apiSymbols}&apikey=${apiKey}`;
+
+  try {
+    const response = await fetch(url, { 
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    const data = await response.json();
+
+    // Twelve Data returns a global error object if the request fails completely
+    if (data.status === "error") {
+      console.error("Twelve Data API Global Error:", data.message);
+      return [];
     }
 
-    const price = parseFloat((startPrice + drift).toFixed(2));
-    const change = parseFloat((price - basePrice).toFixed(2));
-    const changePercent = parseFloat(((change / basePrice) * 100).toFixed(2));
+    // Process each mapped symbol. Twelve Data returns an object keyed by symbol for batch requests.
+    const quotes: Quote[] = Object.entries(SYMBOL_MAP).map(([displayName, apiSymbol]) => {
+      const apiQuote = data[apiSymbol];
 
-    return {
-      symbol,
-      price,
-      change,
-      changePercent,
-      timestamp: now,
-    };
-  });
+      if (!apiQuote) {
+        console.warn(`Market Data Warning: No data returned for ${displayName} (${apiSymbol})`);
+        return null;
+      }
 
-  lastQuotes = quotes;
-  return quotes;
+      if (apiQuote.status === "error") {
+        console.warn(`Market Data Warning for ${displayName}:`, apiQuote.message);
+        return null;
+      }
+
+      return {
+        symbol: displayName,
+        price: parseSafeFloat(apiQuote.close || apiQuote.price),
+        change: parseSafeFloat(apiQuote.change),
+        changePercent: parseSafeFloat(apiQuote.percent_change),
+        timestamp: now,
+      };
+    }).filter((q): q is Quote => q !== null);
+
+    return quotes;
+  } catch (error) {
+    console.error("Market Data critical failure:", error);
+    return [];
+  }
 }
