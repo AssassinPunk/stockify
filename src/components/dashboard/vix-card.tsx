@@ -1,5 +1,7 @@
 
 'use client';
+
+import { useState, useEffect, useRef } from "react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -9,12 +11,23 @@ import { calculateVixMoves, getRiskLevel } from "@/lib/vix";
 import { Info, ShieldAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useRealtimePrice } from "@/hooks/use-realtime-price";
 
 export default function VixCard({ vixData, chartData }: { vixData: VixData; chartData: ChartDataPoint[] }) {
-  const { price, isUpdating } = useRealtimePrice('INDIA VIX', vixData.value, 0, 0);
-  const moves = calculateVixMoves(price);
-  const risk = getRiskLevel(price);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const prevValue = useRef(vixData.value);
+
+  // Trigger visual pulse on live data update
+  useEffect(() => {
+    if (vixData.value !== prevValue.current) {
+      setIsUpdating(true);
+      const timer = setTimeout(() => setIsUpdating(false), 300);
+      prevValue.current = vixData.value;
+      return () => clearTimeout(timer);
+    }
+  }, [vixData.value]);
+
+  const moves = calculateVixMoves(vixData.value);
+  const risk = getRiskLevel(vixData.value);
 
   return (
     <Card className={cn(
@@ -52,11 +65,11 @@ export default function VixCard({ vixData, chartData }: { vixData: VixData; char
                 "font-code text-2xl font-bold cursor-default transition-colors duration-300",
                 isUpdating ? "text-primary" : "text-foreground"
               )}>
-                {formatNumber(price, { minimumFractionDigits: 2 })}
+                {formatNumber(vixData.value, { minimumFractionDigits: 2 })}
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{price < 13 ? "Low VIX = Stable market environment" : price >= 25 ? "Extreme Volatility = Panic selling likely" : "Elevated VIX = Expect wider price swings"}</p>
+              <p>{vixData.value < 13 ? "Low VIX = Stable market environment" : vixData.value >= 25 ? "Extreme Volatility = Panic selling likely" : "Elevated VIX = Expect wider price swings"}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

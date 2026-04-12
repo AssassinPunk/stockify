@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatChange, formatNumber } from "@/lib/format";
 import type { IndexData } from "@/lib/types";
@@ -17,19 +18,23 @@ import {
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRealtimePrice } from "@/hooks/use-realtime-price";
 
 export default function IndexCard({ index }: { index: IndexData }) {
-  const { price, change, percentChange, isUpdating } = useRealtimePrice(
-    index.symbol, 
-    index.value, 
-    index.change, 
-    index.percentChange
-  );
+  const [isUpdating, setIsUpdating] = useState(false);
+  const prevValue = useRef(index.value);
 
-  const isPositive = change >= 0;
+  // Trigger a visual pulse when the price changes via polling
+  useEffect(() => {
+    if (index.value !== prevValue.current) {
+      setIsUpdating(true);
+      const timer = setTimeout(() => setIsUpdating(false), 300);
+      prevValue.current = index.value;
+      return () => clearTimeout(timer);
+    }
+  }, [index.value]);
 
-  // Mock data for "expand" view
+  const isPositive = index.change >= 0;
+
   const contributors = [
     { symbol: 'RELIANCE', impact: 12.5, type: 'up' },
     { symbol: 'TCS', impact: 8.2, type: 'up' },
@@ -70,13 +75,13 @@ export default function IndexCard({ index }: { index: IndexData }) {
               "font-code text-2xl font-bold transition-colors duration-300",
               isUpdating ? "text-primary" : "text-foreground"
             )}>
-              {formatNumber(price, { minimumFractionDigits: 2 })}
+              {formatNumber(index.value, { minimumFractionDigits: 2 })}
             </div>
             <TooltipProvider>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <p className={cn("font-code text-xs cursor-default", isPositive ? 'text-up' : 'text-down')}>
-                    {formatChange(change, percentChange)}
+                    {formatChange(index.change, index.percentChange)}
                   </p>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -98,12 +103,12 @@ export default function IndexCard({ index }: { index: IndexData }) {
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="rounded-xl bg-secondary/30 p-4">
               <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Current Value</span>
-              <div className="text-2xl font-bold font-code mt-1">{formatNumber(price)}</div>
+              <div className="text-2xl font-bold font-code mt-1">{formatNumber(index.value)}</div>
             </div>
             <div className="rounded-xl bg-secondary/30 p-4">
               <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Daily Change</span>
               <div className={cn("text-2xl font-bold font-code mt-1", isPositive ? 'text-up' : 'text-down')}>
-                {formatChange(change, percentChange)}
+                {formatChange(index.change, index.percentChange)}
               </div>
             </div>
           </div>
