@@ -1,3 +1,4 @@
+
 'use client';
 import { Area, AreaChart, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,13 +9,18 @@ import { calculateVixMoves, getRiskLevel } from "@/lib/vix";
 import { Info, ShieldAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useRealtimePrice } from "@/hooks/use-realtime-price";
 
 export default function VixCard({ vixData, chartData }: { vixData: VixData; chartData: ChartDataPoint[] }) {
-  const moves = calculateVixMoves(vixData.value);
-  const risk = getRiskLevel(vixData.value);
+  const { price, isUpdating } = useRealtimePrice('INDIA VIX', vixData.value, 0, 0);
+  const moves = calculateVixMoves(price);
+  const risk = getRiskLevel(price);
 
   return (
-    <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 transition-all hover:shadow-black/20 hover:-translate-y-1">
+    <Card className={cn(
+      "rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 transition-all hover:shadow-black/20 hover:-translate-y-1 overflow-hidden",
+      isUpdating && "ring-2 ring-primary/50"
+    )}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex flex-col gap-1">
           <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
@@ -42,12 +48,15 @@ export default function VixCard({ vixData, chartData }: { vixData: VixData; char
         <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
-              <div className="font-code text-2xl font-bold cursor-default">
-                {formatNumber(vixData.value, { minimumFractionDigits: 2 })}
+              <div className={cn(
+                "font-code text-2xl font-bold cursor-default transition-colors duration-300",
+                isUpdating ? "text-primary" : "text-foreground"
+              )}>
+                {formatNumber(price, { minimumFractionDigits: 2 })}
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{vixData.value < 13 ? "Low VIX = Stable market environment" : vixData.value >= 25 ? "Extreme Volatility = Panic selling likely" : "Elevated VIX = Expect wider price swings"}</p>
+              <p>{price < 13 ? "Low VIX = Stable market environment" : price >= 25 ? "Extreme Volatility = Panic selling likely" : "Elevated VIX = Expect wider price swings"}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
