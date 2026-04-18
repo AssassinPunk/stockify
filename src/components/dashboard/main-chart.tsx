@@ -29,6 +29,9 @@ import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatNumber } from '@/lib/format';
 import FullChartDialog from './full-chart-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getAllTickers } from '@/lib/data';
+import { Loader2 } from 'lucide-react';
 
 const chartConfig = {
   value: {
@@ -177,12 +180,17 @@ const Candlestick = (props: any) => {
 };
 
 export default function MainChart({
-  ticker,
-  chartData,
+  ticker: initialTicker,
+  chartData: initialChartData,
 }: {
   ticker: Ticker;
   chartData: MainChartData;
 }) {
+  const allTickers = useMemo(() => getAllTickers(), []);
+  const [currentTicker, setCurrentTicker] = useState<Ticker>(initialTicker);
+  const [currentData, setCurrentData] = useState<MainChartData>(initialChartData);
+  const [isLoadingChart, setIsLoadingChart] = useState(false);
+
   const [timeframe, setTimeframe] = useState<keyof MainChartData>('1M');
   const [chartType, setChartType] = useState<'area' | 'candle'>('area');
   const [isFullChartOpen, setIsFullChartOpen] = useState(false);
@@ -191,7 +199,20 @@ export default function MainChart({
   const [showRSI, setShowRSI] = useState(false);
   const [compareWith, setCompareWith] = useState<string[]>([]);
 
-  const baseData = chartData[timeframe];
+  const handleStockChange = async (symbol: string) => {
+    const newTicker = allTickers.find(t => t.symbol === symbol);
+    if (!newTicker) return;
+    setCurrentTicker(newTicker);
+    setIsLoadingChart(true);
+    try {
+      const res = await fetch(`/api/chart?symbol=${encodeURIComponent(symbol)}`);
+      const newData = await res.json();
+      if (!newData.error) setCurrentData(newData);
+    } catch {}
+    setIsLoadingChart(false);
+  };
+
+  const baseData = currentData[timeframe];
   
   const processedData = useMemo(() => {
     let data = [...baseData];
@@ -255,9 +276,20 @@ export default function MainChart({
     <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 h-full overflow-hidden">
       <CardHeader className="flex flex-col gap-4 space-y-0 pb-4">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <CardTitle className="text-xl">{ticker.symbol}</CardTitle>
-            <CardDescription>{ticker.name}</CardDescription>
+          <div className="flex items-center gap-3">
+            <Select value={currentTicker.symbol} onValueChange={handleStockChange}>
+              <SelectTrigger className="w-[200px] border-none shadow-none focus:ring-0 p-0 h-auto font-bold text-xl bg-transparent">
+                <SelectValue placeholder="Select Stock" />
+              </SelectTrigger>
+              <SelectContent>
+                {allTickers.map((t) => (
+                  <SelectItem key={t.symbol} value={t.symbol}>
+                    {t.symbol} <span className="text-muted-foreground font-normal ml-2">{t.name}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {isLoadingChart && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center rounded-lg bg-secondary/50 p-1 mr-2">
@@ -422,7 +454,7 @@ export default function MainChart({
 
             <ChartTooltip
               cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1, strokeDasharray: '3 3' }}
-              content={<CustomTooltip ticker={ticker} chartType={chartType} />}
+              content={<CustomTooltip ticker={currentTicker} chartType={chartType} />}
             />
 
             {chartType === 'area' ? (
@@ -430,7 +462,7 @@ export default function MainChart({
                 yAxisId="price"
                 type="monotone"
                 dataKey="value"
-                name={ticker.symbol}
+                name={currentTicker.symbol}
                 stroke="hsl(var(--primary))"
                 strokeWidth={2}
                 fillOpacity={1}
@@ -441,7 +473,7 @@ export default function MainChart({
               <Bar
                 yAxisId="price"
                 dataKey="close"
-                name={ticker.symbol}
+                name={currentTicker.symbol}
                 shape={<Candlestick yIdPriceScale={(val: number) => {
                     // This is a bit of a hack to get the Y-axis scale inside the custom shape
                     // In a real app, you'd use the provided 'y' prop which Recharts maps for you.
@@ -521,10 +553,10 @@ export default function MainChart({
         </ChartContainer>
       </CardContent>
       <FullChartDialog 
-        ticker={ticker} 
+        ticker={currentTicker} 
         isOpen={isFullChartOpen} 
         onOpenChange={setIsFullChartOpen} 
-        chartData={chartData} 
+        chartData={currentData} 
       />
     </Card>
   );

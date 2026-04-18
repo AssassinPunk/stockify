@@ -60,11 +60,11 @@ export async function fetchIndiaVix(): Promise<{ vixData: VixData, chartData: Ch
 }
 
 // Minimal fallback generator for chart data
-function generateFallbackChartData(baseValue: number): ChartDataPoint[] {
+function generateFallbackChartData(baseValue: number, points: number = 30): ChartDataPoint[] {
     const data: ChartDataPoint[] = [];
     let lastValue = baseValue;
     const today = new Date();
-    for(let i=30; i>=0; i--) {
+    for(let i=points; i>=0; i--) {
         const d = new Date(today);
         d.setDate(d.getDate() - i);
         data.push({
@@ -77,4 +77,78 @@ function generateFallbackChartData(baseValue: number): ChartDataPoint[] {
         });
     }
     return data;
+}
+
+// Convert common Indian symbols to Yahoo symbols
+function getYahooSymbol(symbol: string): string {
+    if (symbol === 'NIFTY 50') return '^NSEI';
+    if (symbol === 'SENSEX') return '^BSESN';
+    if (symbol === 'BANK NIFTY') return '^NSEBANK';
+    if (symbol === 'INDIA VIX') return '^INDIAVIX';
+    // If it doesn't look like an international stock, assume NSE
+    const international = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META', 'JPM', 'S&P 500', 'NASDAQ', 'FTSE 100'];
+    if (!international.includes(symbol) && !symbol.includes('.')) {
+         return `${symbol}.NS`;
+    }
+    if (symbol === 'S&P 500') return '^GSPC';
+    if (symbol === 'NASDAQ') return '^IXIC';
+    if (symbol === 'FTSE 100') return '^FTSE';
+    return symbol;
+}
+
+export async function fetchYahooChart(symbol: string): Promise<import('./types').MainChartData> {
+  const ySymbol = getYahooSymbol(symbol);
+  
+  // Format individual timeframe chart
+  async function fetchTimeframe(range: string, interval: string): Promise<ChartDataPoint[]> {
+    try {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ySymbol)}?range=${range}&interval=${interval}`;
+      const res = await fetch(url, { next: { revalidate: 300 } }); 
+      const data = await res.json();
+      
+      if (data.chart.error) return [];
+      
+      const result = data.chart.result[0];
+      const timestamps = result.timestamp;
+      const quote = result.indicators.quote[0];
+
+      const chartData: ChartDataPoint[] = [];
+      if (timestamps && quote) {
+        for (let i = 0; i < timestamps.length; i++) {
+          if (quote.close[i] !== null) {
+            chartData.push({
+              date: new Date(timestamps[i] * 1000).toISOString(),
+              open: quote.open[i] ?? 0,
+              high: quote.high[i] ?? 0,
+              low: quote.low[i] ?? 0,
+              close: quote.close[i] ?? 0,
+              value: quote.close[i] ?? 0,
+              volume: quote.volume?.[i] ?? 0,
+            });
+          }
+        }
+      }
+      return chartData;
+    } catch {
+      return [];
+    }
+  }
+
+  // Fetch all concurrently
+  const [day, week, month, sixMonths, year] = await Promise.all([
+    fetchTimeframe('1d', '5m'),
+    fetchTimeframe('5d', '15m'),
+    fetchTimeframe('1mo', '1d'),
+    fetchTimeframe('6mo', '1d'),
+    fetchTimeframe('1y', '1d')
+  ]);
+
+  // Provide fallback logic if it fails
+  return {
+    '1D': day.length > 0 ? day : generateFallbackChartData(100, 96),
+    '5D': week.length > 0 ? week : generateFallbackChartData(100, 60),
+    '1M': month.length > 0 ? month : generateFallbackChartData(100, 30),
+    '6M': sixMonths.length > 0 ? sixMonths : generateFallbackChartData(100, 120),
+    '1Y': year.length > 0 ? year : generateFallbackChartData(100, 250),
+  };
 }
