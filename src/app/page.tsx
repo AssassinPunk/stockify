@@ -6,18 +6,18 @@ import SectorHeatmap from '@/components/dashboard/sector-heatmap';
 import TrendingTickers from '@/components/dashboard/trending-tickers';
 import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
-import { getSectors, getTrendingTickers, getNews, getMainChartData, getAllTickers } from '@/lib/data';
-import { fetchIndiaVix, fetchLiveIndianIndices } from '@/lib/yahoo-finance';
+import { getSectors, getNews, getMainChartData, getAllTickers } from '@/lib/data';
+import { fetchIndiaVix, fetchLiveIndianIndices, fetchLiveTrendingTickers } from '@/lib/yahoo-finance';
 
 export default async function Home() {
   // Fetch real data via Yahoo Finance
-  const [liveIndices, { vixData, chartData: vixChartData }] = await Promise.all([
+  const [liveIndices, { vixData, chartData: vixChartData }, trending] = await Promise.all([
     fetchLiveIndianIndices(),
-    fetchIndiaVix()
+    fetchIndiaVix(),
+    fetchLiveTrendingTickers()
   ]);
 
   const sectors = getSectors();
-  const trending = getTrendingTickers();
   const news = getNews();
   const allTickers = getAllTickers();
 

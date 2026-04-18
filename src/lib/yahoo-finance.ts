@@ -203,3 +203,45 @@ export async function fetchLiveIndianIndices(): Promise<import('./types').IndexD
     ];
   }
 }
+
+import { getAllTickers } from './data';
+import type { TrendingData, Ticker } from './types';
+
+// Fetch live quotes for all covered Indian stocks and dynamically calculate Top Gainers / Losers
+export async function fetchLiveTrendingTickers(): Promise<TrendingData> {
+  const allTickers = getAllTickers().filter(t => t.currency === 'INR' && !t.isIndex);
+  
+  const promises = allTickers.map(async (ticker) => {
+    try {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(getYahooSymbol(ticker.symbol))}?range=1d&interval=1d`;
+      // Revalidate every 5 minutes to keep trending somewhat fresh but avoid aggressive limits
+      const res = await fetch(url, { next: { revalidate: 300 } }); 
+      const data = await res.json();
+      
+      const meta = data.chart?.result?.[0]?.meta;
+      if (!meta) return ticker; // Return fallback base if unavailable
+
+      const price = meta.regularMarketPrice;
+      const prevClose = meta.chartPreviousClose;
+      const change = price - prevClose;
+      const percentChange = (change / prevClose) * 100;
+
+      return {
+        ...ticker,
+        price,
+        change,
+        percentChange
+      };
+    } catch {
+      return ticker; // fallback
+    }
+  });
+
+  const updatedTickers = await Promise.all(promises);
+  const sorted = updatedTickers.sort((a, b) => b.percentChange - a.percentChange);
+  
+  return {
+    gainers: sorted.slice(0, 4),
+    losers: sorted.slice().reverse().slice(0, 4)
+  };
+}
