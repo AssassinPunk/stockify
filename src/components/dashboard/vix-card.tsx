@@ -1,4 +1,7 @@
+
 'use client';
+
+import { useState, useEffect, useRef } from "react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -10,11 +13,27 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export default function VixCard({ vixData, chartData }: { vixData: VixData; chartData: ChartDataPoint[] }) {
+  const [isUpdating, setIsUpdating] = useState(false);
+  const prevValue = useRef(vixData.value);
+
+  // Trigger visual pulse on live data update
+  useEffect(() => {
+    if (vixData.value !== prevValue.current) {
+      setIsUpdating(true);
+      const timer = setTimeout(() => setIsUpdating(false), 300);
+      prevValue.current = vixData.value;
+      return () => clearTimeout(timer);
+    }
+  }, [vixData.value]);
+
   const moves = calculateVixMoves(vixData.value);
   const risk = getRiskLevel(vixData.value);
 
   return (
-    <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 transition-all hover:shadow-black/20 hover:-translate-y-1">
+    <Card className={cn(
+      "rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 transition-all hover:shadow-black/20 hover:-translate-y-1 overflow-hidden",
+      isUpdating && "ring-2 ring-primary/50"
+    )}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex flex-col gap-1">
           <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
@@ -42,7 +61,10 @@ export default function VixCard({ vixData, chartData }: { vixData: VixData; char
         <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
-              <div className="font-code text-2xl font-bold cursor-default">
+              <div className={cn(
+                "font-code text-2xl font-bold cursor-default transition-colors duration-300",
+                isUpdating ? "text-primary" : "text-foreground"
+              )}>
                 {formatNumber(vixData.value, { minimumFractionDigits: 2 })}
               </div>
             </TooltipTrigger>

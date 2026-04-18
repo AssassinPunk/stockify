@@ -1,5 +1,7 @@
+
 'use client';
 
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatChange, formatNumber } from "@/lib/format";
 import type { IndexData } from "@/lib/types";
@@ -18,9 +20,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function IndexCard({ index }: { index: IndexData }) {
+  const [isUpdating, setIsUpdating] = useState(false);
+  const prevValue = useRef(index.value);
+
+  // Trigger a visual pulse when the price changes via polling
+  useEffect(() => {
+    if (index.value !== prevValue.current) {
+      setIsUpdating(true);
+      const timer = setTimeout(() => setIsUpdating(false), 300);
+      prevValue.current = index.value;
+      return () => clearTimeout(timer);
+    }
+  }, [index.value]);
+
   const isPositive = index.change >= 0;
 
-  // Mock data for "expand" view
   const contributors = [
     { symbol: 'RELIANCE', impact: 12.5, type: 'up' },
     { symbol: 'TCS', impact: 8.2, type: 'up' },
@@ -32,7 +46,10 @@ export default function IndexCard({ index }: { index: IndexData }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 transition-all hover:shadow-black/20 hover:-translate-y-1 cursor-pointer">
+        <Card className={cn(
+          "rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 transition-all hover:shadow-black/20 hover:-translate-y-1 cursor-pointer overflow-hidden",
+          isUpdating && "ring-2 ring-primary/50"
+        )}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
               {index.symbol}
@@ -54,7 +71,10 @@ export default function IndexCard({ index }: { index: IndexData }) {
             )}
           </CardHeader>
           <CardContent>
-            <div className="font-code text-2xl font-bold">
+            <div className={cn(
+              "font-code text-2xl font-bold transition-colors duration-300",
+              isUpdating ? "text-primary" : "text-foreground"
+            )}>
               {formatNumber(index.value, { minimumFractionDigits: 2 })}
             </div>
             <TooltipProvider>
