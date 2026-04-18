@@ -245,3 +245,54 @@ export async function fetchLiveTrendingTickers(): Promise<TrendingData> {
     losers: sorted.slice().reverse().slice(0, 4)
   };
 }
+
+import type { NewsArticle } from './types';
+
+// Fetch real-time market news
+export async function fetchLiveNews(): Promise<NewsArticle[]> {
+  try {
+    const url = `https://query2.finance.yahoo.com/v1/finance/search?q=Indian+Stock+Market&newsCount=8`;
+    // Revalidate every 10 minutes (600s) for fairly fresh news
+    const res = await fetch(url, { next: { revalidate: 600 } });
+    const data = await res.json();
+
+    if (!data.news || !Array.isArray(data.news)) {
+      throw new Error("Invalid news format returned from Yahoo");
+    }
+
+    return data.news.map((item: any, index: number) => {
+      // Calculate human-readable 'time ago'
+      const secondsAgo = Math.floor(Date.now() / 1000 - item.providerPublishTime);
+      let timestamp = '';
+      if (secondsAgo < 3600) timestamp = `${Math.floor(secondsAgo / 60)} min ago`;
+      else if (secondsAgo < 86400) timestamp = `${Math.floor(secondsAgo / 3600)} hours ago`;
+      else timestamp = `${Math.floor(secondsAgo / 86400)} days ago`;
+
+      // Categorize based on keywords in title
+      const lowerTitle = item.title.toLowerCase();
+      let category: 'Indices' | 'Stocks' | 'Macro' = 'Macro';
+      
+      if (lowerTitle.match(/nifty|sensex|index|dow jones|nasdaq|s&p|nse|bse|markets/)) {
+        category = 'Indices';
+      } else if (lowerTitle.match(/shares|stock|earnings|revenue|profit|dividend|tata|reliance|hdfc|infosys|wipro|buy|sell|target/)) {
+        category = 'Stocks';
+      }
+
+      return {
+        id: item.uuid || `news-${index}`,
+        title: item.title,
+        source: item.publisher || 'Yahoo Finance',
+        timestamp: timestamp,
+        url: item.link,
+        category: category
+      };
+    });
+  } catch (error) {
+    console.error("Failed to fetch live news:", error);
+    // Fallback static array if network fails completely
+    return [
+      { id: '1', title: 'Market faces turbulent session amidst global cues', source: 'MarketWire', timestamp: '2 hours ago', url: '#', category: 'Macro' as const },
+      { id: '2', title: 'IT sector sees massive selloff ahead of earnings', source: 'Financial Express', timestamp: '3 hours ago', url: '#', category: 'Stocks' as const },
+    ];
+  }
+}
