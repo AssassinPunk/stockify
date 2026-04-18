@@ -1,5 +1,3 @@
-'use client';
-
 import Header from '@/components/dashboard/header';
 import IndexCard from '@/components/dashboard/index-card';
 import VixCard from '@/components/dashboard/vix-card';
@@ -8,13 +6,17 @@ import SectorHeatmap from '@/components/dashboard/sector-heatmap';
 import TrendingTickers from '@/components/dashboard/trending-tickers';
 import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
-import { getIndices, getVixData, getSectors, getTrendingTickers, getNews, getVixChartData, getMainChartData, getAllTickers } from '@/lib/data';
-import type { Ticker } from '@/lib/types';
+import { getSectors, getTrendingTickers, getNews, getMainChartData, getAllTickers } from '@/lib/data';
+import { fetchWithTwelveData } from '@/lib/twelve-data';
+import { fetchIndiaVix } from '@/lib/yahoo-finance';
 
-export default function Home() {
-  // Mock data fetching
-  const indices = getIndices();
-  const vixData = getVixData();
+export default async function Home() {
+  // Fetch real data via Twelve Data API & Yahoo Finance
+  const [liveIndices, { vixData, chartData: vixChartData }] = await Promise.all([
+    fetchWithTwelveData(),
+    fetchIndiaVix()
+  ]);
+
   const sectors = getSectors();
   const trending = getTrendingTickers();
   const news = getNews();
@@ -22,46 +24,15 @@ export default function Home() {
 
   const nifty50Ticker = allTickers.find(t => t.symbol === 'NIFTY 50');
 
-  // Helper to merge live quotes with initial data structures
-  const getLiveIndexData = (symbol: string): IndexData | undefined => {
-    const initial = initialIndices.find(i => i.symbol === symbol);
-    if (!initial) return undefined;
-    
-    const live = quotes.find(q => q.symbol === symbol);
-    if (!live) return initial;
-
-    return {
-      ...initial,
-      value: live.price,
-      change: live.change,
-      percentChange: live.changePercent,
-    };
-  };
-
-  const getLiveVixData = (): VixData => {
-    const live = quotes.find(q => q.symbol === 'INDIA VIX');
-    if (!live) return initialVixData;
-
-    return {
-      ...initialVixData,
-      value: live.price,
-    };
-  };
-
-  const nifty50 = getLiveIndexData('NIFTY 50');
-  const sensex = getLiveIndexData('SENSEX');
-  const bankNifty = getLiveIndexData('BANK NIFTY');
-  const vixData = getLiveVixData();
-
   if (!nifty50Ticker) {
     return <div>Loading...</div>;
   }
 
   const mainChartData = getMainChartData(nifty50Ticker.symbol);
 
-  const nifty50 = indices.find(i => i.symbol === 'NIFTY 50');
-  const sensex = indices.find(i => i.symbol === 'SENSEX');
-  const bankNifty = indices.find(i => i.symbol === 'BANK NIFTY');
+  const nifty50 = liveIndices[0];
+  const sensex = liveIndices[1];
+  const bankNifty = liveIndices[2];
   
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
