@@ -1,12 +1,21 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { createChart, IChartApi, ISeriesApi } from 'lightweight-charts';
+import { createChart, IChartApi } from 'lightweight-charts';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Maximize2, XIcon } from 'lucide-react';
+import { XIcon, SlidersHorizontal } from 'lucide-react';
 import { Ticker, MainChartData } from '@/lib/types';
 import { formatNumber } from '@/lib/format';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { calculateADL, calculateMA, calculateRSI } from '@/lib/indicators';
+
+const CHART_OPTIONS = {
+  layout: { background: { type: 'solid' as any, color: '#131722' }, textColor: '#888' },
+  grid: { vertLines: { color: '#2a2e39' }, horzLines: { color: '#2a2e39' } },
+  timeScale: { timeVisible: true, secondsVisible: false, borderColor: '#2a2e39' },
+  rightPriceScale: { borderColor: '#2a2e39' },
+};
 
 export default function FullChartDialog({
   ticker,
@@ -20,85 +29,115 @@ export default function FullChartDialog({
   chartData: MainChartData;
 }) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
-  const [chartInstance, setChartInstance] = useState<IChartApi | null>(null);
-  const candlestickSeriesRef = useRef<any>(null);
+  const rsiContainerRef = useRef<HTMLDivElement>(null);
+  const adlContainerRef = useRef<HTMLDivElement>(null);
+
+  const [showRSI, setShowRSI] = useState(false);
+  const [showADL, setShowADL] = useState(false);
+  const [showMA, setShowMA] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !chartContainerRef.current) return;
 
-    // Create chart
-    const chart = createChart(chartContainerRef.current, {
-      layout: {
-        background: { type: 'solid' as any, color: 'transparent' },
-        textColor: '#888',
-      },
-      grid: {
-        vertLines: { color: '#333' },
-        horzLines: { color: '#333' },
-      },
+    // ----- 1. PREPARE DATA -----
+    // Ensure chronological order
+    const dataPoints = chartData['1M'].map(d => ({ ...d })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    // Lightweight Charts wants strictly typed time
+    const chartTime = dataPoints.map(d => (new Date(d.date).getTime() / 1000) as any);
+
+    // Candles
+    const candlesData = dataPoints.map((d, i) => ({
+      time: chartTime[i], open: d.open, high: d.high, low: d.low, close: d.close
+    }));
+
+    // Indicators
+    const maData = calculateMA(dataPoints, 20).filter(d => d.value !== null).map((d, i) => ({ time: chartTime[i], value: d.value as number }));
+    const rsiData = calculateRSI(dataPoints, 14).filter(d => d.value !== null).map((d, i) => ({ time: chartTime[i], value: d.value as number }));
+    const adlData = calculateADL(dataPoints).map((d, i) => ({ time: chartTime[i], value: d.value as number }));
+
+
+    // ----- 2. CREATE CHARTS -----
+    const charts: IChartApi[] = [];
+
+    // Main Chart
+    const mainChart = createChart(chartContainerRef.current, {
+      ...CHART_OPTIONS,
       width: chartContainerRef.current.clientWidth,
       height: chartContainerRef.current.clientHeight,
-      timeScale: {
-        timeVisible: true,
-        secondsVisible: false,
-      },
     });
+    charts.push(mainChart);
 
-    const candlestickSeries = (chart as any).addCandlestickSeries({
-      upColor: '#10b981',
-      downColor: '#ef4444',
-      borderVisible: false,
-      wickUpColor: '#10b981',
-      wickDownColor: '#ef4444',
+    const candlestickSeries = mainChart.addCandlestickSeries({
+      upColor: '#10b981', downColor: '#ef4444', borderVisible: false, wickUpColor: '#10b981', wickDownColor: '#ef4444',
     });
+    candlestickSeries.setData(candlesData);
 
-    // Format data for lightweight-charts
-    const data = chartData['1M'].map(d => ({
-        time: (new Date(d.date).getTime() / 1000) as any,
-        open: d.open,
-        high: d.high,
-        low: d.low,
-        close: d.close,
-    })).sort((a, b) => (a.time as number) - (b.time as number)); // Needs to be chronological
+    if (showMA) {
+      const maSeries = mainChart.addLineSeries({ color: 'rgba(255, 193, 7, 1)', lineWidth: 1.5, crosshairMarkerVisible: false });
+      maSeries.setData(maData);
+    }
 
-    // Simulate "candles forming" by feeding them in over time
-    const initialData = data.slice(0, Math.max(10, data.length - 20));
-    const remainingData = data.slice(Math.max(10, data.length - 20));
-
-    candlestickSeries.setData(initialData);
-
-    chart.timeScale().fitContent();
-
-    setChartInstance(chart);
-    candlestickSeriesRef.current = candlestickSeries;
-
-    let idx = 0;
-    const interval = setInterval(() => {
-      if (idx < remainingData.length) {
-        candlestickSeries.update(remainingData[idx]);
-        idx++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 200);
-
-    const handleResize = () => {
-      if (chartContainerRef.current) {
-        chart.applyOptions({
-           width: chartContainerRef.current.clientWidth,
-           height: chartContainerRef.current.clientHeight,
+    // RSI Pane
+    let rsiChart: IChartApi | null = null;
+    if (showRSI && rsiContainerRef.current) {
+        rsiChart = createChart(rsiContainerRef.current, {
+            ...CHART_OPTIONS,
+            width: rsiContainerRef.current.clientWidth,
+            height: rsiContainerRef.current.clientHeight,
         });
-      }
-    };
+        charts.push(rsiChart);
+        const rsiSeries = rsiChart.addLineSeries({ color: '#8b5cf6', lineWidth: 1.5 });
+        rsiSeries.setData(rsiData);
+    }
 
+    // ADL Pane
+    let adlChart: IChartApi | null = null;
+    if (showADL && adlContainerRef.current) {
+        adlChart = createChart(adlContainerRef.current, {
+            ...CHART_OPTIONS,
+            width: adlContainerRef.current.clientWidth,
+            height: adlContainerRef.current.clientHeight,
+        });
+        charts.push(adlChart);
+        const adlSeries = adlChart.addLineSeries({ color: '#facc15', lineWidth: 1.5 });
+        adlSeries.setData(adlData);
+    }
+
+    // ----- 3. SYNC LOGIC -----
+    function syncTimeScales(source: IChartApi, targets: (IChartApi | null)[]) {
+        source.timeScale().subscribeVisibleTimeRangeChange((range) => {
+            if (!range) return;
+            targets.forEach(target => {
+                if (target && target !== source) {
+                    target.timeScale().setVisibleRange(range);
+                }
+            });
+        });
+    }
+
+    // Wire up symmetric sync
+    syncTimeScales(mainChart, [rsiChart, adlChart]);
+    if (rsiChart) syncTimeScales(rsiChart, [mainChart, adlChart]);
+    if (adlChart) syncTimeScales(adlChart, [mainChart, rsiChart]);
+
+    // Fit content initially
+    mainChart.timeScale().fitContent();
+
+
+    // ----- 4. RESIZE -----
+    const handleResize = () => {
+      if (chartContainerRef.current) mainChart.applyOptions({ width: chartContainerRef.current.clientWidth, height: chartContainerRef.current.clientHeight });
+      if (showRSI && rsiContainerRef.current && rsiChart) rsiChart.applyOptions({ width: rsiContainerRef.current.clientWidth, height: rsiContainerRef.current.clientHeight });
+      if (showADL && adlContainerRef.current && adlChart) adlChart.applyOptions({ width: adlContainerRef.current.clientWidth, height: adlContainerRef.current.clientHeight });
+    };
     window.addEventListener('resize', handleResize);
 
     return () => {
-      clearInterval(interval);
       window.removeEventListener('resize', handleResize);
-      chart.remove();
+      charts.forEach(c => c.remove());
     };
-  }, [isOpen, chartData]);
+  }, [isOpen, chartData, showRSI, showADL, showMA]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -115,13 +154,55 @@ export default function FullChartDialog({
                {formatNumber(ticker.price)} <span className="text-emerald-500/70 ml-1">({ticker.percentChange}%)</span>
             </span>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="text-white hover:bg-white/10 hover:text-white rounded-xl">
-            <XIcon className="h-5 w-5" />
-          </Button>
+          
+          <div className="flex items-center gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 bg-transparent text-white border-white/20 hover:bg-white/10 hover:text-white">
+                    <SlidersHorizontal className="mr-2 h-4 w-4" />
+                    Indicators
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-[#1e222d] border-[#2a2e39] text-white" align="end">
+                <DropdownMenuCheckboxItem checked={showMA} onCheckedChange={setShowMA} className="focus:bg-white/10 focus:text-white cursor-pointer">
+                    Moving Average (MA)
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem checked={showRSI} onCheckedChange={setShowRSI} className="focus:bg-white/10 focus:text-white cursor-pointer">
+                    Relative Strength Index (RSI)
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem checked={showADL} onCheckedChange={setShowADL} className="focus:bg-white/10 focus:text-white cursor-pointer">
+                    Accum/Dist Line (ADL)
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="text-white hover:bg-white/10 hover:text-white rounded-xl">
+              <XIcon className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
-        {/* Chart Container */}
-        <div className="flex-1 w-full bg-[#131722] overflow-hidden" ref={chartContainerRef} style={{cursor: "crosshair"}} />
+        {/* Chart Container Group */}
+        <div className="flex-1 w-full bg-[#131722] flex flex-col overflow-hidden">
+            {/* Main Pane */}
+            <div className="flex-1 w-full relative" ref={chartContainerRef} />
+            
+            {/* RSI Pane */}
+            {showRSI && (
+                <div className="h-48 w-full border-t border-[#2a2e39] relative flex flex-col shrink-0">
+                    <div className="absolute top-2 left-4 z-10 text-[#8b5cf6] text-xs font-semibold">RSI (14)</div>
+                    <div className="flex-1 w-full" ref={rsiContainerRef} />
+                </div>
+            )}
+            
+            {/* ADL Pane */}
+            {showADL && (
+                <div className="h-48 w-full border-t border-[#2a2e39] relative flex flex-col shrink-0">
+                    <div className="absolute top-2 left-4 z-10 text-[#facc15] text-xs font-semibold">Accum/Dist (ADL)</div>
+                    <div className="flex-1 w-full" ref={adlContainerRef} />
+                </div>
+            )}
+        </div>
       </DialogContent>
     </Dialog>
   );
