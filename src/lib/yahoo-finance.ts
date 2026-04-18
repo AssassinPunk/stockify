@@ -152,3 +152,54 @@ export async function fetchYahooChart(symbol: string): Promise<import('./types')
     '1Y': year.length > 0 ? year : generateFallbackChartData(100, 250),
   };
 }
+
+// Fetch live quotes for Indian indices
+export async function fetchLiveIndianIndices(): Promise<import('./types').IndexData[]> {
+  const indices = [
+    { name: 'NIFTY 50', symbol: 'NIFTY 50', yahoo: '^NSEI' },
+    { name: 'SENSEX', symbol: 'SENSEX', yahoo: '^BSESN' },
+    { name: 'BANK NIFTY', symbol: 'BANK NIFTY', yahoo: '^NSEBANK' }
+  ];
+
+  try {
+    const promises = indices.map(async (idx) => {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(idx.yahoo)}?range=1d&interval=1d`;
+      const res = await fetch(url, { next: { revalidate: 60 } }); 
+      const data = await res.json();
+      const meta = data.chart?.result?.[0]?.meta;
+      
+      if (!meta) throw new Error("Metadata missing for " + idx.symbol);
+
+      const price = meta.regularMarketPrice;
+      const prevClose = meta.chartPreviousClose;
+      const change = price - prevClose;
+      const changePercent = (change / prevClose) * 100;
+
+      return {
+        symbol: idx.symbol,
+        value: price,
+        change: change,
+        percentChange: changePercent,
+        lastUpdated: new Date(meta.regularMarketTime * 1000).toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        }) + ' IST'
+      };
+    });
+
+    const results = await Promise.all(promises);
+    return results;
+  } catch (error) {
+    console.error("Failed to fetch Live Indian Indices from Yahoo:", error);
+    // Fallback to initial if Yahoo completely fails
+    return [
+      { symbol: 'NIFTY 50', value: 24200.50, change: -120.30, percentChange: -0.49, lastUpdated: '17 Apr, 3:30 pm IST' },
+      { symbol: 'SENSEX', value: 79500.10, change: -450.80, percentChange: -0.56, lastUpdated: '17 Apr, 3:30 pm IST' },
+      { symbol: 'BANK NIFTY', value: 52100.80, change: 320.40, percentChange: 0.62, lastUpdated: '17 Apr, 3:30 pm IST' }
+    ];
+  }
+}

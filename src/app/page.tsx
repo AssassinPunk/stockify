@@ -7,13 +7,12 @@ import TrendingTickers from '@/components/dashboard/trending-tickers';
 import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
 import { getSectors, getTrendingTickers, getNews, getMainChartData, getAllTickers } from '@/lib/data';
-import { fetchWithTwelveData } from '@/lib/twelve-data';
-import { fetchIndiaVix } from '@/lib/yahoo-finance';
+import { fetchIndiaVix, fetchLiveIndianIndices } from '@/lib/yahoo-finance';
 
 export default async function Home() {
-  // Fetch real data via Twelve Data API & Yahoo Finance
+  // Fetch real data via Yahoo Finance
   const [liveIndices, { vixData, chartData: vixChartData }] = await Promise.all([
-    fetchWithTwelveData(),
+    fetchLiveIndianIndices(),
     fetchIndiaVix()
   ]);
 
