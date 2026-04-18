@@ -11,10 +11,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMe
 import { calculateADL, calculateMA, calculateRSI } from '@/lib/indicators';
 
 const CHART_OPTIONS = {
-  layout: { background: { type: 'solid' as any, color: '#131722' }, textColor: '#888' },
-  grid: { vertLines: { color: '#2a2e39' }, horzLines: { color: '#2a2e39' } },
-  timeScale: { timeVisible: true, secondsVisible: false, borderColor: '#2a2e39' },
-  rightPriceScale: { borderColor: '#2a2e39' },
+  layout: { background: { type: 'solid' as any, color: '#000000' }, textColor: '#888' },
+  grid: { vertLines: { color: '#1f1f1f' }, horzLines: { color: '#1f1f1f' } },
+  timeScale: { timeVisible: true, secondsVisible: false, borderColor: '#1f1f1f' },
+  rightPriceScale: { borderColor: '#1f1f1f' },
 };
 
 export default function FullChartDialog({
@@ -68,13 +68,13 @@ export default function FullChartDialog({
     });
     charts.push(mainChart);
 
-    const candlestickSeries = mainChart.addCandlestickSeries({
+    const candlestickSeries = (mainChart as any).addCandlestickSeries({
       upColor: '#10b981', downColor: '#ef4444', borderVisible: false, wickUpColor: '#10b981', wickDownColor: '#ef4444',
     });
     candlestickSeries.setData(candlesData);
 
     if (showMA) {
-      const maSeries = mainChart.addLineSeries({ color: 'rgba(255, 193, 7, 1)', lineWidth: 1.5, crosshairMarkerVisible: false });
+      const maSeries = (mainChart as any).addLineSeries({ color: 'rgba(255, 193, 7, 1)', lineWidth: 1.5, crosshairMarkerVisible: false });
       maSeries.setData(maData);
     }
 
@@ -87,7 +87,7 @@ export default function FullChartDialog({
             height: rsiContainerRef.current.clientHeight,
         });
         charts.push(rsiChart);
-        const rsiSeries = rsiChart.addLineSeries({ color: '#8b5cf6', lineWidth: 1.5 });
+        const rsiSeries = (rsiChart as any).addLineSeries({ color: '#8b5cf6', lineWidth: 1.5 });
         rsiSeries.setData(rsiData);
     }
 
@@ -100,7 +100,7 @@ export default function FullChartDialog({
             height: adlContainerRef.current.clientHeight,
         });
         charts.push(adlChart);
-        const adlSeries = adlChart.addLineSeries({ color: '#facc15', lineWidth: 1.5 });
+        const adlSeries = (adlChart as any).addLineSeries({ color: '#facc15', lineWidth: 1.5 });
         adlSeries.setData(adlData);
     }
 
@@ -141,12 +141,12 @@ export default function FullChartDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] w-[95vw] h-[95vh] rounded-2xl bg-[#131722] border-border/10 p-0 flex flex-col overflow-hidden">
+      <DialogContent className="max-w-[95vw] w-[95vw] h-[95vh] rounded-2xl bg-[#000000] border-border/10 p-0 flex flex-col overflow-hidden">
         <DialogTitle className="sr-only">Full Chart</DialogTitle>
         <DialogDescription className="sr-only">Detailed stock analysis chart</DialogDescription>
         
         {/* Header toolbar */}
-        <div className="flex items-center justify-between p-4 border-b border-white/5 bg-[#1e222d]">
+        <div className="flex items-center justify-between p-4 border-b border-white/5 bg-[#050505]">
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-bold text-white tracking-tight">{ticker.symbol}</h2>
             <div className="h-4 w-px bg-white/20" />
@@ -163,7 +163,7 @@ export default function FullChartDialog({
                     Indicators
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-[#1e222d] border-[#2a2e39] text-white" align="end">
+              <DropdownMenuContent className="w-56 bg-[#050505] border-[#1f1f1f] text-white" align="end">
                 <DropdownMenuCheckboxItem checked={showMA} onCheckedChange={setShowMA} className="focus:bg-white/10 focus:text-white cursor-pointer">
                     Moving Average (MA)
                 </DropdownMenuCheckboxItem>
@@ -183,13 +183,13 @@ export default function FullChartDialog({
         </div>
 
         {/* Chart Container Group */}
-        <div className="flex-1 w-full bg-[#131722] flex flex-col overflow-hidden">
+        <div className="flex-1 w-full bg-[#000000] flex flex-col overflow-hidden">
             {/* Main Pane */}
             <div className="flex-1 w-full relative" ref={chartContainerRef} />
             
             {/* RSI Pane */}
             {showRSI && (
-                <div className="h-48 w-full border-t border-[#2a2e39] relative flex flex-col shrink-0">
+                <div className="h-48 w-full border-t border-[#1f1f1f] relative flex flex-col shrink-0">
                     <div className="absolute top-2 left-4 z-10 text-[#8b5cf6] text-xs font-semibold">RSI (14)</div>
                     <div className="flex-1 w-full" ref={rsiContainerRef} />
                 </div>
@@ -197,7 +197,7 @@ export default function FullChartDialog({
             
             {/* ADL Pane */}
             {showADL && (
-                <div className="h-48 w-full border-t border-[#2a2e39] relative flex flex-col shrink-0">
+                <div className="h-48 w-full border-t border-[#1f1f1f] relative flex flex-col shrink-0">
                     <div className="absolute top-2 left-4 z-10 text-[#facc15] text-xs font-semibold">Accum/Dist (ADL)</div>
                     <div className="flex-1 w-full" ref={adlContainerRef} />
                 </div>
