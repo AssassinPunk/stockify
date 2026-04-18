@@ -1,0 +1,215 @@
+{
+  "data": [
+    {
+      "symbol": "NIFTYBEES",
+      "instrument_name": "Nippon India ETF Nifty BeES",
+      "exchange": "NSE",
+      "mic_code": "XNSE",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYIETF",
+      "instrument_name": "ICICI Prudential Nifty 50 Exchange Traded Fund",
+      "exchange": "NSE",
+      "mic_code": "XNSE",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYBEES",
+      "instrument_name": "Nippon India ETF Nifty BeES",
+      "exchange": "BSE",
+      "mic_code": "XBOM",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTY1",
+      "instrument_name": "Kotak Nifty 50 Mutual Fund",
+      "exchange": "NSE",
+      "mic_code": "XNSE",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTY1",
+      "instrument_name": "Kotak Nifty 50 Mutual Fund",
+      "exchange": "BSE",
+      "mic_code": "XBOM",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTY100EW",
+      "instrument_name": "Kotak Nifty 100 Equalweight ETF",
+      "exchange": "NSE",
+      "mic_code": "XNSE",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYADD",
+      "instrument_name": "NIFTYADD",
+      "exchange": "NSE",
+      "mic_code": "XNSE",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "Common Stock",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYADD",
+      "instrument_name": "NIFTYADD",
+      "exchange": "BSE",
+      "mic_code": "XBOM",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "Common Stock",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYETF",
+      "instrument_name": "Mirae Asset Nifty 50 ETF",
+      "exchange": "NSE",
+      "mic_code": "XNSE",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYETF",
+      "instrument_name": "Mirae Asset Nifty 50 ETF",
+      "exchange": "BSE",
+      "mic_code": "XBOM",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYBETA",
+      "instrument_name": "NIFTYBETA",
+      "exchange": "NSE",
+      "mic_code": "XNSE",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "Common Stock",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYBETA",
+      "instrument_name": "NIFTYBETA",
+      "exchange": "BSE",
+      "mic_code": "XBOM",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "Common Stock",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYBETF",
+      "instrument_name": "Bajaj Finserv Nifty 50 ETF",
+      "exchange": "NSE",
+      "mic_code": "XNSE",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYBETF",
+      "instrument_name": "Bajaj Finserv Nifty 50 ETF",
+      "exchange": "BSE",
+      "mic_code": "XBOM",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYBINAV",
+      "instrument_name": "",
+      "exchange": "NSE",
+      "mic_code": "XNSE",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "Common Stock",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYCASE",
+      "instrument_name": "Zerodha Nifty 50 ETF",
+      "exchange": "NSE",
+      "mic_code": "XNSE",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYCASE",
+      "instrument_name": "NIFTYCASE",
+      "exchange": "BSE",
+      "mic_code": "XBOM",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "Common Stock",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYCINAV",
+      "instrument_name": "NIFTYCINAV",
+      "exchange": "NSE",
+      "mic_code": "XNSE",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "Common Stock",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYIETF",
+      "instrument_name": "ICICI Prudential Nifty 50 Exchange Traded Fund",
+      "exchange": "BSE",
+      "mic_code": "XBOM",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYQLITY",
+      "instrument_name": "ABSL Nifty 200 Quality 30 Fund",
+      "exchange": "NSE",
+      "mic_code": "XNSE",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    },
+    {
+      "symbol": "NIFTYQLITY",
+      "instrument_name": "ABSL Nifty 200 Quality 30 Fund",
+      "exchange": "BSE",
+      "mic_code": "XBOM",
+      "exchange_timezone": "Asia/Kolkata",
+      "instrument_type": "ETF",
+      "country": "India",
+      "currency": "INR"
+    }
+  ],
+  "status": "ok"
+}

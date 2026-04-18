@@ -48,6 +48,7 @@ export type ChartDataPoint = {
     low: number;
     close: number;
     volume?: number;
+    [key: string]: any;
 };
 
 export type MainChartData = {

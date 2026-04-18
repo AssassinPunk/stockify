@@ -21,13 +21,14 @@ import {
 import { MainChartData, Ticker, ChartDataPoint } from '@/lib/types';
 import { ChartConfig } from '@/components/ui/chart';
 import { Button } from '../ui/button';
-import { XIcon, Activity, Layers, Info, CandlestickChart, AreaChart as AreaChartIcon } from 'lucide-react';
+import { XIcon, Activity, Layers, Info, CandlestickChart, AreaChart as AreaChartIcon, Maximize2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { getMainChartData } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatNumber } from '@/lib/format';
+import FullChartDialog from './full-chart-dialog';
 
 const chartConfig = {
   value: {
@@ -184,6 +185,7 @@ export default function MainChart({
 }) {
   const [timeframe, setTimeframe] = useState<keyof MainChartData>('1M');
   const [chartType, setChartType] = useState<'area' | 'candle'>('area');
+  const [isFullChartOpen, setIsFullChartOpen] = useState(false);
   const [markers, setMarkers] = useState<string[]>([]);
   const [showMA, setShowMA] = useState(false);
   const [showRSI, setShowRSI] = useState(false);
@@ -284,6 +286,10 @@ export default function MainChart({
                 Clear
               </Button>
             )}
+            <Button variant="outline" size="sm" onClick={() => setIsFullChartOpen(true)}>
+              <Maximize2 className="mr-2 h-4 w-4" />
+              Full Chart
+            </Button>
             <Tabs
               defaultValue="1M"
               value={timeframe}
@@ -395,7 +401,7 @@ export default function MainChart({
               }}
             />
             <YAxis
-              yId="price"
+              yAxisId="price"
               stroke="hsl(var(--muted-foreground))"
               fontSize={10}
               tickLine={false}
@@ -407,7 +413,7 @@ export default function MainChart({
             
             {showRSI && (
               <YAxis
-                yId="rsi"
+                yAxisId="rsi"
                 orientation="left"
                 domain={[0, 100]}
                 hide={true}
@@ -421,7 +427,7 @@ export default function MainChart({
 
             {chartType === 'area' ? (
               <Area
-                yId="price"
+                yAxisId="price"
                 type="monotone"
                 dataKey="value"
                 name={ticker.symbol}
@@ -433,7 +439,7 @@ export default function MainChart({
               />
             ) : (
               <Bar
-                yId="price"
+                yAxisId="price"
                 dataKey="close"
                 name={ticker.symbol}
                 shape={<Candlestick yIdPriceScale={(val: number) => {
@@ -449,7 +455,7 @@ export default function MainChart({
 
             {showMA && (
               <Line
-                yId="price"
+                yAxisId="price"
                 type="monotone"
                 dataKey="ma"
                 stroke={chartConfig.ma.color}
@@ -461,7 +467,7 @@ export default function MainChart({
 
             {showRSI && (
               <Line
-                yId="rsi"
+                yAxisId="rsi"
                 type="monotone"
                 dataKey="rsi"
                 stroke={chartConfig.rsi.color}
@@ -473,7 +479,7 @@ export default function MainChart({
             {compareWith.map(symbol => (
               <Line
                 key={symbol}
-                yId="price"
+                yAxisId="price"
                 type="monotone"
                 dataKey={symbol}
                 stroke={chartConfig[symbol as keyof typeof chartConfig]?.color || '#8884d8'}
@@ -489,7 +495,7 @@ export default function MainChart({
                 stroke="hsl(var(--foreground))"
                 strokeWidth={1}
                 strokeDasharray="4 4"
-                yId="price"
+                yAxisId="price"
               />
             ))}
 
@@ -500,7 +506,7 @@ export default function MainChart({
                 stroke="hsl(var(--muted-foreground))"
                 strokeOpacity={0.5}
                 strokeWidth={1}
-                yId="price"
+                yAxisId="price"
                 label={{
                   position: 'top',
                   value: ann.label,
@@ -514,6 +520,12 @@ export default function MainChart({
           </ComposedChart>
         </ChartContainer>
       </CardContent>
+      <FullChartDialog 
+        ticker={ticker} 
+        isOpen={isFullChartOpen} 
+        onOpenChange={setIsFullChartOpen} 
+        chartData={chartData} 
+      />
     </Card>
   );
 }
