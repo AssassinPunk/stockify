@@ -46,14 +46,6 @@ const chartConfig = {
     label: 'RSI (14)',
     color: 'hsl(var(--destructive))',
   },
-  SENSEX: {
-    label: 'SENSEX',
-    color: '#ff7300',
-  },
-  'BANK NIFTY': {
-    label: 'BANK NIFTY',
-    color: '#387908',
-  },
 } satisfies ChartConfig;
 
 // Simple Technical Indicators
@@ -144,37 +136,34 @@ const CustomTooltip = ({ active, payload, label, ticker, chartType }: any) => {
 };
 
 // Custom Candlestick Component for Recharts
+// Recharts passes y = pixel position of `close`, height = pixel distance from close to yDomain[0].
+// We derive the full scale from those two anchors.
 const Candlestick = (props: any) => {
-  const { x, y, width, height, low, high, open, close } = props;
+  const { x, y, width, height, open, close, high, low, yDomain } = props;
   const isUp = close >= open;
-  const color = isUp ? 'var(--up)' : 'var(--down)';
+  const color = isUp ? 'hsl(var(--up))' : 'hsl(var(--down))';
 
-  const ratio = height / Math.abs(open - close);
-  const candleY = Math.min(y, y + height);
-  const candleHeight = Math.abs(height);
+  // scale(val): price -> pixel y (higher price = smaller y = higher on screen)
+  // y anchors close; y+height anchors yDomain[0]
+  const denominator = close - (yDomain?.[0] ?? 0);
+  const scale = (val: number) => {
+    if (!denominator) return y;
+    return y + height * (close - val) / denominator;
+  };
 
-  // Calculate wick positions
+  const openY = scale(open);
+  const closeY = y; // scale(close) === y by definition
+  const highY = scale(high);
+  const lowY = scale(low);
+
+  const bodyTop = Math.min(openY, closeY);
+  const bodyHeight = Math.max(1, Math.abs(openY - closeY));
   const wickX = x + width / 2;
-  const wickTop = props.yIdPriceScale(high);
-  const wickBottom = props.yIdPriceScale(low);
 
   return (
     <g>
-      <line
-        x1={wickX}
-        y1={wickTop}
-        x2={wickX}
-        y2={wickBottom}
-        stroke={color}
-        strokeWidth={1}
-      />
-      <rect
-        x={x}
-        y={y}
-        width={width}
-        height={Math.max(1, candleHeight)}
-        fill={color}
-      />
+      <line x1={wickX} y1={highY} x2={wickX} y2={lowY} stroke={color} strokeWidth={1} />
+      <rect x={x} y={bodyTop} width={Math.max(1, width - 1)} height={bodyHeight} fill={color} />
     </g>
   );
 };
@@ -198,6 +187,7 @@ export default function MainChart({
   const [showMA, setShowMA] = useState(false);
   const [showRSI, setShowRSI] = useState(false);
   const [compareWith, setCompareWith] = useState<string[]>([]);
+  const [compareToAdd, setCompareToAdd] = useState<string | undefined>(undefined);
 
   const handleStockChange = async (symbol: string) => {
     const newTicker = allTickers.find(t => t.symbol === symbol);
@@ -270,6 +260,19 @@ export default function MainChart({
     setCompareWith(prev => 
       prev.includes(symbol) ? prev.filter(s => s !== symbol) : [...prev, symbol]
     );
+  };
+
+  const compareCandidates = useMemo(() => {
+    return allTickers.filter(t => t.symbol !== currentTicker.symbol);
+  }, [allTickers, currentTicker.symbol]);
+
+  const handleAddComparison = (symbol: string) => {
+    setCompareWith(prev => (prev.includes(symbol) ? prev : [...prev, symbol]));
+    setCompareToAdd(undefined);
+  };
+
+  const removeComparison = (symbol: string) => {
+    setCompareWith(prev => prev.filter(s => s !== symbol));
   };
 
   return (
@@ -347,20 +350,43 @@ export default function MainChart({
                     <Info className="h-3 w-3 cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Compare performance with indices.</p>
+                    <p>Add one or more tickers to compare.</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </span>
-            <div className="flex gap-3">
-              {['SENSEX', 'BANK NIFTY'].map(s => (
-                <div key={s} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`comp-${s}`} 
-                    checked={compareWith.includes(s)}
-                    onCheckedChange={() => toggleComparison(s)}
-                  />
-                  <Label htmlFor={`comp-${s}`} className="cursor-pointer">{s}</Label>
+            <div className="flex flex-wrap items-center gap-2">
+              <Select value={compareToAdd} onValueChange={handleAddComparison}>
+                <SelectTrigger className="h-8 w-[220px]">
+                  <SelectValue placeholder="Add ticker..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {compareCandidates
+                    .filter(t => !compareWith.includes(t.symbol))
+                    .map((t) => (
+                      <SelectItem key={t.symbol} value={t.symbol}>
+                        {t.symbol} <span className="text-muted-foreground font-normal ml-2">{t.name}</span>
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+
+              {compareWith.map((s) => (
+                <div
+                  key={s}
+                  className="flex items-center gap-1 rounded-full border border-border/60 bg-background/50 px-2 py-1"
+                >
+                  <span className="font-medium">{s}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5"
+                    onClick={() => removeComparison(s)}
+                    aria-label={`Remove ${s} comparison`}
+                  >
+                    <XIcon className="h-3 w-3" />
+                  </Button>
                 </div>
               ))}
             </div>
@@ -474,14 +500,7 @@ export default function MainChart({
                 yAxisId="price"
                 dataKey="close"
                 name={currentTicker.symbol}
-                shape={<Candlestick yIdPriceScale={(val: number) => {
-                    // This is a bit of a hack to get the Y-axis scale inside the custom shape
-                    // In a real app, you'd use the provided 'y' prop which Recharts maps for you.
-                    // But we need Open/Close mapping.
-                    const range = yDomain[1] - yDomain[0];
-                    const chartHeight = 400 - 20 - 40; // Approx based on container height
-                    return 20 + (1 - (val - yDomain[0]) / range) * chartHeight;
-                }} />}
+                shape={(shapeProps: any) => <Candlestick {...shapeProps} yDomain={yDomain} />}
               />
             )}
 
