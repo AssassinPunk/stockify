@@ -1,13 +1,33 @@
 import type { VixData, ChartDataPoint } from './types';
 
+type FetchPolicy = {
+  /**
+   * Use `no-store` for truly live client polling endpoints.
+   * Default behavior uses Next's revalidate caching.
+   */
+  cache?: RequestCache;
+  revalidate?: number;
+};
+
+function fetchInit(policy: FetchPolicy | undefined, defaultRevalidate: number) {
+  if (policy?.cache === 'no-store') return { cache: 'no-store' as const };
+  return { next: { revalidate: policy?.revalidate ?? defaultRevalidate } };
+}
+
 // Fallback data
 const FALLBACK_VIX: VixData = { value: 26.80, lastUpdated: new Date().toLocaleTimeString() };
 
-export async function fetchIndiaVix(): Promise<{ vixData: VixData, chartData: ChartDataPoint[] }> {
+export async function fetchIndiaVix(options?: {
+  range?: string;
+  interval?: string;
+  policy?: FetchPolicy;
+}): Promise<{ vixData: VixData, chartData: ChartDataPoint[] }> {
   try {
-    const url = 'https://query1.finance.yahoo.com/v8/finance/chart/%5EINDIAVIX?range=1mo&interval=1d';
-    // Revalidate every 6 hours to handle "daily" but remain relatively fresh
-    const res = await fetch(url, { next: { revalidate: 21600 } }); 
+    const range = options?.range ?? '1mo';
+    const interval = options?.interval ?? '1d';
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/%5EINDIAVIX?range=${encodeURIComponent(range)}&interval=${encodeURIComponent(interval)}`;
+    // Default: revalidate every 6 hours for daily history.
+    const res = await fetch(url, fetchInit(options?.policy, 21600));
     const data = await res.json();
     
     if (data.chart.error) {
@@ -96,14 +116,17 @@ function getYahooSymbol(symbol: string): string {
     return symbol;
 }
 
-export async function fetchYahooChart(symbol: string): Promise<import('./types').MainChartData> {
+export async function fetchYahooChart(
+  symbol: string,
+  policy?: FetchPolicy
+): Promise<import('./types').MainChartData> {
   const ySymbol = getYahooSymbol(symbol);
   
   // Format individual timeframe chart
   async function fetchTimeframe(range: string, interval: string): Promise<ChartDataPoint[]> {
     try {
       const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ySymbol)}?range=${range}&interval=${interval}`;
-      const res = await fetch(url, { next: { revalidate: 300 } }); 
+      const res = await fetch(url, fetchInit(policy, 300));
       const data = await res.json();
       
       if (data.chart.error) return [];
@@ -154,7 +177,7 @@ export async function fetchYahooChart(symbol: string): Promise<import('./types')
 }
 
 // Fetch live quotes for Indian indices
-export async function fetchLiveIndianIndices(): Promise<import('./types').IndexData[]> {
+export async function fetchLiveIndianIndices(policy?: FetchPolicy): Promise<import('./types').IndexData[]> {
   const indices = [
     { name: 'NIFTY 50', symbol: 'NIFTY 50', yahoo: '^NSEI' },
     { name: 'SENSEX', symbol: 'SENSEX', yahoo: '^BSESN' },
@@ -164,7 +187,7 @@ export async function fetchLiveIndianIndices(): Promise<import('./types').IndexD
   try {
     const promises = indices.map(async (idx) => {
       const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(idx.yahoo)}?range=1d&interval=1d`;
-      const res = await fetch(url, { next: { revalidate: 60 } }); 
+      const res = await fetch(url, fetchInit(policy, 60));
       const data = await res.json();
       const meta = data.chart?.result?.[0]?.meta;
       

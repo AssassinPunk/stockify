@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -195,12 +195,44 @@ export default function MainChart({
     setCurrentTicker(newTicker);
     setIsLoadingChart(true);
     try {
-      const res = await fetch(`/api/chart?symbol=${encodeURIComponent(symbol)}`);
+      const res = await fetch(`/api/chart?symbol=${encodeURIComponent(symbol)}`, { cache: 'no-store' });
       const newData = await res.json();
       if (!newData.error) setCurrentData(newData);
     } catch {}
     setIsLoadingChart(false);
   };
+
+  // Live refresh (no page reload) for the selected symbol.
+  useEffect(() => {
+    let cancelled = false;
+    let inFlight = false;
+
+    const pollMs =
+      timeframe === '1D' ? 5000 :
+      timeframe === '5D' ? 10000 :
+      30000;
+
+    const tick = async () => {
+      if (inFlight) return;
+      inFlight = true;
+      try {
+        const res = await fetch(`/api/chart?symbol=${encodeURIComponent(currentTicker.symbol)}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && !data?.error) setCurrentData(data);
+      } catch {
+      } finally {
+        inFlight = false;
+      }
+    };
+
+    tick();
+    const id = setInterval(tick, pollMs);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [currentTicker.symbol, timeframe]);
 
   const baseData = currentData[timeframe];
   

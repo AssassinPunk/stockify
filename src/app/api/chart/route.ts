@@ -10,9 +10,14 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const data = await fetchYahooChart(symbol);
-    return NextResponse.json(data);
+    const data = await fetchYahooChart(symbol, { cache: 'no-store' });
+    return NextResponse.json(data, {
+      headers: { 'Cache-Control': 'no-store, max-age=0' },
+    });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500, headers: { 'Cache-Control': 'no-store, max-age=0' } }
+    );
   }
 }

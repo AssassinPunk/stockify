@@ -1,11 +1,10 @@
 import Header from '@/components/dashboard/header';
-import IndexCard from '@/components/dashboard/index-card';
-import VixCard from '@/components/dashboard/vix-card';
 import MainChart from '@/components/dashboard/main-chart';
 import SectorHeatmap from '@/components/dashboard/sector-heatmap';
 import TrendingTickers from '@/components/dashboard/trending-tickers';
 import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
+import LiveDashboard from '@/components/dashboard/live-dashboard';
 import { getSectors, getMainChartData, getAllTickers } from '@/lib/data';
 import { fetchIndiaVix, fetchLiveIndianIndices, fetchLiveTrendingTickers, fetchLiveNews } from '@/lib/yahoo-finance';
 
@@ -37,12 +36,11 @@ export default async function Home() {
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
       <Header />
       <main className="flex-1 space-y-6 p-4 md:p-6">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {nifty50 && <IndexCard index={nifty50} />}
-          {sensex && <IndexCard index={sensex} />}
-          {bankNifty && <IndexCard index={bankNifty} />}
-          {vixData && <VixCard vixData={vixData} chartData={vixChartData} />}
-        </div>
+        <LiveDashboard
+          initialIndices={liveIndices}
+          initialVixData={vixData}
+          initialVixChartData={vixChartData}
+        />
         
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <div className="lg:col-span-8">
