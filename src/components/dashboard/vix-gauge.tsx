@@ -53,7 +53,8 @@ function arc(fromVix: number, toVix: number, r = R) {
   const [sx, sy] = polar(vixToMathAngle(fromVix), r);
   const [ex, ey] = polar(vixToMathAngle(toVix),   r);
   const large = vixToMathAngle(fromVix) - vixToMathAngle(toVix) > 180 ? 1 : 0;
-  return `M ${sx} ${sy} A ${r} ${r} 0 ${large} 0 ${ex} ${ey}`;
+  // Sweep=1 draws the top semicircle (the gauge lives on the upper half).
+  return `M ${sx} ${sy} A ${r} ${r} 0 ${large} 1 ${ex} ${ey}`;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
