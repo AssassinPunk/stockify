@@ -1,85 +1,107 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Search } from 'lucide-react';
 import { getAllTickers } from '@/lib/data';
 import type { Ticker } from '@/lib/types';
-import { useDebounce } from '@/hooks/use-debounce';
 import { formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { useDebounce } from '@/hooks/use-debounce';
 
-export default function StockSearch({ onSelect }: { onSelect: () => void }) {
+export default function StockSearch() {
   const [query, setQuery] = useState('');
-  const debouncedQuery = useDebounce(query, 200);
-  const [results, setResults] = useState<Ticker[]>([]);
+  const [open, setOpen] = useState(false);
+  const debouncedQuery = useDebounce(query, 150);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const allTickers = useMemo(() => getAllTickers(), []);
   const router = useRouter();
 
-  useEffect(() => {
-    if (debouncedQuery) {
-      const filtered = allTickers.filter(
-        (ticker) =>
-          ticker.symbol.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-          ticker.name.toLowerCase().includes(debouncedQuery.toLowerCase())
-      );
-      setResults(filtered.slice(0, 10)); // Limit results for performance
-    } else {
-      // Show top 5 tickers by default if query is empty
-      setResults(allTickers.slice(0, 5));
-    }
+  const results = useMemo(() => {
+    if (!debouncedQuery) return allTickers.slice(0, 6);
+    return allTickers
+      .filter(
+        t =>
+          t.symbol.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+          t.name.toLowerCase().includes(debouncedQuery.toLowerCase()),
+      )
+      .slice(0, 8);
   }, [debouncedQuery, allTickers]);
 
-  const handleSelect = (value: string) => {
-    const ticker = allTickers.find(t => t.symbol.toLowerCase() === value.toLowerCase());
-    if (ticker) {
-        setQuery('');
-        onSelect();
-        router.push(`/stock/${ticker.symbol}`);
-    }
-  };
+  const handleSelect = useCallback(
+    (ticker: Ticker) => {
+      setQuery('');
+      setOpen(false);
+      inputRef.current?.blur();
+      router.push(`/stock/${encodeURIComponent(ticker.symbol)}`);
+    },
+    [router],
+  );
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   return (
-    <Command shouldFilter={false} className="bg-secondary" onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-            const firstResult = document.querySelector('[cmdk-item][aria-selected="true"]');
-            if(firstResult){
-                (firstResult as HTMLElement).click();
-            }
-        }
-    }}>
-      <CommandInput
-        placeholder="Search stocks..."
+    <div ref={containerRef} className="relative">
+      <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <input
+        ref={inputRef}
         value={query}
-        onValueChange={setQuery}
-        className="h-11 border-0 bg-secondary ring-offset-0 focus:ring-0"
-        autoFocus
+        onChange={e => setQuery(e.target.value)}
+        onFocus={() => setOpen(true)}
+        onKeyDown={e => {
+          if (e.key === 'Escape') { setOpen(false); inputRef.current?.blur(); }
+          if (e.key === 'Enter' && results.length > 0) handleSelect(results[0]);
+        }}
+        placeholder="Search stocks..."
+        className="h-9 w-[140px] rounded-lg border border-border/50 bg-secondary pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring sm:w-[200px] lg:w-[300px]"
       />
-      <CommandList>
-        {results.length > 0 && (
-          <CommandGroup heading={debouncedQuery ? "Results" : "Popular"}>
-            {results.map((ticker) => (
-              <CommandItem key={ticker.symbol} onSelect={() => handleSelect(ticker.symbol)} value={ticker.symbol}>
-                <div className="flex w-full cursor-pointer items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="font-semibold">{ticker.symbol}</span>
-                    <span className="text-xs text-muted-foreground">{ticker.name}</span>
-                  </div>
-                  <div className="flex flex-col items-end">
-                     <span className="font-code text-sm font-medium">
-                        {formatNumber(ticker.price, {style: 'currency', currency: 'INR', minimumFractionDigits: 2})}
-                     </span>
-                     <span className={cn("font-code text-xs", ticker.percentChange >= 0 ? 'text-up' : 'text-down')}>
-                        {ticker.percentChange > 0 ? '+' : ''}{ticker.percentChange.toFixed(2)}%
-                    </span>
-                  </div>
-                </div>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        )}
-        {debouncedQuery && results.length === 0 && <CommandEmpty>No results found.</CommandEmpty>}
-      </CommandList>
-    </Command>
+
+      {open && results.length > 0 && (
+        <div className="absolute right-0 top-full z-50 mt-1 w-[280px] overflow-hidden rounded-lg border border-border/50 bg-popover shadow-xl sm:w-[320px]">
+          <p className="border-b border-border/30 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {debouncedQuery ? 'Results' : 'Popular'}
+          </p>
+          {results.map(ticker => (
+            <button
+              key={ticker.symbol}
+              className="flex w-full cursor-pointer items-center justify-between px-3 py-2.5 transition-colors hover:bg-secondary/80"
+              // onMouseDown instead of onClick so it fires before the input loses focus
+              onMouseDown={e => {
+                e.preventDefault();
+                handleSelect(ticker);
+              }}
+            >
+              <div className="flex flex-col items-start">
+                <span className="font-mono font-semibold">{ticker.symbol}</span>
+                <span className="text-[11px] text-muted-foreground">{ticker.name}</span>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="font-mono text-sm font-medium">
+                  {formatNumber(ticker.price, {
+                    style: 'currency',
+                    currency: ticker.currency || 'INR',
+                    minimumFractionDigits: 2,
+                  })}
+                </span>
+                <span className={cn('font-mono text-[11px]', ticker.percentChange >= 0 ? 'text-up' : 'text-down')}>
+                  {ticker.percentChange > 0 ? '+' : ''}
+                  {ticker.percentChange.toFixed(2)}%
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

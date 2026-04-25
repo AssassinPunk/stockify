@@ -1,11 +1,9 @@
 
 'use client';
 
-import { AreaChart, Settings, Search, LogOut, User as UserIcon, Menu } from 'lucide-react';
+import { AreaChart, Settings, LogOut, User as UserIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import StockSearch from './stock-search';
-import { Input } from '../ui/input';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -110,7 +108,6 @@ function EditPinnedStocksDialog({ pinnedStocks, onSave }: { pinnedStocks: Ticker
 }
 
 export default function Header() {
-  const [open, setOpen] = useState(false);
   const [pinnedStocks, setPinnedStocks] = useState<Ticker[]>([]);
   const pathname = usePathname();
   const router = useRouter();
@@ -189,27 +186,7 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
-          <div className="relative flex items-center">
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search stocks..."
-                    className="w-[120px] rounded-lg bg-secondary pl-10 sm:w-[200px] md:w-[200px] lg:w-[300px]"
-                    onFocus={() => setOpen(true)}
-                  />
-                </div>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-[calc(100vw-32px)] rounded-lg bg-secondary p-0 md:w-[200px] lg:w-[320px]"
-                align="end"
-                onOpenAutoFocus={(e) => e.preventDefault()}
-              >
-                <StockSearch onSelect={() => setOpen(false)} />
-              </PopoverContent>
-            </Popover>
-          </div>
+          <StockSearch />
 
           {user ? (
             <DropdownMenu>
