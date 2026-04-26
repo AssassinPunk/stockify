@@ -3,6 +3,7 @@ import MainChart from '@/components/dashboard/main-chart';
 import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
 import FundamentalsCard from '@/components/dashboard/fundamentals-card';
+import CompareChart from '@/components/dashboard/compare-chart';
 import { getAllTickers, getNews, getMainChartData, getInternationalNews } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatChange, formatNumber } from '@/lib/format';
@@ -93,6 +94,9 @@ export default async function StockPage({ params }: { params: Promise<{ symbol: 
             <TrendingTickers trending={trending} />
           </div>
         </div>
+
+        {/* Comparison chart */}
+        <CompareChart ticker={ticker} />
 
         <div className="grid grid-cols-1">
           <NewsFeed news={combinedNews} />

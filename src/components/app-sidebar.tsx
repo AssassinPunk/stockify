@@ -10,6 +10,7 @@ import {
   Globe,
   Flag,
   GraduationCap,
+  CalendarDays,
 } from 'lucide-react';
 
 import {
@@ -69,6 +70,11 @@ const data = {
       icon: Newspaper,
     },
     {
+      title: 'Calendar',
+      url: '/calendar',
+      icon: CalendarDays,
+    },
+    {
       title: 'Education',
       url: '/education',
       icon: GraduationCap,
@@ -80,7 +86,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
 
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" className="flex flex-col" {...props}>
       <SidebarHeader className="h-16 flex items-center justify-center border-b border-sidebar-border">
         <div className="flex items-center gap-2 font-semibold">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
