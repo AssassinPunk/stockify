@@ -88,12 +88,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" className="flex flex-col" {...props}>
       <SidebarHeader className="h-16 flex items-center justify-center border-b border-sidebar-border">
-        <div className="flex items-center gap-2 font-semibold">
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 rounded-md px-2 py-1 hover:text-emerald-300 transition-colors"
+          aria-label="Go to Stockify home"
+        >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <LayoutDashboard className="h-5 w-5" />
           </div>
           <span className="group-data-[collapsible=icon]:hidden text-xl font-bold tracking-tight">Stockify</span>
-        </div>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -109,7 +113,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   >
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
-                        <SidebarMenuButton tooltip={item.title}>
+                        <SidebarMenuButton
+                          tooltip={item.title}
+                          isActive={pathname === '/' || pathname === '/international'}
+                        >
                           {item.icon && <item.icon />}
                           <span>{item.title}</span>
                           <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />

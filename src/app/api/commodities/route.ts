@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server';
 const COMMODITIES = [
   { id: 'gold',   label: 'Gold',      symbol: 'GC=F',     unit: '$/oz'  },
   { id: 'oil',    label: 'Crude Oil', symbol: 'CL=F',     unit: '$/bbl' },
-  { id: 'usdinr', label: 'USD/INR',   symbol: 'USDINR=X', unit: '₹/USD' },
 ];
 
 export async function GET() {

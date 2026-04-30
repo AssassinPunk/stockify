@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Coins, Droplets, ArrowLeftRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CurrencyConverterTile } from '@/components/dashboard/currency-converter-tile';
 
 type Commodity = {
   id: string;
@@ -17,22 +18,19 @@ type Commodity = {
 const ICONS = {
   gold:   Coins,
   oil:    Droplets,
-  usdinr: ArrowLeftRight,
+  fx: ArrowLeftRight,
 } as const;
 
 const FALLBACK: Commodity[] = [
   { id: 'gold',   label: 'Gold',      symbol: 'GC=F',     unit: '$/oz',  price: 3300, change: 0, percentChange: 0 },
   { id: 'oil',    label: 'Crude Oil', symbol: 'CL=F',     unit: '$/bbl', price: 65,   change: 0, percentChange: 0 },
-  { id: 'usdinr', label: 'USD/INR',   symbol: 'USDINR=X', unit: '₹/USD', price: 84.5, change: 0, percentChange: 0 },
 ];
 
 function CommodityItem({ item }: { item: Commodity }) {
   const isPos = item.percentChange >= 0;
   const Icon = ICONS[item.id as keyof typeof ICONS] ?? Coins;
   const priceStr =
-    item.id === 'usdinr'
-      ? `₹${item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`
-      : `$${item.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    `$${item.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
     <div className="flex flex-1 items-center gap-3 px-5 py-3.5">
@@ -67,7 +65,7 @@ export default function CommodityStrip() {
         const res = await fetch('/api/commodities', { cache: 'no-store' });
         if (!res.ok) return;
         const json = await res.json();
-        if (Array.isArray(json) && json.length === 3) setData(json);
+        if (Array.isArray(json) && json.length === 2) setData(json);
       } catch {}
     };
 
@@ -83,12 +81,17 @@ export default function CommodityStrip() {
           key={item.id}
           className={cn(
             'flex flex-1',
-            i < data.length - 1 && 'border-b border-border/30 sm:border-b-0 sm:border-r',
+            'border-b border-border/30 sm:border-b-0 sm:border-r',
+            i === data.length - 1 && 'sm:border-r-0',
           )}
         >
           <CommodityItem item={item} />
         </div>
       ))}
+
+      <div className="flex flex-1">
+        <CurrencyConverterTile />
+      </div>
     </div>
   );
 }
