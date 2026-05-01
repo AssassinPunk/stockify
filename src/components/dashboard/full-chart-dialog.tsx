@@ -116,7 +116,6 @@ export default function FullChartDialog({
         ...CHART_OPTS,
         autoSize: true,
         timeScale: {
-          ...CHART_OPTS.grid,
           borderColor: GRID_COLOR,
           timeVisible: timeframe === '1D' || timeframe === '5D',
           secondsVisible: false,

@@ -57,3 +57,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes ticker-scroll {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+@keyframes ticker-scroll-h {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}

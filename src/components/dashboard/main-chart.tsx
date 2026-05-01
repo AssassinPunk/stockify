@@ -267,7 +267,7 @@ export default function MainChart({
   const handleRemoveComparison = (s: string) => setCompareWith(p => p.filter(x => x !== s));
 
   return (
-    <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 h-full overflow-hidden flex flex-col">
+    <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 overflow-hidden flex flex-col">
       {/* ── toolbar ─────────────────────────────────────────────────────────── */}
       <CardHeader className="shrink-0 flex flex-col gap-3 pb-3">
 
@@ -275,14 +275,14 @@ export default function MainChart({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Select value={currentTicker.symbol} onValueChange={handleStockChange}>
-              <SelectTrigger className="w-[190px] border-none shadow-none focus:ring-0 p-0 h-auto font-bold text-lg bg-transparent">
-                <SelectValue />
+              <SelectTrigger className="w-auto border-none shadow-none focus:ring-0 p-0 h-auto font-bold text-lg bg-transparent gap-1.5">
+                <span>{currentTicker.symbol}</span>
               </SelectTrigger>
               <SelectContent>
                 {allTickers.map(t => (
                   <SelectItem key={t.symbol} value={t.symbol}>
-                    {t.symbol}
-                    <span className="ml-2 font-normal text-muted-foreground">{t.name}</span>
+                    <span className="font-semibold">{t.symbol}</span>
+                    <span className="ml-2 font-normal text-muted-foreground text-xs">{t.name}</span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -368,7 +368,7 @@ export default function MainChart({
               </SelectTrigger>
               <SelectContent>
                 {compareCandidates.map(t => (
-                  <SelectItem key={t.symbol} value={t.symbol}>
+                  <SelectItem key={t.symbol} value={t.symbol} textValue={t.symbol}>
                     {t.symbol}
                     <span className="ml-1 font-normal text-muted-foreground">{t.name}</span>
                   </SelectItem>
@@ -392,8 +392,8 @@ export default function MainChart({
       </CardHeader>
 
       {/* ── chart area ──────────────────────────────────────────────────────── */}
-      <CardContent className="flex-1 p-0 min-h-0 flex flex-col overflow-hidden rounded-b-2xl">
-        <div className="flex-1 min-h-0 relative" ref={chartContainerRef} style={{ background: CHART_BG }} />
+      <CardContent className="p-0 flex flex-col overflow-hidden rounded-b-2xl">
+        <div className="relative w-full" style={{ height: 420, background: CHART_BG }} ref={chartContainerRef} />
         {showRSI && (
           <div className="h-28 shrink-0 border-t border-[#1c1c1c] relative">
             <span className="absolute top-1.5 left-3 z-10 text-[10px] font-semibold text-violet-400">RSI (14)</span>
