@@ -105,6 +105,8 @@ function getYahooSymbol(symbol: string): string {
     if (symbol === 'SENSEX') return '^BSESN';
     if (symbol === 'BANK NIFTY') return '^NSEBANK';
     if (symbol === 'INDIA VIX') return '^INDIAVIX';
+    // Commodity futures (=F) and forex pairs (=X) must pass through unchanged
+    if (symbol.includes('=')) return symbol;
     // If it doesn't look like an international stock, assume NSE
     const international = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META', 'JPM', 'S&P 500', 'NASDAQ', 'FTSE 100'];
     if (!international.includes(symbol) && !symbol.includes('.')) {

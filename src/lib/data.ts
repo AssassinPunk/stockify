@@ -34,6 +34,22 @@ export function getSectors(): SectorData[] {
   ];
 }
 
+export function getInternationalSectors(): SectorData[] {
+  return [
+    { name: 'Technology',         change:  1.85 },
+    { name: 'Healthcare',         change: -0.42 },
+    { name: 'Financials',         change:  0.67 },
+    { name: 'Energy',             change: -1.20 },
+    { name: 'Consumer Discret.',  change:  1.10 },
+    { name: 'Consumer Staples',   change:  0.28 },
+    { name: 'Industrials',        change:  0.55 },
+    { name: 'Materials',          change: -0.75 },
+    { name: 'Real Estate',        change:  0.38 },
+    { name: 'Utilities',          change: -0.18 },
+    { name: 'Communication',      change:  2.05 },
+  ];
+}
+
 export function getTrendingTickers(): TrendingData {
   return {
     gainers: [

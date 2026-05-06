@@ -6,7 +6,8 @@ import MainChart from '@/components/dashboard/main-chart';
 import TrendingTickers from '@/components/dashboard/trending-tickers';
 import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
-import { getInternationalIndices, getInternationalTrendingTickers, getInternationalNews, getMainChartData, getAllTickers } from '@/lib/data';
+import SectorHeatmap from '@/components/dashboard/sector-heatmap';
+import { getInternationalIndices, getInternationalTrendingTickers, getInternationalNews, getMainChartData, getAllTickers, getInternationalSectors } from '@/lib/data';
 import type { Ticker } from '@/lib/types';
 
 export default function InternationalPage() {
@@ -14,6 +15,7 @@ export default function InternationalPage() {
   const trending = getInternationalTrendingTickers();
   const news = getInternationalNews();
   const allTickers = getAllTickers();
+  const sectors = getInternationalSectors();
 
   const sp500Ticker = allTickers.find(t => t.symbol === 'S&P 500');
 
@@ -38,16 +40,21 @@ export default function InternationalPage() {
         </div>
         
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-8">
             <MainChart ticker={sp500Ticker} chartData={mainChartData} />
           </div>
-          <div className="lg:col-span-5">
-            <TrendingTickers trending={trending} />
+          <div className="lg:col-span-4">
+            <SectorHeatmap sectors={sectors} />
           </div>
         </div>
 
-        <div className="grid grid-cols-1">
-          <NewsFeed news={news} />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <TrendingTickers trending={trending} />
+          </div>
+          <div className="lg:col-span-7">
+            <NewsFeed news={news} />
+          </div>
         </div>
       </main>
       <Disclaimer />

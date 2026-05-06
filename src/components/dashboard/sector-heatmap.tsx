@@ -14,23 +14,38 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
-import { 
-  Building2, Monitor, Car, Pill, ShoppingCart, 
-  Home, Wrench, Tv, Building, LayoutGrid
+import {
+  Building2, Monitor, Car, Pill, ShoppingCart,
+  Home, Wrench, Tv, Building, LayoutGrid,
+  Cpu, HeartPulse, Zap, Factory, FlaskConical,
+  Wifi, Landmark, Leaf
 } from "lucide-react";
 
-// Map sectors to intuitive icons
+// Map sectors to intuitive icons — covers both Indian (Nifty) and International (S&P GICS) names
 const getSectorIcon = (name: string) => {
   const n = name.toLowerCase();
-  if (n.includes('it')) return Monitor;
-  if (n.includes('bank')) return Building2;
-  if (n.includes('auto')) return Car;
-  if (n.includes('pharma')) return Pill;
-  if (n.includes('fmcg')) return ShoppingCart;
-  if (n.includes('realty')) return Home;
-  if (n.includes('metal')) return Wrench;
-  if (n.includes('media')) return Tv;
+  // Indian sectors
+  if (n.includes('it'))            return Monitor;
+  if (n.includes('bank'))          return Building2;
+  if (n.includes('auto'))          return Car;
+  if (n.includes('pharma'))        return Pill;
+  if (n.includes('fmcg'))          return ShoppingCart;
+  if (n.includes('realty'))        return Home;
+  if (n.includes('metal'))         return Wrench;
+  if (n.includes('media'))         return Tv;
   if (n.includes('pse') || n.includes('psu')) return Building;
+  // International sectors
+  if (n.includes('tech'))          return Cpu;
+  if (n.includes('health'))        return HeartPulse;
+  if (n.includes('financ'))        return Landmark;
+  if (n.includes('energy'))        return Zap;
+  if (n.includes('consumer disc')) return ShoppingCart;
+  if (n.includes('consumer stap')) return ShoppingCart;
+  if (n.includes('industri'))      return Factory;
+  if (n.includes('material'))      return FlaskConical;
+  if (n.includes('real estate'))   return Home;
+  if (n.includes('util'))          return Leaf;
+  if (n.includes('commun'))        return Wifi;
   return LayoutGrid;
 };
 
