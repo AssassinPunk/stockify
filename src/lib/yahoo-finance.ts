@@ -229,8 +229,8 @@ export async function fetchLiveIndianIndices(policy?: FetchPolicy): Promise<impo
   }
 }
 
-import { getAllTickers } from './data';
-import type { TrendingData, Ticker } from './types';
+import { getAllTickers, getInternationalNews } from './data';
+import type { TrendingData } from './types';
 
 // Fetch live quotes for all covered Indian stocks and dynamically calculate Top Gainers / Losers
 export async function fetchLiveTrendingTickers(): Promise<TrendingData> {
@@ -319,5 +319,88 @@ export async function fetchLiveNews(): Promise<NewsArticle[]> {
       { id: '1', title: 'Market faces turbulent session amidst global cues', source: 'MarketWire', timestamp: '2 hours ago', url: '#', category: 'Macro' as const },
       { id: '2', title: 'IT sector sees massive selloff ahead of earnings', source: 'Financial Express', timestamp: '3 hours ago', url: '#', category: 'Stocks' as const },
     ];
+  }
+}
+
+export async function fetchLiveInternationalIndices(policy?: FetchPolicy): Promise<import('./types').IndexData[]> {
+  const indices = [
+    { symbol: 'S&P 500',  yahoo: '^GSPC' },
+    { symbol: 'NASDAQ',   yahoo: '^IXIC' },
+    { symbol: 'FTSE 100', yahoo: '^FTSE' },
+  ];
+  try {
+    const promises = indices.map(async (idx) => {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(idx.yahoo)}?range=1d&interval=1d`;
+      const res  = await fetch(url, fetchInit(policy, 60));
+      const data = await res.json();
+      const meta = data.chart?.result?.[0]?.meta;
+      if (!meta) throw new Error('Missing meta for ' + idx.symbol);
+      const price      = meta.regularMarketPrice;
+      const prevClose  = meta.chartPreviousClose;
+      const change     = price - prevClose;
+      const percentChange = (change / prevClose) * 100;
+      return {
+        symbol: idx.symbol,
+        value:  price,
+        change,
+        percentChange,
+        lastUpdated: new Date(meta.regularMarketTime * 1000).toLocaleString('en-US', {
+          month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true,
+        }) + ' ET',
+      };
+    });
+    return await Promise.all(promises);
+  } catch (error) {
+    console.error('Failed to fetch live international indices:', error);
+    return [
+      { symbol: 'S&P 500',  value: 5477.90,  change: 4.60,   percentChange: 0.08,  lastUpdated: '' },
+      { symbol: 'NASDAQ',   value: 17721.59, change: -32.23, percentChange: -0.18, lastUpdated: '' },
+      { symbol: 'FTSE 100', value: 8237.72,  change: -43.83, percentChange: -0.53, lastUpdated: '' },
+    ];
+  }
+}
+
+export async function fetchLiveInternationalTrendingTickers(): Promise<TrendingData> {
+  const tickers = getAllTickers().filter(t => t.currency === 'USD' && !t.isIndex);
+  const promises = tickers.map(async (ticker) => {
+    try {
+      const url  = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker.symbol)}?range=1d&interval=1d`;
+      const res  = await fetch(url, { next: { revalidate: 300 } });
+      const data = await res.json();
+      const meta = data.chart?.result?.[0]?.meta;
+      if (!meta) return ticker;
+      const price      = meta.regularMarketPrice;
+      const prevClose  = meta.chartPreviousClose;
+      const change     = price - prevClose;
+      const percentChange = (change / prevClose) * 100;
+      return { ...ticker, price, change, percentChange };
+    } catch { return ticker; }
+  });
+  const updated = await Promise.all(promises);
+  const sorted  = [...updated].sort((a, b) => b.percentChange - a.percentChange);
+  return { gainers: sorted.slice(0, 4), losers: sorted.slice().reverse().slice(0, 4) };
+}
+
+export async function fetchLiveInternationalNews(): Promise<import('./types').NewsArticle[]> {
+  try {
+    const url  = 'https://query2.finance.yahoo.com/v1/finance/search?q=US+Stock+Market+Wall+Street&newsCount=8';
+    const res  = await fetch(url, { next: { revalidate: 600 } });
+    const data = await res.json();
+    if (!data.news || !Array.isArray(data.news)) throw new Error('Bad format');
+    return data.news.map((item: { uuid?: string; title: string; publisher?: string; providerPublishTime: number; link: string }, index: number) => {
+      const secondsAgo = Math.floor(Date.now() / 1000 - item.providerPublishTime);
+      let timestamp = '';
+      if (secondsAgo < 3600)       timestamp = `${Math.floor(secondsAgo / 60)} min ago`;
+      else if (secondsAgo < 86400) timestamp = `${Math.floor(secondsAgo / 3600)} hours ago`;
+      else                         timestamp = `${Math.floor(secondsAgo / 86400)} days ago`;
+      const t = item.title.toLowerCase();
+      let category: 'Indices' | 'Stocks' | 'Macro' = 'Macro';
+      if (t.match(/s&p|nasdaq|dow|ftse|index|markets/)) category = 'Indices';
+      else if (t.match(/stock|shares|earnings|profit|apple|nvidia|microsoft|tesla|amazon|meta|google/)) category = 'Stocks';
+      return { id: item.uuid ?? `intl-${index}`, title: item.title, source: item.publisher ?? 'Yahoo Finance', timestamp, url: item.link, category };
+    });
+  } catch (error) {
+    console.error('Failed to fetch international news:', error);
+    return getInternationalNews();
   }
 }
