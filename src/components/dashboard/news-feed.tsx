@@ -10,7 +10,14 @@ import { Separator } from '@/components/ui/separator';
 export default function NewsFeed({ news }: { news: NewsArticle[] }) {
   const [filter, setFilter] = useState('All');
 
-  const filteredNews = filter === 'All' ? news : news.filter(n => n.category === filter);
+  const seen = new Set<string>();
+  const uniqueNews = news.filter(a => {
+    if (seen.has(a.id)) return false;
+    seen.add(a.id);
+    return true;
+  });
+
+  const filteredNews = filter === 'All' ? uniqueNews : uniqueNews.filter(n => n.category === filter);
 
   return (
     <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 h-full">
@@ -31,7 +38,7 @@ export default function NewsFeed({ news }: { news: NewsArticle[] }) {
         <ScrollArea className="h-[300px]">
           <div className="space-y-4 pr-4">
             {filteredNews.map((article, index) => (
-              <div key={article.id}>
+              <div key={`${article.id}-${index}`}>
                 <div className="space-y-1">
                   <Link href={article.url} target="_blank" rel="noopener noreferrer" className="font-semibold hover:text-primary transition-colors">
                     {article.title}

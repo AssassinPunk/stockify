@@ -90,7 +90,8 @@ export function CurrencyConverterTile({
 }) {
   const [from, setFrom] = useState(defaultFrom);
   const [to, setTo] = useState(defaultTo);
-  const [amount, setAmount] = useState<number>(defaultAmount);
+  const [inputValue, setInputValue] = useState<string>(defaultAmount > 0 ? String(defaultAmount) : '');
+  const amount = parseFloat(inputValue) || 0;
   const [rates, setRates] = useState<Record<string, number> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -152,7 +153,7 @@ export function CurrencyConverterTile({
   }, [rates, to]);
 
   const converted = useMemo(() => {
-    if (rate == null || !Number.isFinite(amount)) return null;
+    if (rate == null || amount <= 0) return null;
     return amount * rate;
   }, [amount, rate]);
 
@@ -170,12 +171,17 @@ export function CurrencyConverterTile({
 
           <div className="mt-1 grid grid-cols-3 gap-2 items-center">
             <Input
-              value={Number.isFinite(amount) ? String(amount) : ""}
-              onChange={e => setAmount(e.target.value === "" ? 0 : Number(e.target.value))}
+              value={inputValue}
+              onChange={e => {
+                const v = e.target.value;
+                // Allow empty, digits, and one decimal point only
+                if (/^\d*\.?\d*$/.test(v)) setInputValue(v);
+              }}
+              onBlur={() => {
+                if (!inputValue || inputValue === '.') setInputValue('');
+              }}
               inputMode="decimal"
-              type="number"
-              min={0}
-              step="any"
+              placeholder="0"
               className="h-9 font-mono text-sm"
               aria-label="Amount"
             />

@@ -1,14 +1,16 @@
-
-'use client';
-
 import Header from '@/components/dashboard/header';
 import Disclaimer from '@/components/dashboard/disclaimer';
 import NewsFeed from '@/components/dashboard/news-feed';
-import { getNews, getInternationalNews } from '@/lib/data';
+import { fetchLiveNews, fetchLiveInternationalNews } from '@/lib/yahoo-finance';
 import { Newspaper } from 'lucide-react';
 
-export default function NewsPage() {
-  const news = [...getNews(), ...getInternationalNews()];
+export default async function NewsPage() {
+  const [indianNews, intlNews] = await Promise.all([
+    fetchLiveNews(),
+    fetchLiveInternationalNews(),
+  ]);
+
+  const news = [...indianNews, ...intlNews];
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">

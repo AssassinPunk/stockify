@@ -84,10 +84,11 @@ function TickerItem({ item, onClick }: { item: Commodity; onClick: () => void })
 
 // Compact inline currency converter
 function MiniConverter() {
-  const [from, setFrom]     = useState('USD');
-  const [to, setTo]         = useState('INR');
-  const [amount, setAmount] = useState(1);
-  const [rate, setRate]     = useState<number | null>(null);
+  const [from, setFrom]         = useState('USD');
+  const [to, setTo]             = useState('INR');
+  const [amountStr, setAmountStr] = useState('');
+  const amount = parseFloat(amountStr) || 0;
+  const [rate, setRate]         = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -98,16 +99,21 @@ function MiniConverter() {
     return () => { cancelled = true; };
   }, [from, to]);
 
-  const result = rate != null ? (amount * rate).toFixed(4) : '—';
+  const result = rate != null && amount > 0 ? (amount * rate).toFixed(4) : '0.0000';
 
   return (
     <div className="flex items-center gap-3 px-5">
       <ArrowLeftRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
       <input
-        type="number"
-        value={amount}
-        min={0}
-        onChange={e => setAmount(Number(e.target.value))}
+        type="text"
+        inputMode="decimal"
+        value={amountStr}
+        placeholder="0"
+        onChange={e => {
+          const v = e.target.value;
+          if (/^\d*\.?\d*$/.test(v)) setAmountStr(v);
+        }}
+        onBlur={() => { if (!amountStr || amountStr === '.') setAmountStr(''); }}
         className="w-16 rounded-md bg-secondary/60 px-2 py-1 font-mono text-xs font-bold outline-none focus:ring-1 focus:ring-border"
       />
       <input

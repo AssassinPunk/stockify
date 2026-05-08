@@ -4,24 +4,24 @@ import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
 import FundamentalsCard from '@/components/dashboard/fundamentals-card';
 import CompareChart from '@/components/dashboard/compare-chart';
-import { getAllTickers, getNews, getMainChartData, getInternationalNews } from '@/lib/data';
+import { getAllTickers, getMainChartData } from '@/lib/data';
+import {
+  fetchLiveQuote,
+  fetchLiveNews,
+  fetchLiveInternationalNews,
+  fetchLiveTrendingTickers,
+  fetchLiveInternationalTrendingTickers,
+} from '@/lib/yahoo-finance';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatChange, formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import TrendingTickers from '@/components/dashboard/trending-tickers';
-import { getTrendingTickers, getInternationalTrendingTickers } from '@/lib/data';
 
 export default async function StockPage({ params }: { params: Promise<{ symbol: string }> }) {
   const { symbol: rawSymbol } = await params;
-  const allTickers = getAllTickers();
-  const indianNews = getNews();
-  const internationalNews = getInternationalNews();
-  const indianTrending = getTrendingTickers();
-  const internationalTrending = getInternationalTrendingTickers();
-
   const decodedSymbol = decodeURIComponent(rawSymbol);
-  const ticker = allTickers.find(t => t.symbol.toLowerCase() === decodedSymbol.toLowerCase());
+  const ticker = getAllTickers().find(t => t.symbol.toLowerCase() === decodedSymbol.toLowerCase());
 
   if (!ticker) {
     return (
@@ -37,17 +37,26 @@ export default async function StockPage({ params }: { params: Promise<{ symbol: 
   }
 
   const isIndianTicker = ticker.currency === 'INR';
-  const news = isIndianTicker ? indianNews : internationalNews;
-  const trending = isIndianTicker ? indianTrending : internationalTrending;
-  const mainChartData = getMainChartData(ticker.symbol);
-  const isPositive = ticker.change >= 0;
 
-  const stockNews = news.filter(
-    article => article.title.toLowerCase().includes(ticker.name.toLowerCase().split(' ')[0])
-  );
-  const otherNews = news.filter(
-    article => !article.title.toLowerCase().includes(ticker.name.toLowerCase().split(' ')[0])
-  );
+  const [liveQuote, news, trendingData] = await Promise.all([
+    fetchLiveQuote(ticker.symbol, { cache: 'no-store' }),
+    isIndianTicker ? fetchLiveNews() : fetchLiveInternationalNews(),
+    isIndianTicker ? fetchLiveTrendingTickers() : fetchLiveInternationalTrendingTickers(),
+  ]);
+
+  const displayTicker = {
+    ...ticker,
+    price:         liveQuote?.price         ?? 0,
+    change:        liveQuote?.change        ?? 0,
+    percentChange: liveQuote?.percentChange ?? 0,
+  };
+
+  const mainChartData = getMainChartData(ticker.symbol);
+  const isPositive = displayTicker.change >= 0;
+
+  const firstWord = displayTicker.name.toLowerCase().split(' ')[0];
+  const stockNews = news.filter(a => a.title.toLowerCase().includes(firstWord));
+  const otherNews = news.filter(a => !a.title.toLowerCase().includes(firstWord));
   const combinedNews = [...stockNews, ...otherNews].slice(0, 5);
 
   return (
@@ -59,7 +68,7 @@ export default async function StockPage({ params }: { params: Promise<{ symbol: 
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
               <CardTitle className="text-2xl font-bold">
-                {ticker.name} ({ticker.symbol})
+                {displayTicker.name} ({displayTicker.symbol})
               </CardTitle>
             </div>
             {isPositive ? (
@@ -70,33 +79,33 @@ export default async function StockPage({ params }: { params: Promise<{ symbol: 
           </CardHeader>
           <CardContent>
             <div className="font-code text-3xl font-bold">
-              {formatNumber(ticker.price, {
+              {formatNumber(displayTicker.price, {
                 style: 'currency',
-                currency: ticker.currency || 'INR',
+                currency: displayTicker.currency || 'INR',
                 minimumFractionDigits: 2,
               })}
             </div>
             <p className={cn('font-code text-lg', isPositive ? 'text-up' : 'text-down')}>
-              {formatChange(ticker.change, ticker.percentChange)}
+              {formatChange(displayTicker.change, displayTicker.percentChange)}
             </p>
           </CardContent>
         </Card>
 
         {/* Key metrics */}
-        <FundamentalsCard symbol={ticker.symbol} currency={ticker.currency ?? 'INR'} />
+        <FundamentalsCard symbol={displayTicker.symbol} currency={displayTicker.currency ?? 'INR'} />
 
         {/* Chart + sidebar */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <div className="lg:col-span-8">
-            <MainChart ticker={ticker} chartData={mainChartData} />
+            <MainChart ticker={displayTicker} chartData={mainChartData} />
           </div>
           <div className="lg:col-span-4">
-            <TrendingTickers trending={trending} />
+            <TrendingTickers trending={trendingData} />
           </div>
         </div>
 
         {/* Comparison chart */}
-        <CompareChart ticker={ticker} />
+        <CompareChart ticker={displayTicker} />
 
         <div className="grid grid-cols-1">
           <NewsFeed news={combinedNews} />

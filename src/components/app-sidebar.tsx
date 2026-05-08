@@ -11,6 +11,8 @@ import {
   Flag,
   GraduationCap,
   CalendarDays,
+  Activity,
+  FlaskConical,
 } from 'lucide-react';
 
 import {
@@ -79,6 +81,15 @@ const data = {
       url: '/education',
       icon: GraduationCap,
     },
+    {
+      title: 'Tools',
+      url: '/fear-greed',
+      icon: Activity,
+      items: [
+        { title: 'Fear & Greed Index', url: '/fear-greed',  icon: Activity },
+        { title: 'What If Backtester', url: '/backtester',  icon: FlaskConical },
+      ],
+    },
   ],
 };
 
@@ -108,14 +119,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 {item.items ? (
                   <Collapsible
                     asChild
-                    defaultOpen={pathname === '/' || pathname === '/international'}
+                    defaultOpen={item.items?.some(s => s.url === pathname) || pathname === '/' || pathname === '/international'}
                     className="group/collapsible"
                   >
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton
                           tooltip={item.title}
-                          isActive={pathname === '/' || pathname === '/international'}
+                          isActive={item.items?.some(s => s.url === pathname) || pathname === '/' || pathname === '/international'}
                         >
                           {item.icon && <item.icon />}
                           <span>{item.title}</span>

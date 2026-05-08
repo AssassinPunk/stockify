@@ -9,9 +9,15 @@ type FetchPolicy = {
   revalidate?: number;
 };
 
+const YAHOO_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Accept': 'application/json',
+};
+
 function fetchInit(policy: FetchPolicy | undefined, defaultRevalidate: number) {
-  if (policy?.cache === 'no-store') return { cache: 'no-store' as const };
-  return { next: { revalidate: policy?.revalidate ?? defaultRevalidate } };
+  const headers = YAHOO_HEADERS;
+  if (policy?.cache === 'no-store') return { cache: 'no-store' as const, headers };
+  return { next: { revalidate: policy?.revalidate ?? defaultRevalidate }, headers };
 }
 
 // Fallback data
@@ -59,7 +65,6 @@ export async function fetchIndiaVix(options?: {
     }
 
     const currentVix = meta.regularMarketPrice;
-    const previousClose = meta.chartPreviousClose; 
     const lastUpdated = new Date(meta.regularMarketTime * 1000).toLocaleString('en-IN', {
       timeZone: 'Asia/Kolkata',
       month: 'short',
@@ -99,22 +104,24 @@ function generateFallbackChartData(baseValue: number, points: number = 30): Char
     return data;
 }
 
-// Convert common Indian symbols to Yahoo symbols
+// Convert app symbols to Yahoo Finance symbols.
+// Uses TICKER_REGISTRY to determine currency — no hardcoded international list needed.
 function getYahooSymbol(symbol: string): string {
-    if (symbol === 'NIFTY 50') return '^NSEI';
-    if (symbol === 'SENSEX') return '^BSESN';
+    if (symbol === 'NIFTY 50')   return '^NSEI';
+    if (symbol === 'SENSEX')     return '^BSESN';
     if (symbol === 'BANK NIFTY') return '^NSEBANK';
-    if (symbol === 'INDIA VIX') return '^INDIAVIX';
-    // Commodity futures (=F) and forex pairs (=X) must pass through unchanged
+    if (symbol === 'INDIA VIX')  return '^INDIAVIX';
+    if (symbol === 'S&P 500')    return '^GSPC';
+    if (symbol === 'NASDAQ')     return '^IXIC';
+    if (symbol === 'FTSE 100')   return '^FTSE';
+    // Commodity futures (=F) and forex pairs (=X) pass through unchanged
     if (symbol.includes('=')) return symbol;
-    // If it doesn't look like an international stock, assume NSE
-    const international = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META', 'JPM', 'S&P 500', 'NASDAQ', 'FTSE 100'];
-    if (!international.includes(symbol) && !symbol.includes('.')) {
-         return `${symbol}.NS`;
-    }
-    if (symbol === 'S&P 500') return '^GSPC';
-    if (symbol === 'NASDAQ') return '^IXIC';
-    if (symbol === 'FTSE 100') return '^FTSE';
+    // Look up in registry — use override symbol if present
+    const meta = TICKER_REGISTRY.find(t => t.symbol === symbol);
+    if (meta?.yahooSymbol) return meta.yahooSymbol;
+    if (meta && meta.currency !== 'INR') return symbol; // USD/GBP symbols pass through
+    // Default: assume NSE-listed Indian stock
+    if (!symbol.includes('.')) return `${symbol}.NS`;
     return symbol;
 }
 
@@ -229,7 +236,7 @@ export async function fetchLiveIndianIndices(policy?: FetchPolicy): Promise<impo
   }
 }
 
-import { getAllTickers, getInternationalNews } from './data';
+import { getAllTickers, getInternationalNews, TICKER_REGISTRY } from './data';
 import type { TrendingData } from './types';
 
 // Fetch live quotes for all covered Indian stocks and dynamically calculate Top Gainers / Losers
@@ -240,9 +247,9 @@ export async function fetchLiveTrendingTickers(): Promise<TrendingData> {
     try {
       const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(getYahooSymbol(ticker.symbol))}?range=1d&interval=1d`;
       // Revalidate every 5 minutes to keep trending somewhat fresh but avoid aggressive limits
-      const res = await fetch(url, { next: { revalidate: 300 } }); 
+      const res = await fetch(url, { next: { revalidate: 300 }, headers: YAHOO_HEADERS });
       const data = await res.json();
-      
+
       const meta = data.chart?.result?.[0]?.meta;
       if (!meta) return ticker; // Return fallback base if unavailable
 
@@ -277,8 +284,7 @@ import type { NewsArticle } from './types';
 export async function fetchLiveNews(): Promise<NewsArticle[]> {
   try {
     const url = `https://query2.finance.yahoo.com/v1/finance/search?q=Indian+Stock+Market&newsCount=8`;
-    // Revalidate every 10 minutes (600s) for fairly fresh news
-    const res = await fetch(url, { next: { revalidate: 600 } });
+    const res = await fetch(url, { next: { revalidate: 600 }, headers: YAHOO_HEADERS });
     const data = await res.json();
 
     if (!data.news || !Array.isArray(data.news)) {
@@ -320,6 +326,25 @@ export async function fetchLiveNews(): Promise<NewsArticle[]> {
       { id: '2', title: 'IT sector sees massive selloff ahead of earnings', source: 'Financial Express', timestamp: '3 hours ago', url: '#', category: 'Stocks' as const },
     ];
   }
+}
+
+export async function fetchLiveQuote(
+  symbol: string,
+  policy?: FetchPolicy,
+): Promise<{ price: number; change: number; percentChange: number } | null> {
+  const ySymbol = getYahooSymbol(symbol);
+  try {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ySymbol)}?range=1d&interval=1d`;
+    const res  = await fetch(url, fetchInit(policy, 60));
+    const data = await res.json();
+    const meta = data.chart?.result?.[0]?.meta;
+    if (!meta) return null;
+    const price         = meta.regularMarketPrice as number;
+    const prevClose     = meta.chartPreviousClose  as number;
+    const change        = price - prevClose;
+    const percentChange = (change / prevClose) * 100;
+    return { price, change, percentChange };
+  } catch { return null; }
 }
 
 export async function fetchLiveInternationalIndices(policy?: FetchPolicy): Promise<import('./types').IndexData[]> {
@@ -365,7 +390,7 @@ export async function fetchLiveInternationalTrendingTickers(): Promise<TrendingD
   const promises = tickers.map(async (ticker) => {
     try {
       const url  = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker.symbol)}?range=1d&interval=1d`;
-      const res  = await fetch(url, { next: { revalidate: 300 } });
+      const res  = await fetch(url, { next: { revalidate: 300 }, headers: YAHOO_HEADERS });
       const data = await res.json();
       const meta = data.chart?.result?.[0]?.meta;
       if (!meta) return ticker;
@@ -384,7 +409,7 @@ export async function fetchLiveInternationalTrendingTickers(): Promise<TrendingD
 export async function fetchLiveInternationalNews(): Promise<import('./types').NewsArticle[]> {
   try {
     const url  = 'https://query2.finance.yahoo.com/v1/finance/search?q=US+Stock+Market+Wall+Street&newsCount=8';
-    const res  = await fetch(url, { next: { revalidate: 600 } });
+    const res  = await fetch(url, { next: { revalidate: 600 }, headers: YAHOO_HEADERS });
     const data = await res.json();
     if (!data.news || !Array.isArray(data.news)) throw new Error('Bad format');
     return data.news.map((item: { uuid?: string; title: string; publisher?: string; providerPublishTime: number; link: string }, index: number) => {
