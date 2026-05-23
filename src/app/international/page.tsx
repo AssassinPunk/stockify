@@ -5,27 +5,27 @@ import TrendingTickers from '@/components/dashboard/trending-tickers';
 import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
 import SectorHeatmap from '@/components/dashboard/sector-heatmap';
-import { getMainChartData, getAllTickers, getInternationalSectors } from '@/lib/data';
+import { getAllTickers } from '@/lib/data';
 import {
   fetchLiveInternationalIndices,
   fetchLiveInternationalTrendingTickers,
   fetchLiveInternationalNews,
+  fetchLiveInternationalSectors,
+  fetchYahooChart,
 } from '@/lib/yahoo-finance';
 
 export default async function InternationalPage() {
-  const [indices, trendingData, news] = await Promise.all([
-    fetchLiveInternationalIndices(),
-    fetchLiveInternationalTrendingTickers(),
-    fetchLiveInternationalNews(),
-  ]);
-
   const allTickers = getAllTickers();
-  const sectors = getInternationalSectors();
-
   const sp500Ticker = allTickers.find(t => t.symbol === 'S&P 500');
   if (!sp500Ticker) return <div>Loading...</div>;
 
-  const mainChartData = getMainChartData(sp500Ticker.symbol);
+  const [indices, trendingData, news, sectors, mainChartData] = await Promise.all([
+    fetchLiveInternationalIndices(),
+    fetchLiveInternationalTrendingTickers(),
+    fetchLiveInternationalNews(),
+    fetchLiveInternationalSectors(),
+    fetchYahooChart(sp500Ticker.symbol),
+  ]);
 
   const sp500   = indices.find(i => i.symbol === 'S&P 500');
   const nasdaq  = indices.find(i => i.symbol === 'NASDAQ');

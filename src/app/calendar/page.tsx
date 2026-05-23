@@ -1,12 +1,11 @@
 import Header from '@/components/dashboard/header';
 import Disclaimer from '@/components/dashboard/disclaimer';
 import { CALENDAR_EVENTS, type CalendarEvent } from '@/lib/calendar-data';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CalendarDays, Circle, IndianRupee, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const TODAY = '2026-04-26';
+export const dynamic = 'force-dynamic';
 
 const CATEGORY_COLORS: Record<CalendarEvent['category'], string> = {
   RBI:           'bg-purple-500/15 text-purple-400 border-purple-500/30',
@@ -30,10 +29,16 @@ const IMPACT_LABEL: Record<CalendarEvent['impact'], string> = {
   Low:    'Low Impact',
 };
 
-function daysFromToday(dateStr: string): number {
-  const today = new Date(TODAY + 'T00:00:00');
-  const event = new Date(dateStr + 'T00:00:00');
-  return Math.round((event.getTime() - today.getTime()) / 86_400_000);
+function getTodayStr(): string {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString().split('T')[0];
+}
+
+function daysFromToday(dateStr: string, today: string): number {
+  const t = new Date(today + 'T00:00:00');
+  const e = new Date(dateStr + 'T00:00:00');
+  return Math.round((e.getTime() - t.getTime()) / 86_400_000);
 }
 
 function DaysLabel({ diff }: { diff: number }) {
@@ -78,8 +83,8 @@ function EventTable({ events }: { events: (CalendarEvent & { diff: number })[] }
               <tbody className="divide-y divide-border/30">
                 {monthEvents.map((event, idx) => {
                   const d = new Date(event.date + 'T00:00:00');
-                  const day   = d.toLocaleDateString('en-IN', { day: '2-digit' });
-                  const month = d.toLocaleDateString('en-IN', { month: 'short' });
+                  const day     = d.toLocaleDateString('en-IN', { day: '2-digit' });
+                  const month   = d.toLocaleDateString('en-IN', { month: 'short' });
                   const weekday = d.toLocaleDateString('en-IN', { weekday: 'short' });
                   const isPast  = event.diff < 0;
                   const isToday = event.diff === 0;
@@ -94,7 +99,6 @@ function EventTable({ events }: { events: (CalendarEvent & { diff: number })[] }
                         isPast   && 'opacity-40',
                       )}
                     >
-                      {/* Date */}
                       <td className="px-4 py-3">
                         <div className="flex flex-col">
                           <span className={cn('font-bold leading-none', isToday ? 'text-primary' : 'text-foreground')}>
@@ -104,7 +108,6 @@ function EventTable({ events }: { events: (CalendarEvent & { diff: number })[] }
                         </div>
                       </td>
 
-                      {/* Title + description */}
                       <td className="px-4 py-3">
                         <p className={cn('font-medium leading-snug', isPast && 'line-through')}>
                           {event.title}
@@ -114,7 +117,6 @@ function EventTable({ events }: { events: (CalendarEvent & { diff: number })[] }
                         )}
                       </td>
 
-                      {/* Category */}
                       <td className="px-4 py-3 hidden sm:table-cell">
                         <Badge
                           variant="outline"
@@ -124,7 +126,6 @@ function EventTable({ events }: { events: (CalendarEvent & { diff: number })[] }
                         </Badge>
                       </td>
 
-                      {/* Impact */}
                       <td className="px-4 py-3 hidden md:table-cell">
                         <div className="flex items-center gap-1.5">
                           <Circle className={cn('h-2 w-2 shrink-0', IMPACT_COLORS[event.impact])} />
@@ -132,7 +133,6 @@ function EventTable({ events }: { events: (CalendarEvent & { diff: number })[] }
                         </div>
                       </td>
 
-                      {/* Days label */}
                       <td className="px-4 py-3 text-right">
                         <DaysLabel diff={event.diff} />
                       </td>
@@ -148,15 +148,102 @@ function EventTable({ events }: { events: (CalendarEvent & { diff: number })[] }
   );
 }
 
-export default function CalendarPage() {
-  const india = [...CALENDAR_EVENTS]
+// ── Live earnings from Twelve Data ───────────────────────────────────────────
+
+interface TwelveEarning {
+  date?: string;
+  eps_estimate?: string;
+}
+
+interface TwelveSymbolData {
+  meta?: { name?: string; symbol?: string };
+  earnings?: TwelveEarning[];
+}
+
+async function fetchLiveEarnings(today: string): Promise<CalendarEvent[]> {
+  const apiKey = process.env.TWELVE_DATA_API_KEY;
+  if (!apiKey) return [];
+
+  const usSymbols   = ['AAPL', 'MSFT', 'GOOGL', 'NVDA', 'META', 'AMZN', 'TSLA'];
+  const indiaSymbols = ['TCS.NS', 'INFY.NS', 'WIPRO.NS', 'HDFCBANK.NS', 'RELIANCE.NS', 'ICICIBANK.NS'];
+  const symbols = [...usSymbols, ...indiaSymbols];
+
+  const maxDate = new Date(Date.now() + 120 * 86_400_000).toISOString().split('T')[0];
+
+  try {
+    const res = await fetch(
+      `https://api.twelvedata.com/earnings?symbol=${symbols.join(',')}&apikey=${apiKey}`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!res.ok) return [];
+
+    const data: Record<string, unknown> = await res.json();
+    if ((data as { code?: number }).code === 429 || (data as { status?: string }).status === 'error') return [];
+
+    const events: CalendarEvent[] = [];
+
+    const processSymbol = (symbolKey: string, info: unknown) => {
+      if (!info || typeof info !== 'object') return;
+      const sd = info as TwelveSymbolData;
+      if (!Array.isArray(sd.earnings)) return;
+
+      const rawName = sd.meta?.name ?? symbolKey.replace('.NS', '');
+      // Shorten very long names (e.g. "Tata Consultancy Services Limited" → "TCS")
+      const name = rawName.length > 30 ? (sd.meta?.symbol ?? symbolKey.replace('.NS', '')) : rawName;
+      const isIndia = symbolKey.endsWith('.NS');
+
+      for (const e of sd.earnings) {
+        if (!e.date) continue;
+        // Only show events within the displayed window
+        if (e.date < today || e.date > maxDate) continue;
+        events.push({
+          date: e.date,
+          title: `${name} Earnings`,
+          category: 'Earnings',
+          market: isIndia ? 'India' : 'International',
+          impact: 'High',
+          description: e.eps_estimate ? `EPS estimate: $${e.eps_estimate}` : 'Quarterly earnings announcement',
+        });
+      }
+    };
+
+    // Twelve Data returns flat {meta, earnings} for a single symbol,
+    // or {AAPL: {meta, earnings}, MSFT: ...} for multiple symbols.
+    if ('earnings' in data && Array.isArray(data.earnings)) {
+      processSymbol(symbols[0], data);
+    } else {
+      for (const [sym, info] of Object.entries(data)) {
+        processSymbol(sym, info);
+      }
+    }
+
+    return events;
+  } catch {
+    return [];
+  }
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+export default async function CalendarPage() {
+  const TODAY = getTodayStr();
+  const liveEarnings = await fetchLiveEarnings(TODAY);
+
+  // If Twelve Data returned earnings, use live earnings + static macro events.
+  // Otherwise fall back to fully static data so the page is never empty.
+  const staticMacro = CALENDAR_EVENTS.filter(e => e.category !== 'Earnings');
+  const allEvents = liveEarnings.length > 0
+    ? [...staticMacro, ...liveEarnings]
+    : [...CALENDAR_EVENTS];
+
+  const india = allEvents
     .filter(e => e.market === 'India')
-    .map(e => ({ ...e, diff: daysFromToday(e.date) }))
+    .map(e => ({ ...e, diff: daysFromToday(e.date, TODAY) }))
     .sort((a, b) => a.diff - b.diff);
 
-  const international = [...CALENDAR_EVENTS]
+  const international = allEvents
     .filter(e => e.market === 'International')
-    .map(e => ({ ...e, diff: daysFromToday(e.date) }))
+    .map(e => ({ ...e, diff: daysFromToday(e.date, TODAY) }))
     .sort((a, b) => a.diff - b.diff);
 
   return (
@@ -164,17 +251,20 @@ export default function CalendarPage() {
       <Header />
       <main className="flex-1 space-y-8 p-4 md:p-6">
 
-        {/* Page title */}
         <div className="flex items-center gap-3">
           <CalendarDays className="h-6 w-6 text-primary" />
           <div>
             <h1 className="text-2xl font-bold">Economic Calendar</h1>
-            <p className="text-sm text-muted-foreground">Upcoming market-moving events — India & International</p>
+            <p className="text-sm text-muted-foreground">
+              Upcoming market-moving events — India &amp; International
+              {liveEarnings.length > 0 && (
+                <span className="ml-2 text-green-500/70">· Live earnings data</span>
+              )}
+            </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          {/* India */}
           <div>
             <div className="mb-4 flex items-center gap-2">
               <IndianRupee className="h-4 w-4 text-primary" />
@@ -183,7 +273,6 @@ export default function CalendarPage() {
             <EventTable events={india} />
           </div>
 
-          {/* International */}
           <div>
             <div className="mb-4 flex items-center gap-2">
               <Globe className="h-4 w-4 text-primary" />

@@ -229,14 +229,14 @@ export async function fetchLiveIndianIndices(policy?: FetchPolicy): Promise<impo
     console.error("Failed to fetch Live Indian Indices from Yahoo:", error);
     // Fallback to initial if Yahoo completely fails
     return [
-      { symbol: 'NIFTY 50', value: 24200.50, change: -120.30, percentChange: -0.49, lastUpdated: '17 Apr, 3:30 pm IST' },
-      { symbol: 'SENSEX', value: 79500.10, change: -450.80, percentChange: -0.56, lastUpdated: '17 Apr, 3:30 pm IST' },
-      { symbol: 'BANK NIFTY', value: 52100.80, change: 320.40, percentChange: 0.62, lastUpdated: '17 Apr, 3:30 pm IST' }
+      { symbol: 'NIFTY 50',   value: 0, change: 0, percentChange: 0, lastUpdated: 'Data unavailable' },
+      { symbol: 'SENSEX',     value: 0, change: 0, percentChange: 0, lastUpdated: 'Data unavailable' },
+      { symbol: 'BANK NIFTY', value: 0, change: 0, percentChange: 0, lastUpdated: 'Data unavailable' },
     ];
   }
 }
 
-import { getAllTickers, getInternationalNews, TICKER_REGISTRY } from './data';
+import { getAllTickers, TICKER_REGISTRY } from './data';
 import type { TrendingData } from './types';
 
 // Fetch live quotes for all covered Indian stocks and dynamically calculate Top Gainers / Losers
@@ -378,9 +378,9 @@ export async function fetchLiveInternationalIndices(policy?: FetchPolicy): Promi
   } catch (error) {
     console.error('Failed to fetch live international indices:', error);
     return [
-      { symbol: 'S&P 500',  value: 5477.90,  change: 4.60,   percentChange: 0.08,  lastUpdated: '' },
-      { symbol: 'NASDAQ',   value: 17721.59, change: -32.23, percentChange: -0.18, lastUpdated: '' },
-      { symbol: 'FTSE 100', value: 8237.72,  change: -43.83, percentChange: -0.53, lastUpdated: '' },
+      { symbol: 'S&P 500',  value: 0, change: 0, percentChange: 0, lastUpdated: 'Data unavailable' },
+      { symbol: 'NASDAQ',   value: 0, change: 0, percentChange: 0, lastUpdated: 'Data unavailable' },
+      { symbol: 'FTSE 100', value: 0, change: 0, percentChange: 0, lastUpdated: 'Data unavailable' },
     ];
   }
 }
@@ -426,6 +426,73 @@ export async function fetchLiveInternationalNews(): Promise<import('./types').Ne
     });
   } catch (error) {
     console.error('Failed to fetch international news:', error);
-    return getInternationalNews();
+    return [];
   }
+}
+
+// ── Live sector performance ──────────────────────────────────────────────────
+
+export async function fetchLiveSectors(policy?: FetchPolicy): Promise<import('./types').SectorData[]> {
+  const sectors = [
+    { name: 'Nifty IT',     yahoo: '^CNXIT' },
+    { name: 'Nifty Bank',   yahoo: '^NSEBANK' },
+    { name: 'Nifty Auto',   yahoo: '^CNXAUTO' },
+    { name: 'Nifty Pharma', yahoo: '^CNXPHARMA' },
+    { name: 'Nifty FMCG',   yahoo: '^CNXFMCG' },
+    { name: 'Nifty Realty', yahoo: '^CNXREALTY' },
+    { name: 'Nifty Metal',  yahoo: '^CNXMETAL' },
+    { name: 'Nifty Media',  yahoo: '^CNXMEDIA' },
+    { name: 'Nifty PSE',    yahoo: '^CNXPSE' },
+  ];
+
+  const results = await Promise.allSettled(
+    sectors.map(async (s) => {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s.yahoo)}?range=1d&interval=1d`;
+      const res  = await fetch(url, fetchInit(policy, 300));
+      const data = await res.json();
+      const meta = data.chart?.result?.[0]?.meta;
+      if (!meta) throw new Error(`No meta for ${s.name}`);
+      const price = meta.regularMarketPrice as number;
+      const prev  = meta.chartPreviousClose  as number;
+      return { name: s.name, change: ((price - prev) / prev) * 100 };
+    })
+  );
+
+  return results.map((r, i) =>
+    r.status === 'fulfilled' ? r.value : { name: sectors[i].name, change: 0 }
+  );
+}
+
+export async function fetchLiveInternationalSectors(policy?: FetchPolicy): Promise<import('./types').SectorData[]> {
+  // SPDR Select Sector ETFs — free-tier Yahoo Finance, no auth needed
+  const sectors = [
+    { name: 'Technology',        etf: 'XLK'  },
+    { name: 'Healthcare',        etf: 'XLV'  },
+    { name: 'Financials',        etf: 'XLF'  },
+    { name: 'Energy',            etf: 'XLE'  },
+    { name: 'Consumer Discret.', etf: 'XLY'  },
+    { name: 'Consumer Staples',  etf: 'XLP'  },
+    { name: 'Industrials',       etf: 'XLI'  },
+    { name: 'Materials',         etf: 'XLB'  },
+    { name: 'Real Estate',       etf: 'XLRE' },
+    { name: 'Utilities',         etf: 'XLU'  },
+    { name: 'Communication',     etf: 'XLC'  },
+  ];
+
+  const results = await Promise.allSettled(
+    sectors.map(async (s) => {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s.etf)}?range=1d&interval=1d`;
+      const res  = await fetch(url, fetchInit(policy, 300));
+      const data = await res.json();
+      const meta = data.chart?.result?.[0]?.meta;
+      if (!meta) throw new Error(`No meta for ${s.name}`);
+      const price = meta.regularMarketPrice as number;
+      const prev  = meta.chartPreviousClose  as number;
+      return { name: s.name, change: ((price - prev) / prev) * 100 };
+    })
+  );
+
+  return results.map((r, i) =>
+    r.status === 'fulfilled' ? r.value : { name: sectors[i].name, change: 0 }
+  );
 }

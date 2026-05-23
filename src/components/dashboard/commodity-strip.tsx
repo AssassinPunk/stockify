@@ -31,19 +31,20 @@ const ITEM_ICONS: Record<string, React.ElementType> = {
   usdcny:   ArrowLeftRight,
 };
 
-const FALLBACK: Commodity[] = [
-  { id: 'gold',     label: 'Gold',        symbol: 'GC=F',     unit: '$/oz',    category: 'Metal',  price: 3300,  change: 0, percentChange: 0 },
-  { id: 'silver',   label: 'Silver',      symbol: 'SI=F',     unit: '$/oz',    category: 'Metal',  price: 33,    change: 0, percentChange: 0 },
-  { id: 'platinum', label: 'Platinum',    symbol: 'PL=F',     unit: '$/oz',    category: 'Metal',  price: 980,   change: 0, percentChange: 0 },
-  { id: 'copper',   label: 'Copper',      symbol: 'HG=F',     unit: '$/lb',    category: 'Metal',  price: 4.5,   change: 0, percentChange: 0 },
-  { id: 'oil',      label: 'Crude Oil',   symbol: 'CL=F',     unit: '$/bbl',   category: 'Energy', price: 65,    change: 0, percentChange: 0 },
-  { id: 'brent',    label: 'Brent Crude', symbol: 'BZ=F',     unit: '$/bbl',   category: 'Energy', price: 68,    change: 0, percentChange: 0 },
-  { id: 'natgas',   label: 'Natural Gas', symbol: 'NG=F',     unit: '$/MMBtu', category: 'Energy', price: 3.5,   change: 0, percentChange: 0 },
-  { id: 'usdinr',   label: 'USD/INR',     symbol: 'USDINR=X', unit: '₹',      category: 'Forex',  price: 83.5,  change: 0, percentChange: 0 },
-  { id: 'eurusd',   label: 'EUR/USD',     symbol: 'EURUSD=X', unit: '$',       category: 'Forex',  price: 1.09,  change: 0, percentChange: 0 },
-  { id: 'gbpusd',   label: 'GBP/USD',     symbol: 'GBPUSD=X', unit: '$',       category: 'Forex',  price: 1.27,  change: 0, percentChange: 0 },
-  { id: 'usdjpy',   label: 'USD/JPY',     symbol: 'USDJPY=X', unit: '¥',      category: 'Forex',  price: 149,   change: 0, percentChange: 0 },
-  { id: 'usdcny',   label: 'USD/CNY',     symbol: 'USDCNY=X', unit: '¥',      category: 'Forex',  price: 7.24,  change: 0, percentChange: 0 },
+// Symbol/label metadata only — no prices. Prices always come from the API.
+const COMMODITY_META = [
+  { id: 'gold',     label: 'Gold',        symbol: 'GC=F',     unit: '$/oz',    category: 'Metal'  },
+  { id: 'silver',   label: 'Silver',      symbol: 'SI=F',     unit: '$/oz',    category: 'Metal'  },
+  { id: 'platinum', label: 'Platinum',    symbol: 'PL=F',     unit: '$/oz',    category: 'Metal'  },
+  { id: 'copper',   label: 'Copper',      symbol: 'HG=F',     unit: '$/lb',    category: 'Metal'  },
+  { id: 'oil',      label: 'Crude Oil',   symbol: 'CL=F',     unit: '$/bbl',   category: 'Energy' },
+  { id: 'brent',    label: 'Brent Crude', symbol: 'BZ=F',     unit: '$/bbl',   category: 'Energy' },
+  { id: 'natgas',   label: 'Natural Gas', symbol: 'NG=F',     unit: '$/MMBtu', category: 'Energy' },
+  { id: 'usdinr',   label: 'USD/INR',     symbol: 'USDINR=X', unit: '₹',      category: 'Forex'  },
+  { id: 'eurusd',   label: 'EUR/USD',     symbol: 'EURUSD=X', unit: '$',       category: 'Forex'  },
+  { id: 'gbpusd',   label: 'GBP/USD',     symbol: 'GBPUSD=X', unit: '$',       category: 'Forex'  },
+  { id: 'usdjpy',   label: 'USD/JPY',     symbol: 'USDJPY=X', unit: '¥',      category: 'Forex'  },
+  { id: 'usdcny',   label: 'USD/CNY',     symbol: 'USDCNY=X', unit: '¥',      category: 'Forex'  },
 ];
 
 function formatPrice(p: number) {
@@ -134,8 +135,21 @@ function MiniConverter() {
   );
 }
 
+function SkeletonItem() {
+  return (
+    <div className="flex shrink-0 items-center gap-2.5 px-4 py-2">
+      <div className="h-7 w-7 rounded-md bg-secondary/50 animate-pulse" />
+      <div className="flex flex-col gap-1">
+        <div className="h-2 w-10 rounded bg-secondary/50 animate-pulse" />
+        <div className="h-3 w-16 rounded bg-secondary/50 animate-pulse" />
+      </div>
+      <div className="h-3 w-10 rounded bg-secondary/50 animate-pulse ml-1" />
+    </div>
+  );
+}
+
 export default function CommodityStrip() {
-  const [data, setData]     = useState<Commodity[]>(FALLBACK);
+  const [data, setData]     = useState<Commodity[] | null>(null);
   const [paused, setPaused] = useState(false);
   const router = useRouter();
 
@@ -153,9 +167,9 @@ export default function CommodityStrip() {
     return () => clearInterval(id);
   }, []);
 
-  // duplicate for seamless loop
-  const items = [...data, ...data];
-  const speed = data.length * 4; // seconds
+  // duplicate for seamless loop; only start scrolling once real data is loaded
+  const items = data ? [...data, ...data] : [];
+  const speed = (data?.length ?? 0) * 4; // seconds
 
   return (
     <div className="flex w-full items-center overflow-hidden rounded-2xl border border-border/50 bg-card shadow-lg shadow-black/10 h-14">
@@ -171,22 +185,29 @@ export default function CommodityStrip() {
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
-        <div
-          className="flex items-center h-14"
-          style={{
-            animation: `ticker-scroll-h ${speed}s linear infinite`,
-            animationPlayState: paused ? 'paused' : 'running',
-            width: 'max-content',
-          }}
-        >
-          {items.map((item, i) => (
-            <TickerItem
-              key={`${item.id}-${i}`}
-              item={item}
-              onClick={() => router.push(`/commodity/${item.id}`)}
-            />
-          ))}
-        </div>
+        {data === null ? (
+          // Show skeleton items until the first API response arrives
+          <div className="flex items-center h-14">
+            {COMMODITY_META.map(m => <SkeletonItem key={m.id} />)}
+          </div>
+        ) : (
+          <div
+            className="flex items-center h-14"
+            style={{
+              animation: `ticker-scroll-h ${speed}s linear infinite`,
+              animationPlayState: paused ? 'paused' : 'running',
+              width: 'max-content',
+            }}
+          >
+            {items.map((item, i) => (
+              <TickerItem
+                key={`${item.id}-${i}`}
+                item={item}
+                onClick={() => router.push(`/commodity/${item.id}`)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="h-8 w-px shrink-0 bg-border/40" />

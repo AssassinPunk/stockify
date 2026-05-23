@@ -9,14 +9,15 @@ import {
   fetchLiveInternationalIndices,
   fetchLiveInternationalTrendingTickers,
   fetchLiveInternationalNews,
+  fetchLiveSectors,
+  fetchLiveInternationalSectors,
 } from '@/lib/yahoo-finance';
-import { getSectors, getInternationalSectors } from '@/lib/data';
 import { Lightbulb } from 'lucide-react';
 
 export default async function InsightsPage() {
   const [
     liveIndices, { vixData }, indiaTrending, indiaNews,
-    intlIndices, intlTrending, intlNews,
+    intlIndices, intlTrending, intlNews, indiaSectors, intlSectors,
   ] = await Promise.all([
     fetchLiveIndianIndices(),
     fetchIndiaVix(),
@@ -25,17 +26,16 @@ export default async function InsightsPage() {
     fetchLiveInternationalIndices(),
     fetchLiveInternationalTrendingTickers(),
     fetchLiveInternationalNews(),
+    fetchLiveSectors(),
+    fetchLiveInternationalSectors(),
   ]);
 
-  const nifty50    = liveIndices[0] ?? null;
-  const sensex     = liveIndices[1] ?? null;
-  const bankNifty  = liveIndices[2] ?? null;
-  const sp500      = intlIndices[0] ?? null;
-  const nasdaq     = intlIndices[1] ?? null;
-  const ftse100    = intlIndices[2] ?? null;
-
-  const indiaSectors = getSectors();
-  const intlSectors  = getInternationalSectors();
+  const nifty50   = liveIndices[0] ?? null;
+  const sensex    = liveIndices[1] ?? null;
+  const bankNifty = liveIndices[2] ?? null;
+  const sp500     = intlIndices[0] ?? null;
+  const nasdaq    = intlIndices[1] ?? null;
+  const ftse100   = intlIndices[2] ?? null;
 
   const dateLabel = new Date().toLocaleDateString('en-IN', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',

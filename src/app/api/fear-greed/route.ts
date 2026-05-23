@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSectors } from '@/lib/data';
+import { fetchLiveSectors } from '@/lib/yahoo-finance';
 
 export type FGIComponent = {
   name: string;
@@ -38,11 +38,12 @@ async function safeJson(url: string): Promise<any> {
 
 export async function GET() {
   try {
-    const [vixJson, nifty3mJson, nifty1mJson, goldJson] = await Promise.all([
+    const [vixJson, nifty3mJson, nifty1mJson, goldJson, sectors] = await Promise.all([
       safeJson('https://query1.finance.yahoo.com/v8/finance/chart/%5EINDIAVIX?range=1d&interval=1d'),
       safeJson('https://query1.finance.yahoo.com/v8/finance/chart/%5ENSEI?range=3mo&interval=1d'),
       safeJson('https://query1.finance.yahoo.com/v8/finance/chart/%5ENSEI?range=1mo&interval=1d'),
       safeJson('https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF?range=1mo&interval=1d'),
+      fetchLiveSectors(),
     ]);
 
     // ── 1. Volatility: India VIX ─────────────────────────────────────────────
@@ -72,7 +73,6 @@ export async function GET() {
     }
 
     // ── 3. Sector Breadth ───────────────────────────────────────────────────
-    const sectors      = getSectors();
     const positiveCount = sectors.filter(s => s.change > 0).length;
     const breadthPct   = (positiveCount / sectors.length) * 100;
     const breadthScore = Math.round(breadthPct);

@@ -6,24 +6,27 @@ import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
 import LiveDashboard from '@/components/dashboard/live-dashboard';
 import CommodityStrip from '@/components/dashboard/commodity-strip';
-import { getSectors, getMainChartData, getAllTickers } from '@/lib/data';
-import { fetchIndiaVix, fetchLiveIndianIndices, fetchLiveTrendingTickers, fetchLiveNews } from '@/lib/yahoo-finance';
+import { getAllTickers } from '@/lib/data';
+import {
+  fetchIndiaVix, fetchLiveIndianIndices, fetchLiveTrendingTickers,
+  fetchLiveNews, fetchLiveSectors, fetchYahooChart,
+} from '@/lib/yahoo-finance';
 
 export default async function Home() {
-  const [liveIndices, { vixData, chartData: vixChartData }, trending, news] = await Promise.all([
-    fetchLiveIndianIndices(),
-    fetchIndiaVix(),
-    fetchLiveTrendingTickers(),
-    fetchLiveNews(),
-  ]);
-
-  const sectors = getSectors();
   const allTickers = getAllTickers();
   const nifty50Ticker = allTickers.find(t => t.symbol === 'NIFTY 50');
 
   if (!nifty50Ticker) return <div>Loading...</div>;
 
-  const mainChartData = getMainChartData(nifty50Ticker.symbol);
+  const [liveIndices, { vixData, chartData: vixChartData }, trending, news, sectors, mainChartData] =
+    await Promise.all([
+      fetchLiveIndianIndices(),
+      fetchIndiaVix(),
+      fetchLiveTrendingTickers(),
+      fetchLiveNews(),
+      fetchLiveSectors(),
+      fetchYahooChart(nifty50Ticker.symbol),
+    ]);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">

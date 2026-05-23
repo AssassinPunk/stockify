@@ -4,13 +4,14 @@ import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
 import FundamentalsCard from '@/components/dashboard/fundamentals-card';
 import CompareChart from '@/components/dashboard/compare-chart';
-import { getAllTickers, getMainChartData } from '@/lib/data';
+import { getAllTickers } from '@/lib/data';
 import {
   fetchLiveQuote,
   fetchLiveNews,
   fetchLiveInternationalNews,
   fetchLiveTrendingTickers,
   fetchLiveInternationalTrendingTickers,
+  fetchYahooChart,
 } from '@/lib/yahoo-finance';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatChange, formatNumber } from '@/lib/format';
@@ -38,10 +39,11 @@ export default async function StockPage({ params }: { params: Promise<{ symbol: 
 
   const isIndianTicker = ticker.currency === 'INR';
 
-  const [liveQuote, news, trendingData] = await Promise.all([
+  const [liveQuote, news, trendingData, mainChartData] = await Promise.all([
     fetchLiveQuote(ticker.symbol, { cache: 'no-store' }),
     isIndianTicker ? fetchLiveNews() : fetchLiveInternationalNews(),
     isIndianTicker ? fetchLiveTrendingTickers() : fetchLiveInternationalTrendingTickers(),
+    fetchYahooChart(ticker.symbol),
   ]);
 
   const displayTicker = {
@@ -50,8 +52,6 @@ export default async function StockPage({ params }: { params: Promise<{ symbol: 
     change:        liveQuote?.change        ?? 0,
     percentChange: liveQuote?.percentChange ?? 0,
   };
-
-  const mainChartData = getMainChartData(ticker.symbol);
   const isPositive = displayTicker.change >= 0;
 
   const firstWord = displayTicker.name.toLowerCase().split(' ')[0];

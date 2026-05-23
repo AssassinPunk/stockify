@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { getMainChartData, getAllTickers } from '@/lib/data';
+import { getAllTickers } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import FullChartDialog from './full-chart-dialog';
@@ -72,6 +72,7 @@ export default function MainChart({
   const [showRSI,     setShowRSI]     = useState(false);
   const [compareWith, setCompareWith] = useState<string[]>([]);
   const [compareToAdd, setCompareToAdd] = useState<string | undefined>(undefined);
+  const [compChartData, setCompChartData] = useState<Record<string, MainChartData>>({});
   const [isFullChartOpen, setIsFullChartOpen] = useState(false);
 
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -80,6 +81,21 @@ export default function MainChart({
   const rsiChartRef       = useRef<IChartApi | null>(null);
   const mainSeriesRef     = useRef<any>(null);
   const liveBarRef        = useRef<any>(null);
+
+  // ── fetch live data for comparison overlays ──────────────────────────────
+  useEffect(() => {
+    const missing = compareWith.filter(s => !compChartData[s]);
+    if (missing.length === 0) return;
+    missing.forEach(async (sym) => {
+      try {
+        const res = await fetch(`/api/chart?symbol=${encodeURIComponent(sym)}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.error) setCompChartData(prev => ({ ...prev, [sym]: data }));
+      } catch {}
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [compareWith]);
 
   // ── chart initialisation ────────────────────────────────────────────────────
   useEffect(() => {
@@ -168,7 +184,7 @@ export default function MainChart({
 
       // ── comparison overlays ──
       compareWith.forEach((sym, idx) => {
-        const compData = getMainChartData(sym)[timeframe];
+        const compData = compChartData[sym]?.[timeframe];
         if (!compData?.length) return;
         const sorted = [...compData].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         const lineData = sorted.map(d => ({ time: toTime(d.date), value: d.value }));
@@ -222,7 +238,7 @@ export default function MainChart({
       cleanUp();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeframe, chartType, showMA, showRSI, compareWith, currentData]);
+  }, [timeframe, chartType, showMA, showRSI, compareWith, currentData, compChartData]);
 
   // ── live polling ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -263,8 +279,11 @@ export default function MainChart({
     [allTickers, currentTicker.symbol, compareWith],
   );
 
-  const handleAddComparison   = (s: string) => { setCompareWith(p => [...p, s]); setCompareToAdd(undefined); };
-  const handleRemoveComparison = (s: string) => setCompareWith(p => p.filter(x => x !== s));
+  const handleAddComparison    = (s: string) => { setCompareWith(p => [...p, s]); setCompareToAdd(undefined); };
+  const handleRemoveComparison = (s: string) => {
+    setCompareWith(p => p.filter(x => x !== s));
+    setCompChartData(prev => { const n = { ...prev }; delete n[s]; return n; });
+  };
 
   return (
     <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 overflow-hidden flex flex-col">
