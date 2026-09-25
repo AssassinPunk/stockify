@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { useAuth } from '@/firebase';
+import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,39 +12,64 @@ import { useToast } from '@/hooks/use-toast';
 import { AreaChart, Mail, Lock, User, Loader2 } from 'lucide-react';
 
 export default function SignUpPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName]                       = useState('');
+  const [email, setEmail]                     = useState('');
+  const [password, setPassword]               = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const auth = useAuth();
+  const [isLoading, setIsLoading]             = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (password !== confirmPassword) {
-      toast({
-        variant: 'destructive',
-        title: 'Passwords mismatch',
-        description: 'Passwords do not match.',
-      });
+      toast({ variant: 'destructive', title: 'Passwords mismatch', description: 'Passwords do not match.' });
+      return;
+    }
+    if (password.length < 8) {
+      toast({ variant: 'destructive', title: 'Weak password', description: 'Password must be at least 8 characters.' });
       return;
     }
 
     setIsLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      toast({
-        title: 'Account created',
-        description: 'Successfully registered for Stockify.',
+      // 1. Register via API
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
       });
-      router.push('/');
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Registration Failed',
-        description: error.message,
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast({
+          variant: 'destructive',
+          title: 'Registration Failed',
+          description: data.error ?? 'Something went wrong.',
+        });
+        return;
+      }
+
+      // 2. Auto sign in after registration
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
       });
+
+      if (result?.error) {
+        // Account created but sign-in failed — redirect to login
+        toast({ title: 'Account created', description: 'Please sign in with your new credentials.' });
+        router.push('/login');
+      } else {
+        toast({ title: 'Welcome to Stockify!', description: 'Your account has been created.' });
+        router.push('/');
+        router.refresh();
+      }
+    } catch {
+      toast({ variant: 'destructive', title: 'Registration Failed', description: 'Something went wrong. Please try again.' });
     } finally {
       setIsLoading(false);
     }
@@ -63,11 +87,26 @@ export default function SignUpPage() {
           </div>
           <CardTitle className="text-2xl">Create an account</CardTitle>
           <CardDescription>
-            Enter your email below to create your account
+            Enter your details below to create your account
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSignUp}>
           <CardContent className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Name</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Your name"
+                  className="pl-10"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -90,6 +129,7 @@ export default function SignUpPage() {
                 <Input
                   id="password"
                   type="password"
+                  placeholder="Min. 8 characters"
                   className="pl-10"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

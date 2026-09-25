@@ -2,7 +2,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
-import { FirebaseClientProvider } from "@/firebase/client-provider"
+import NextAuthSessionProvider from "@/components/providers/session-provider"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 
@@ -24,7 +24,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body bg-background text-foreground antialiased overflow-x-hidden" suppressHydrationWarning>
-        <FirebaseClientProvider>
+        <NextAuthSessionProvider>
           <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
@@ -32,7 +32,7 @@ export default function RootLayout({
             </SidebarInset>
           </SidebarProvider>
           <Toaster />
-        </FirebaseClientProvider>
+        </NextAuthSessionProvider>
       </body>
     </html>
   );

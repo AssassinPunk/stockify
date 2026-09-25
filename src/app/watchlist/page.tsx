@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useContext, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
 import Header from '@/components/dashboard/header';
 import Disclaimer from '@/components/dashboard/disclaimer';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,42 +23,48 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { FirebaseContext } from '@/firebase/provider';
-import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 
-const STORAGE_KEY = 'stockify_watchlist_v2';
+const STORAGE_KEY        = 'stockify_watchlist_v2';
 const ALERTS_STORAGE_KEY = 'stockify_alerts_v1';
 
 type WatchlistEntry = {
-  symbol: string;
-  name: string;
-  currency: string;
-  addedAt: number;
+  symbol:     string;
+  name:       string;
+  currency:   string;
+  addedAt:    number;
   addedPrice: number;
 };
 
 type LiveQuote = {
-  price: number;
-  change: number;
+  price:         number;
+  change:        number;
   percentChange: number;
-  sparkline: number[];
+  sparkline:     number[];
 };
 
 type AlertEntry = {
-  symbol: string;
+  symbol:      string;
   targetPrice: number;
-  condition: 'above' | 'below';
-  createdAt: number;
+  condition:   'above' | 'below';
+  createdAt:   number;
+};
+
+type DbWishlistItem = {
+  id:           string;
+  stock_symbol: string;
+  stock_name:   string;
+  added_at:     string;
+  notes:        string | null;
 };
 
 // ── Inline SVG sparkline ────────────────────────────────────────────────────
 function Sparkline({ data, positive }: { data: number[]; positive: boolean }) {
   if (data.length < 2) return <div className="w-20 h-8" />;
   const W = 80, H = 32, P = 2;
-  const min = Math.min(...data);
-  const max = Math.max(...data);
+  const min   = Math.min(...data);
+  const max   = Math.max(...data);
   const range = max - min || 1;
-  const pts = data
+  const pts   = data
     .map((v, i) => `${P + (i / (data.length - 1)) * (W - P * 2)},${H - P - ((v - min) / range) * (H - P * 2)}`)
     .join(' ');
   return (
@@ -76,8 +83,8 @@ function Sparkline({ data, positive }: { data: number[]; positive: boolean }) {
 
 function SinceAddedBadge({ pct }: { pct: number }) {
   const positive = pct >= 0;
-  const neutral = Math.abs(pct) < 0.01;
-  const Icon = neutral ? Minus : positive ? TrendingUp : TrendingDown;
+  const neutral  = Math.abs(pct) < 0.01;
+  const Icon     = neutral ? Minus : positive ? TrendingUp : TrendingDown;
   return (
     <span
       className={cn(
@@ -93,24 +100,18 @@ function SinceAddedBadge({ pct }: { pct: number }) {
 
 // ── Alert dialog ─────────────────────────────────────────────────────────────
 function AlertDialog({
-  symbol,
-  currency,
-  currentPrice,
-  existing,
-  onSave,
-  onRemove,
-  onClose,
+  symbol, currency, currentPrice, existing, onSave, onRemove, onClose,
 }: {
-  symbol: string;
-  currency: string;
+  symbol:       string;
+  currency:     string;
   currentPrice: number;
-  existing: AlertEntry | undefined;
-  onSave: (targetPrice: number, condition: 'above' | 'below') => void;
-  onRemove: () => void;
-  onClose: () => void;
+  existing:     AlertEntry | undefined;
+  onSave:       (targetPrice: number, condition: 'above' | 'below') => void;
+  onRemove:     () => void;
+  onClose:      () => void;
 }) {
   const [condition, setCondition] = useState<'above' | 'below'>(existing?.condition ?? 'above');
-  const [price, setPrice] = useState(String(existing?.targetPrice ?? ''));
+  const [price, setPrice]         = useState(String(existing?.targetPrice ?? ''));
   const currSym = currency === 'INR' ? '₹' : '$';
 
   const handleSave = () => {
@@ -181,9 +182,7 @@ function AlertDialog({
             Remove Alert
           </Button>
         )}
-        <Button variant="outline" size="sm" onClick={onClose}>
-          Cancel
-        </Button>
+        <Button variant="outline" size="sm" onClick={onClose}>Cancel</Button>
         <Button size="sm" onClick={handleSave} disabled={!price || parseFloat(price) <= 0}>
           {existing ? 'Update Alert' : 'Set Alert'}
         </Button>
@@ -194,107 +193,100 @@ function AlertDialog({
 
 // ── Main page ────────────────────────────────────────────────────────────────
 export default function WatchlistPage() {
-  const [watchlist, setWatchlist] = useState<WatchlistEntry[]>([]);
-  const [alerts, setAlerts] = useState<AlertEntry[]>([]);
-  const [quotes, setQuotes] = useState<Record<string, LiveQuote>>({});
-  const [loadingSymbols, setLoadingSymbols] = useState<Set<string>>(new Set());
-  const [addSymbol, setAddSymbol] = useState<string | undefined>();
-  const [refreshing, setRefreshing] = useState(false);
-  const [alertDialogSymbol, setAlertDialogSymbol] = useState<string | null>(null);
-  const [synced, setSynced] = useState(false);
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === 'authenticated' && !!session?.user?.id;
 
-  const fetchedRef = useRef<Set<string>>(new Set());
-  const alertsRef = useRef<AlertEntry[]>([]);
-  const { toast } = useToast();
-  const allTickers = getAllTickers().filter(t => !t.isIndex);
+  const [watchlist,          setWatchlist]          = useState<WatchlistEntry[]>([]);
+  const [alerts,             setAlerts]             = useState<AlertEntry[]>([]);
+  const [quotes,             setQuotes]             = useState<Record<string, LiveQuote>>({});
+  const [loadingSymbols,     setLoadingSymbols]     = useState<Set<string>>(new Set());
+  const [addSymbol,          setAddSymbol]          = useState<string | undefined>();
+  const [refreshing,         setRefreshing]         = useState(false);
+  const [alertDialogSymbol,  setAlertDialogSymbol]  = useState<string | null>(null);
+  const [synced,             setSynced]             = useState(false);
 
-  // Firebase (safe — won't throw)
-  const fbCtx = useContext(FirebaseContext);
-  const firestore = fbCtx?.firestore ?? null;
-  const user = fbCtx?.user ?? null;
-
-  const userDocRef = useMemo(
-    () => (firestore && user ? doc(firestore, 'users', user.uid) : null),
-    [firestore, user],
-  );
+  const fetchedRef  = useRef<Set<string>>(new Set());
+  const alertsRef   = useRef<AlertEntry[]>([]);
+  const { toast }   = useToast();
+  const allTickers  = getAllTickers().filter(t => !t.isIndex);
 
   // Keep alertsRef in sync for use inside callbacks
   useEffect(() => { alertsRef.current = alerts; }, [alerts]);
 
   // ── Persist helpers ───────────────────────────────────────────────────────
-  const persistWatchlist = useCallback((list: WatchlistEntry[]) => {
+  const saveLocal = useCallback((list: WatchlistEntry[]) => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch {}
-    if (userDocRef) {
-      setDoc(userDocRef, { watchlist: list }, { merge: true }).catch(console.error);
-    }
-  }, [userDocRef]);
+  }, []);
 
-  const persistAlerts = useCallback((list: AlertEntry[]) => {
+  const saveAlertsLocal = useCallback((list: AlertEntry[]) => {
     try { localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(list)); } catch {}
-    if (userDocRef) {
-      setDoc(userDocRef, { alerts: list }, { merge: true }).catch(console.error);
-    }
-  }, [userDocRef]);
+  }, []);
 
-  // ── Firebase / localStorage sync on mount / auth change ──────────────────
+  // ── Load on mount / auth change ──────────────────────────────────────────
   useEffect(() => {
-    if (!userDocRef) {
-      // Not logged in — use localStorage
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) setWatchlist(JSON.parse(raw));
-        const rawAlerts = localStorage.getItem(ALERTS_STORAGE_KEY);
-        if (rawAlerts) setAlerts(JSON.parse(rawAlerts));
-      } catch {}
+    // Always load localStorage first (instant, available for guests)
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) setWatchlist(JSON.parse(raw));
+      const rawAlerts = localStorage.getItem(ALERTS_STORAGE_KEY);
+      if (rawAlerts) setAlerts(JSON.parse(rawAlerts));
+    } catch {}
+
+    if (status === 'loading') return;
+
+    if (!isLoggedIn) {
       setSynced(false);
       return;
     }
 
-    const unsub = onSnapshot(
-      userDocRef,
-      snap => {
-        if (snap.exists()) {
-          const d = snap.data();
-          setWatchlist(d.watchlist ?? []);
-          setAlerts(d.alerts ?? []);
-        } else {
-          // First login — migrate localStorage to Firestore
-          const localWatchlist: WatchlistEntry[] = [];
-          const localAlerts: AlertEntry[] = [];
-          try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) localWatchlist.push(...JSON.parse(raw));
-            const rawAlerts = localStorage.getItem(ALERTS_STORAGE_KEY);
-            if (rawAlerts) localAlerts.push(...JSON.parse(rawAlerts));
-          } catch {}
-          setDoc(userDocRef, { watchlist: localWatchlist, alerts: localAlerts }).catch(console.error);
-          setWatchlist(localWatchlist);
-          setAlerts(localAlerts);
-        }
-        setSynced(true);
-      },
-      () => {
-        // Firestore permission error — fall back silently
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (raw) setWatchlist(JSON.parse(raw));
-        } catch {}
-        setSynced(false);
-      },
-    );
+    // Merge DB watchlist into local state
+    fetch('/api/wishlist')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then((dbItems: DbWishlistItem[]) => {
+        setWatchlist(prev => {
+          const localSymbols = new Set(prev.map(e => e.symbol));
+          const extra: WatchlistEntry[] = [];
 
-    return unsub;
-  }, [userDocRef]);
+          for (const item of dbItems) {
+            if (!localSymbols.has(item.stock_symbol)) {
+              // Reconstruct metadata from notes JSON
+              let addedPrice = 0;
+              let addedAt    = new Date(item.added_at).getTime();
+              try {
+                const meta = item.notes ? JSON.parse(item.notes) : {};
+                if (typeof meta.addedPrice === 'number') addedPrice = meta.addedPrice;
+                if (typeof meta.addedAt    === 'number') addedAt    = meta.addedAt;
+              } catch {}
+
+              const ticker = allTickers.find(t => t.symbol === item.stock_symbol);
+              extra.push({
+                symbol:     item.stock_symbol,
+                name:       item.stock_name,
+                currency:   ticker?.currency ?? 'INR',
+                addedAt,
+                addedPrice,
+              });
+            }
+          }
+
+          if (extra.length === 0) return prev;
+          const merged = [...prev, ...extra];
+          saveLocal(merged);
+          return merged;
+        });
+        setSynced(true);
+      })
+      .catch(() => setSynced(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn, status]);
 
   // ── Quote fetching ────────────────────────────────────────────────────────
   const fetchQuote = useCallback(async (symbol: string) => {
     setLoadingSymbols(prev => new Set(prev).add(symbol));
     try {
-      const res = await fetch(`/api/quote?symbol=${encodeURIComponent(symbol)}`);
+      const res  = await fetch(`/api/quote?symbol=${encodeURIComponent(symbol)}`);
       const data = await res.json();
-      if (!data.error) {
-        setQuotes(prev => ({ ...prev, [symbol]: data }));
-      }
+      if (!data.error) setQuotes(prev => ({ ...prev, [symbol]: data }));
     } catch {}
     setLoadingSymbols(prev => { const n = new Set(prev); n.delete(symbol); return n; });
   }, []);
@@ -323,18 +315,18 @@ export default function WatchlistPage() {
     if (triggered.length === 0) return;
 
     triggered.forEach(a => {
-      const q = quotes[a.symbol];
-      const sym = a.condition === 'above' ? '₹' : '₹';
+      const q    = quotes[a.symbol];
+      const sym  = '₹';
       toast({
-        title: `Alert triggered: ${a.symbol}`,
+        title:       `Alert triggered: ${a.symbol}`,
         description: `Price ${a.condition === 'above' ? 'crossed above' : 'dropped below'} ${sym}${a.targetPrice.toFixed(2)} — now at ${sym}${q?.price.toFixed(2)}`,
       });
     });
 
     const remaining = currentAlerts.filter(a => !triggered.includes(a));
     setAlerts(remaining);
-    persistAlerts(remaining);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    saveAlertsLocal(remaining);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quotes]);
 
   // ── Watchlist actions ─────────────────────────────────────────────────────
@@ -346,31 +338,59 @@ export default function WatchlistPage() {
     }
     const ticker = allTickers.find(t => t.symbol === symbol);
     if (!ticker) return;
+
     const entry: WatchlistEntry = {
-      symbol: ticker.symbol,
-      name: ticker.name,
-      currency: ticker.currency || 'INR',
-      addedAt: Date.now(),
+      symbol:     ticker.symbol,
+      name:       ticker.name,
+      currency:   ticker.currency ?? 'INR',
+      addedAt:    Date.now(),
       addedPrice: ticker.price,
     };
+
     const updated = [...watchlist, entry];
     setWatchlist(updated);
-    persistWatchlist(updated);
+    saveLocal(updated);
     setAddSymbol(undefined);
+
+    // Persist to DB when logged in
+    if (isLoggedIn) {
+      fetch('/api/wishlist', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          stock_symbol: ticker.symbol,
+          stock_name:   ticker.name,
+          notes:        JSON.stringify({ addedPrice: ticker.price, addedAt: entry.addedAt }),
+        }),
+      })
+        .then(r => r.ok && setSynced(true))
+        .catch(() => {});
+    }
+
     toast({ title: `Added ${ticker.symbol}`, description: `Now tracking ${ticker.name}.` });
   };
 
   const handleRemove = (symbol: string) => {
     const updated = watchlist.filter(e => e.symbol !== symbol);
     setWatchlist(updated);
-    persistWatchlist(updated);
+    saveLocal(updated);
     fetchedRef.current.delete(symbol);
     setQuotes(prev => { const n = { ...prev }; delete n[symbol]; return n; });
-    // remove any alert for this symbol too
+
+    // Remove any alert for this symbol too
     const updatedAlerts = alerts.filter(a => a.symbol !== symbol);
     if (updatedAlerts.length !== alerts.length) {
       setAlerts(updatedAlerts);
-      persistAlerts(updatedAlerts);
+      saveAlertsLocal(updatedAlerts);
+    }
+
+    // Remove from DB when logged in
+    if (isLoggedIn) {
+      fetch('/api/wishlist', {
+        method:  'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ stock_symbol: symbol }),
+      }).catch(() => {});
     }
   };
 
@@ -386,40 +406,37 @@ export default function WatchlistPage() {
   // ── Alert actions ─────────────────────────────────────────────────────────
   const handleSaveAlert = (symbol: string, targetPrice: number, condition: 'above' | 'below') => {
     const filtered = alerts.filter(a => a.symbol !== symbol);
-    const updated = [...filtered, { symbol, targetPrice, condition, createdAt: Date.now() }];
+    const updated  = [...filtered, { symbol, targetPrice, condition, createdAt: Date.now() }];
     setAlerts(updated);
-    persistAlerts(updated);
+    saveAlertsLocal(updated);
     setAlertDialogSymbol(null);
-    const sym = '₹';
     toast({
-      title: `Alert set for ${symbol}`,
-      description: `You'll be notified when it goes ${condition} ${sym}${targetPrice.toFixed(2)}.`,
+      title:       `Alert set for ${symbol}`,
+      description: `You'll be notified when it goes ${condition} ₹${targetPrice.toFixed(2)}.`,
     });
   };
 
   const handleRemoveAlert = (symbol: string) => {
     const updated = alerts.filter(a => a.symbol !== symbol);
     setAlerts(updated);
-    persistAlerts(updated);
+    saveAlertsLocal(updated);
     setAlertDialogSymbol(null);
     toast({ title: `Alert removed for ${symbol}` });
   };
 
   // ── Summary stats ─────────────────────────────────────────────────────────
-  const loaded = watchlist.filter(e => quotes[e.symbol]);
-  const gainersToday = loaded.filter(e => (quotes[e.symbol]?.percentChange ?? 0) >= 0).length;
-  const losersToday = loaded.length - gainersToday;
-  const bestSinceAdded = loaded.reduce<{ symbol: string; pct: number } | null>((best, e) => {
+  const loaded          = watchlist.filter(e => quotes[e.symbol]);
+  const gainersToday    = loaded.filter(e => (quotes[e.symbol]?.percentChange ?? 0) >= 0).length;
+  const losersToday     = loaded.length - gainersToday;
+  const bestSinceAdded  = loaded.reduce<{ symbol: string; pct: number } | null>((best, e) => {
     const live = quotes[e.symbol];
     if (!live) return best;
-    const pct = ((live.price - e.addedPrice) / e.addedPrice) * 100;
+    const pct  = ((live.price - e.addedPrice) / e.addedPrice) * 100;
     return !best || pct > best.pct ? { symbol: e.symbol, pct } : best;
   }, null);
 
-  const available = allTickers.filter(t => !watchlist.some(e => e.symbol === t.symbol));
-  const activeAlertSymbol = alertDialogSymbol
-    ? watchlist.find(e => e.symbol === alertDialogSymbol)
-    : null;
+  const available          = allTickers.filter(t => !watchlist.some(e => e.symbol === t.symbol));
+  const activeAlertSymbol  = alertDialogSymbol ? watchlist.find(e => e.symbol === alertDialogSymbol) : null;
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
@@ -435,21 +452,20 @@ export default function WatchlistPage() {
           </div>
           <div className="flex items-center gap-2">
             {/* Sync status badge */}
-            {user ? (
+            {isLoggedIn ? (
               <Badge
                 variant="secondary"
-                className={cn(
-                  'gap-1.5 text-xs',
-                  synced ? 'text-up' : 'text-muted-foreground',
-                )}
+                className={cn('gap-1.5 text-xs', synced ? 'text-up' : 'text-muted-foreground')}
               >
                 {synced ? <Cloud className="h-3 w-3" /> : <CloudOff className="h-3 w-3" />}
-                {synced ? 'Synced' : 'Offline'}
+                {synced ? 'Synced' : 'Syncing…'}
               </Badge>
             ) : (
               <Badge variant="secondary" className="gap-1.5 text-xs text-muted-foreground">
                 <CloudOff className="h-3 w-3" />
-                Sign in to sync
+                <Link href="/login" className="hover:text-foreground transition-colors">
+                  Sign in to sync
+                </Link>
               </Badge>
             )}
             {watchlist.length > 0 && (
@@ -465,9 +481,9 @@ export default function WatchlistPage() {
         {watchlist.length > 0 && (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {[
-              { label: 'Watching',       value: <span className="text-2xl font-bold">{watchlist.length}</span> },
-              { label: 'Up today',       value: <span className="text-2xl font-bold text-up">{gainersToday}</span> },
-              { label: 'Down today',     value: <span className="text-2xl font-bold text-down">{losersToday}</span> },
+              { label: 'Watching',   value: <span className="text-2xl font-bold">{watchlist.length}</span> },
+              { label: 'Up today',   value: <span className="text-2xl font-bold text-up">{gainersToday}</span> },
+              { label: 'Down today', value: <span className="text-2xl font-bold text-down">{losersToday}</span> },
               {
                 label: 'Best since added',
                 value: bestSinceAdded ? (
@@ -522,7 +538,7 @@ export default function WatchlistPage() {
               </div>
               <p className="mb-2 text-lg font-semibold">Your watchlist is empty</p>
               <p className="max-w-xs text-sm text-muted-foreground">
-                Add stocks above. We'll track their price and show how they move from the day you started watching.
+                Add stocks above. We&apos;ll track their price and show how they move from the day you started watching.
               </p>
             </CardContent>
           </Card>
@@ -545,12 +561,12 @@ export default function WatchlistPage() {
                 </thead>
                 <tbody>
                   {watchlist.map((entry, idx) => {
-                    const live = quotes[entry.symbol];
-                    const isLoading = loadingSymbols.has(entry.symbol);
+                    const live         = quotes[entry.symbol];
+                    const isLoading    = loadingSymbols.has(entry.symbol);
                     const currentPrice = live?.price ?? entry.addedPrice;
-                    const sinceAdded = ((currentPrice - entry.addedPrice) / entry.addedPrice) * 100;
-                    const dayPositive = (live?.percentChange ?? 0) >= 0;
-                    const hasAlert = alerts.some(a => a.symbol === entry.symbol);
+                    const sinceAdded   = ((currentPrice - entry.addedPrice) / entry.addedPrice) * 100;
+                    const dayPositive  = (live?.percentChange ?? 0) >= 0;
+                    const hasAlert     = alerts.some(a => a.symbol === entry.symbol);
 
                     return (
                       <tr
@@ -630,10 +646,7 @@ export default function WatchlistPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className={cn(
-                              'h-7 w-7',
-                              hasAlert ? 'text-primary' : 'text-muted-foreground hover:text-primary',
-                            )}
+                            className={cn('h-7 w-7', hasAlert ? 'text-primary' : 'text-muted-foreground hover:text-primary')}
                             onClick={() => setAlertDialogSymbol(entry.symbol)}
                             title={hasAlert ? 'Edit alert' : 'Set alert'}
                           >
