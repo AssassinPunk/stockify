@@ -103,7 +103,7 @@ Market data is sourced from Yahoo Finance's public chart endpoints through a ded
 | bcryptjs | Password hashing at cost factor 12 |
 | Zod 3.24 | Runtime validation of API request bodies and AI output schemas |
 | Yahoo Finance (public endpoints) | Primary market data source — quotes, OHLCV, news, fundamentals |
-| Twelve Data | Supplementary quotes and live earnings calendar data |
+| Twelve Data | Live earnings calendar data |
 
 ### AI
 
@@ -143,7 +143,7 @@ stockify/
 │   │   ├── education/             # Placeholder page
 │   │   ├── stock/[symbol]/        # Per-stock detail page
 │   │   ├── commodity/[id]/        # Per-commodity detail page
-│   │   ├── login/ signup/ forgot-password/
+│   │   ├── login/ signup/
 │   │   └── api/                   # Route handlers (see API Endpoints)
 │   ├── components/
 │   │   ├── dashboard/             # Charts, tickers, heatmap, news, VIX widgets
@@ -152,27 +152,21 @@ stockify/
 │   │   ├── providers/             # NextAuth SessionProvider client wrapper
 │   │   └── ui/                    # shadcn/ui components
 │   ├── hooks/
-│   │   ├── use-realtime-price.ts  # Subscribes to the realtime service
-│   │   ├── useLiveMarket.ts       # Polls Twelve Data quotes
 │   │   ├── use-debounce.ts
 │   │   └── use-toast.ts
 │   ├── lib/
 │   │   ├── yahoo-finance.ts       # Yahoo adapter: quotes, charts, news, sectors
 │   │   ├── data.ts                # TICKER_REGISTRY — single source of truth
-│   │   ├── realtime-service.ts    # Pub/sub polling singleton
 │   │   ├── indicators.ts          # MA, RSI, ADL
 │   │   ├── vix.ts                 # Implied moves, risk zones, percentile
 │   │   ├── auth.ts                # NextAuth configuration
 │   │   ├── db.ts                  # Prisma client singleton
-│   │   ├── marketData.ts          # Twelve Data quote fetching
 │   │   ├── commodities-data.ts    # Commodity and forex registry
 │   │   ├── calendar-data.ts       # Static economic events
 │   │   ├── format.ts              # Intl number formatting (en-IN / en-US)
 │   │   └── utils.ts               # cn() helper
-│   ├── types/
-│   │   ├── market.ts
-│   │   └── next-auth.d.ts         # Module augmentation adding user.id
-│   └── firebase/                  # Legacy Firebase layer (see Known Limitations)
+│   └── types/
+│       └── next-auth.d.ts         # Module augmentation adding user.id
 ├── tailwind.config.ts
 ├── next.config.ts
 ├── components.json                # shadcn/ui configuration
@@ -189,23 +183,17 @@ The application separates market data from user data into two distinct paths.
 
 **The Yahoo adapter** (`src/lib/yahoo-finance.ts`) is the core of the data layer. Yahoo returns columnar data — a `timestamp[]` array alongside separate `open[]`, `high[]`, `low[]`, `close[]` and `volume[]` arrays, with `null` holes for non-trading intervals. The adapter normalises this into the app's own `ChartDataPoint` type, converts epoch seconds to ISO strings, and skips null bars. It also maps internal symbols to Yahoo's conventions: NSE equities get a `.NS` suffix, indices use a `^` prefix, futures use `=F` and forex uses `=X`.
 
-**Caching** operates in three tiers:
+**Caching** uses the Next.js server data cache, with `next: { revalidate: n }` set per fetch: VIX history 6h, fundamentals 1h, news 10m, sectors 5m.
 
-| Tier | Mechanism | Example |
-| --- | --- | --- |
-| Server data cache | `next: { revalidate: n }` per fetch | VIX history 6h, fundamentals 1h, news 10m, sectors 5m, quotes 60s |
-| HTTP cache | `Cache-Control` response headers | `/api/quotes/bulk` uses `max-age=60, stale-while-revalidate=30` |
-| Client memory | `Map` inside the realtime singleton | New subscribers receive the last known price immediately |
-
-**Live updates** are handled by `RealtimeDataService`, a module-level pub/sub singleton that polls `/api/quotes/bulk` every 30 seconds and fans results out to a `Set` of listeners. This means eight components displaying eight symbols cause one network request per tick rather than eight. The main chart runs its own adaptive polling interval (5s on 1D, 10s on 5D, 30s otherwise).
+**Live updates** are handled by client components polling route handlers: the dashboard polls `/api/indices` every 4 seconds and `/api/vix` every 10 seconds, and the commodity strip polls `/api/commodities` every 30 seconds. The main chart runs its own adaptive polling interval (5s on 1D, 10s on 5D, 30s otherwise).
 
 ## Prerequisites
 
-- **Node.js 20 or later** (the workspace configuration in `.idx/dev.nix` pins Node 20)
+- **Node.js 20 or later**
 - **npm** (the repository uses `package-lock.json`)
 - **A PostgreSQL database** — local or hosted (Neon, Supabase, Railway, etc.)
 - **A Google Gemini API key** — required for the AI brief features
-- **A Twelve Data API key** — optional; used for the earnings calendar and the Twelve Data quote route
+- **A Twelve Data API key** — optional; used for the earnings calendar
 - **Google OAuth credentials** — optional; required only for Google sign-in
 
 ## Environment Variables
@@ -218,7 +206,7 @@ Create a `.env` file in the project root. This file is gitignored and is never c
 | `NEXTAUTH_SECRET` | Yes | Secret used to sign NextAuth JWTs. Generate with `openssl rand -base64 32` |
 | `NEXTAUTH_URL` | Yes | Base URL of the app — `http://localhost:9002` in development |
 | `GEMINI_API_KEY` | Yes (for AI features) | Google Gemini API key used by the Genkit `googleAI` plugin |
-| `TWELVE_DATA_API_KEY` | Optional | Enables the live earnings calendar and `/api/market/quotes`. Features degrade silently when absent |
+| `TWELVE_DATA_API_KEY` | Optional | Enables the live earnings calendar. The feature degrades silently when absent |
 | `GOOGLE_CLIENT_ID` | Optional | Google OAuth client ID; required for Google sign-in |
 | `GOOGLE_CLIENT_SECRET` | Optional | Google OAuth client secret |
 
@@ -316,13 +304,11 @@ All route handlers live under `src/app/api/`.
 | Method | Endpoint | Query Parameters | Description |
 | --- | --- | --- | --- |
 | `GET` | `/api/quote` | `symbol` | Single quote with price, change, percent change and a sparkline series |
-| `GET` | `/api/quotes/bulk` | `symbols` (comma-separated, max 50) | Batch quotes keyed by symbol; failed symbols are omitted |
 | `GET` | `/api/chart` | `symbol` | OHLCV data across all five timeframes |
 | `GET` | `/api/indices` | — | NIFTY 50, SENSEX and BANK NIFTY |
 | `GET` | `/api/vix` | — | Live India VIX value plus intraday series |
 | `GET` | `/api/fundamentals` | `symbol` | Market cap, P/E, forward P/E, EPS, dividend yield, 52-week range, beta |
 | `GET` | `/api/commodities` | — | Live prices for all 12 commodity and forex instruments |
-| `GET` | `/api/market/quotes` | — | Index quotes via Twelve Data |
 
 ### Analytics
 
@@ -395,8 +381,6 @@ Flow files are marked `'use server'`, so they are invoked directly from client c
 
 **A single ticker registry.** `TICKER_REGISTRY` in `src/lib/data.ts` stores only metadata — symbol, display name, currency, optional Yahoo override. Prices are never stored, so there is no stale hardcoded data, and adding a ticker makes it available across search, charts, comparison, watchlist and backtester at once.
 
-**Pub/sub over per-component polling.** `RealtimeDataService` uses a `Set` of listeners for O(1) subscribe and unsubscribe, returns its own unsubscribe closure so React effect cleanup is a one-liner, replays its cache to new subscribers, and guards `setInterval` behind a `typeof window` check to avoid leaking timers during server rendering.
-
 **Offline-first watchlist sync.** Local state loads from `localStorage` first for instant rendering, then merges server rows as a union once the session resolves. Writes are optimistic — local state updates before the API call — and the three-state `useSession` status is handled explicitly so the loading state does not flash the guest view.
 
 **Careful React lifecycle management around an imperative chart library.** The chart effect guards against zero-size containers, retries initialisation through a `ResizeObserver`, and uses `destroyed` and `initDone` flags so observer callbacks cannot construct a chart after unmount or double-initialise.
@@ -408,13 +392,11 @@ Flow files are marked `'use server'`, so they are invoked directly from client c
 Documented honestly so contributors know what they are working with.
 
 - **No automated tests.** There is no test suite in the repository.
-- **Legacy Firebase layer.** `src/firebase/` remains from the original Firebase Studio scaffold. The app migrated to NextAuth and Prisma, but `/forgot-password` still calls Firebase's `sendPasswordResetEmail`, and `FirebaseClientProvider` is not mounted in the root layout — so password reset is non-functional in its current state.
+- **No password reset.** The Firebase-based `/forgot-password` page was removed during the NextAuth migration and has not been replaced, so users cannot currently reset a forgotten password.
 - **Build checks disabled.** `next.config.ts` sets `typescript.ignoreBuildErrors` and `eslint.ignoreDuringBuilds` to `true`, so type and lint errors do not fail the build.
 - **Unofficial data source.** Yahoo Finance's chart endpoints are undocumented and carry no SLA. The app sends a browser-like `User-Agent` and relies on fallbacks when calls fail.
 - **No rate limiting** on route handlers or Server Actions.
-- **Polling interval mismatch.** `useLiveMarket` polls every 3 seconds against Twelve Data, whose free tier allows 8 requests per minute.
 - **Duplicated symbol mapping.** The Yahoo symbol translation is reimplemented in the adapter and in four route handlers, and the `/api/fundamentals` copy has drifted from the shared registry.
-- **Unused dependencies.** `socket.io-client` and `patch-package` are declared but not used.
 - **Watchlist sync is additive only.** Deletions do not propagate between devices, and optimistic writes have no rollback if the API call fails.
 
 ## Future Improvements
@@ -424,8 +406,8 @@ Documented honestly so contributors know what they are working with.
 - Consolidate symbol mapping into a single exported helper in `src/lib/data.ts`.
 - Use `series.update()` for live chart bars instead of rebuilding the chart on every poll.
 - Add rate limiting, error tracking and structured logging.
-- Reference-count subscribers in the realtime service and pause polling on hidden tabs.
-- Remove the legacy Firebase layer and reimplement password reset through NextAuth.
+- Pause polling on hidden tabs.
+- Implement password reset through NextAuth.
 - Move watchlist metadata out of the `notes` JSON string into dedicated typed columns.
 - Add `error.tsx` and `loading.tsx` boundaries per route segment.
 - Build out the Education Center.

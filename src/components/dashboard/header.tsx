@@ -25,8 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
 import { Separator } from '../ui/separator';
-import { useUser, useAuth } from '@/firebase';
-import { signOut } from 'firebase/auth';
+import { useSession, signOut } from 'next-auth/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
@@ -111,8 +110,8 @@ export default function Header() {
   const [pinnedStocks, setPinnedStocks] = useState<Ticker[]>([]);
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useUser();
-  const auth = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user;
   const { toast } = useToast();
 
   useEffect(() => {
@@ -141,7 +140,7 @@ export default function Header() {
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      await signOut({ redirect: false });
       toast({
         title: "Signed out",
         description: "You have been successfully signed out.",
@@ -193,7 +192,7 @@ export default function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar className="h-9 w-9">
-                    <AvatarImage src={user.photoURL || ''} alt={user.email || 'User'} />
+                    <AvatarImage src={user.image || ''} alt={user.email || 'User'} />
                     <AvatarFallback className="bg-primary/10 text-primary">
                       {user.email?.[0].toUpperCase() || 'U'}
                     </AvatarFallback>
@@ -203,7 +202,7 @@ export default function Header() {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.displayName || 'Account'}</p>
+                    <p className="text-sm font-medium leading-none">{user.name || 'Account'}</p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
                     </p>
