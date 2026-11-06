@@ -150,6 +150,7 @@
 .cta-copy { display: grid; gap: 16px; }
 .cta-copy p { max-width: 52ch; }
 .cta-actions { display: grid; gap: 16px; justify-items: start; }
+.cta-actions p a { text-decoration: underline; text-underline-offset: 3px; font-weight: 600; }
 
 /* Footer */
 .footer { padding: clamp(48px, 6vw, 80px) var(--gutter) 32px; display: grid; gap: 28px; }
@@ -160,7 +161,7 @@
 .landing .footer h2 { font-size: var(--size-5); font-weight: 600; letter-spacing: 0; color: var(--muted); margin-bottom: 4px; }
 .footer nav a { text-decoration: none; transition: color .15s ease; }
 .footer nav a:hover { color: var(--accent); }
-.footer-legal { font-size: var(--size-5); color: var(--muted); max-width: 75ch; line-height: 1.5; }
+.footer-legal { font-size: var(--size-5); color: var(--muted); max-width: 60ch; line-height: 1.5; }
 
 /* Product fragments: the app's own panels, borders and radii */
 [data-ui].product { display: grid; gap: 12px; padding: 12px; background: var(--surface); border-radius: 16px; font-size: 15px; line-height: 1.35; }
@@ -227,10 +228,11 @@
 /* The exhibit's list and screens stack, so every screen is seen without hovering. */
 @media (max-width: 900px) {
   .exhibit { min-height: 0; display: grid; gap: 24px; }
+  .exhibit > li { min-width: 0; }
   .exhibit > li { display: grid; gap: 10px; }
   .exhibit > li > a { width: auto; padding: 0; }
   .exhibit > li > a:hover, .exhibit > li.is-active > a { background: none; }
-  .exhibit figure[data-ui] { position: static; width: 100%; opacity: 1; }
+  .exhibit figure[data-ui] { position: static; width: 100%; opacity: 1; overflow: hidden; aspect-ratio: 4 / 3; border-radius: 12px; }
   [data-ui] .product-main { grid-template-columns: minmax(0, 1fr); }
   .band-head { grid-template-columns: minmax(0, 1fr); }
   .cta-inner { grid-template-columns: minmax(0, 1fr); }
@@ -240,6 +242,7 @@
 
 /* Phone: its own composition, built for one thumb */
 @media (max-width: 640px) {
+  .exhibit figure[data-ui] img { width: 170%; max-width: none; border-radius: 0; }
   .landing { --size-1: 7.2vw; --size-2: 6.1vw; }
   .nav-bar { height: 64px; }
   .nav-signin { display: none; }

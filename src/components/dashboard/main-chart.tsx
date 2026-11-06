@@ -32,7 +32,7 @@ import FullChartDialog from './full-chart-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { calculateMA, calculateRSI } from '@/lib/indicators';
 
-const CHART_BG = '#050505';
+const CHART_BG = '#111111';
 const GRID_COLOR = '#1c1c1c';
 
 const BASE_CHART_OPTS = {
@@ -48,7 +48,7 @@ const BASE_CHART_OPTS = {
   crosshair: { mode: CrosshairMode.Normal },
 };
 
-const COMPARE_COLORS = ['#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'];
+const COMPARE_COLORS = ['#3b82f6', '#f59e0b', '#22d3ee', '#ec4899', '#14b8a6'];
 
 const toTime = (date: string): number => Math.floor(new Date(date).getTime() / 1000);
 function last<T>(arr: T[]): T | undefined { return arr.length ? arr[arr.length - 1] : undefined; }
@@ -156,7 +156,7 @@ export default function MainChart({
       } else {
         const areaData = dataPoints.map(d => ({ time: toTime(d.date), value: d.value }));
         const series   = chart.addSeries(AreaSeries, {
-          lineColor:       '#6366f1',
+          lineColor:       '#d4d4d4',
           topColor:        'rgba(99,102,241,0.35)',
           bottomColor:     'rgba(99,102,241,0)',
           lineWidth:       2,
@@ -212,7 +212,7 @@ export default function MainChart({
           .map(d => ({ time: toTime(d.date), value: d.value as number }));
 
         const rsiSeries = rsiChart.addSeries(LineSeries, {
-          color: '#8b5cf6', lineWidth: 1.5,
+          color: '#d4d4d4', lineWidth: 1.5,
         } as any);
         rsiSeries.setData(rsiData as any);
 
@@ -286,7 +286,7 @@ export default function MainChart({
   };
 
   return (
-    <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 overflow-hidden flex flex-col">
+    <Card className="rounded-2xl border-0 bg-card shadow-none overflow-hidden flex flex-col h-full">
       {/* ── toolbar ─────────────────────────────────────────────────────────── */}
       <CardHeader className="shrink-0 flex flex-col gap-3 pb-3">
 
@@ -356,7 +356,7 @@ export default function MainChart({
         </div>
 
         {/* Row 2: indicators + compare */}
-        <div className="flex flex-wrap items-center gap-4 rounded-xl bg-secondary/20 px-3 py-2 text-xs">
+        <div className="flex flex-wrap items-center gap-4 px-0 py-1 text-xs">
           {/* Indicators */}
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1 font-semibold text-muted-foreground">
@@ -397,7 +397,7 @@ export default function MainChart({
             {compareWith.map((s, i) => (
               <span
                 key={s}
-                className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold"
+                className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
                 style={{ borderColor: COMPARE_COLORS[i % COMPARE_COLORS.length], color: COMPARE_COLORS[i % COMPARE_COLORS.length] }}
               >
                 {s}
@@ -412,10 +412,10 @@ export default function MainChart({
 
       {/* ── chart area ──────────────────────────────────────────────────────── */}
       <CardContent className="p-0 flex flex-col overflow-hidden rounded-b-2xl">
-        <div className="relative w-full" style={{ height: 420, background: CHART_BG }} ref={chartContainerRef} />
+        <div className="relative h-[280px] w-full xl:h-[400px]" style={{ background: CHART_BG }} ref={chartContainerRef} />
         {showRSI && (
           <div className="h-28 shrink-0 border-t border-[#1c1c1c] relative">
-            <span className="absolute top-1.5 left-3 z-10 text-[10px] font-semibold text-violet-400">RSI (14)</span>
+            <span className="absolute top-1.5 left-3 z-10 text-xs font-medium text-muted-foreground">RSI (14)</span>
             <div className="h-full w-full" ref={rsiContainerRef} />
           </div>
         )}

@@ -142,7 +142,7 @@ export default function FullChartDialog({
       } else {
         const areaData = dataPoints.map(d => ({ time: toTime(d.date), value: d.value }));
         const series   = mainChart.addSeries(AreaSeries, {
-          lineColor:   '#6366f1',
+          lineColor:   '#d4d4d4',
           topColor:    'rgba(99,102,241,0.35)',
           bottomColor: 'rgba(99,102,241,0)',
           lineWidth:   2,
@@ -166,7 +166,7 @@ export default function FullChartDialog({
       if (showRSI && rsiContainerRef.current) {
         rsiChart = createChart(rsiContainerRef.current, { ...CHART_OPTS, autoSize: true });
         charts.push(rsiChart);
-        const rsiSeries = rsiChart.addSeries(LineSeries, { color: '#8b5cf6', lineWidth: 1.5 } as any);
+        const rsiSeries = rsiChart.addSeries(LineSeries, { color: '#d4d4d4', lineWidth: 1.5 } as any);
         rsiSeries.setData(rsiData as any);
       }
 
@@ -380,7 +380,7 @@ export default function FullChartDialog({
 
           {showRSI && (
             <div className="h-40 w-full border-t border-[#1f1f1f] relative flex flex-col shrink-0">
-              <span className="absolute top-2 left-4 z-10 text-[#8b5cf6] text-xs font-semibold">RSI (14)</span>
+              <span className="absolute top-2 left-4 z-10 text-[#d4d4d4] text-xs font-semibold">RSI (14)</span>
               <div className="flex-1 w-full" ref={rsiContainerRef} />
             </div>
           )}

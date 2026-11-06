@@ -1,3 +1,4 @@
+import { previousSessionClose } from '@/lib/yahoo-finance';
 import { NextRequest, NextResponse } from 'next/server';
 import { TICKER_REGISTRY } from '@/lib/data';
 
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     const timestamps: number[] = result.timestamp ?? [];
 
     const price: number = meta.regularMarketPrice;
-    const prevClose: number = meta.chartPreviousClose;
+    const prevClose: number = previousSessionClose(result);
     const change = price - prevClose;
     const percentChange = (change / prevClose) * 100;
 

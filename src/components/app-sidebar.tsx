@@ -30,6 +30,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -95,13 +96,17 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+  const closeOnLink = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('a')) setOpenMobile(false);
+  };
 
   return (
     <Sidebar collapsible="icon" className="flex flex-col" {...props}>
-      <SidebarHeader className="h-16 flex items-center justify-center border-b border-sidebar-border">
+      <SidebarHeader className="h-16 flex items-center justify-center border-b border-sidebar-border" onClick={closeOnLink}>
         <Link
           href="/"
-          className="flex items-center gap-2 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 rounded-md px-2 py-1 hover:text-emerald-300 transition-colors"
+          className="flex items-center gap-2 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring rounded-md px-2 py-1 hover:text-white transition-colors"
           aria-label="Go to Stockify home"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -110,7 +115,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <span className="group-data-[collapsible=icon]:hidden text-xl font-bold tracking-tight">Stockify</span>
         </Link>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent onClick={closeOnLink}>
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarMenu>
@@ -165,7 +170,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border p-4">
-        <p className="text-[10px] text-muted-foreground group-data-[collapsible=icon]:hidden">
+        <p className="text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
           © 2024 Stockify AI
         </p>
       </SidebarFooter>

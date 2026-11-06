@@ -20,6 +20,23 @@ function fetchInit(policy: FetchPolicy | undefined, defaultRevalidate: number) {
   return { next: { revalidate: policy?.revalidate ?? defaultRevalidate }, headers };
 }
 
+// The last close of the session before the latest one. Yahoo's meta.chartPreviousClose is the close before
+// the requested range, which can be several sessions back, so day change is worked out from the bars.
+export function previousSessionClose(result: any): number {
+  const timestamps: number[] = result?.timestamp ?? [];
+  const closes: (number | null)[] = result?.indicators?.quote?.[0]?.close ?? [];
+  const offset: number = result?.meta?.gmtoffset ?? 0;
+
+  const lastCloseByDay = new Map<string, number>();
+  timestamps.forEach((time, i) => {
+    const close = closes[i];
+    if (close != null) lastCloseByDay.set(new Date((time + offset) * 1000).toISOString().slice(0, 10), close);
+  });
+
+  const sessions = [...lastCloseByDay.values()];
+  return sessions.length >= 2 ? sessions[sessions.length - 2] : result?.meta?.chartPreviousClose;
+}
+
 // Fallback data
 const FALLBACK_VIX: VixData = { value: 26.80, lastUpdated: new Date().toLocaleTimeString() };
 
@@ -195,7 +212,7 @@ export async function fetchLiveIndianIndices(policy?: FetchPolicy): Promise<impo
 
   try {
     const promises = indices.map(async (idx) => {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(idx.yahoo)}?range=1d&interval=1d`;
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(idx.yahoo)}?range=5d&interval=1d`;
       const res = await fetch(url, fetchInit(policy, 60));
       const data = await res.json();
       const meta = data.chart?.result?.[0]?.meta;
@@ -203,7 +220,7 @@ export async function fetchLiveIndianIndices(policy?: FetchPolicy): Promise<impo
       if (!meta) throw new Error("Metadata missing for " + idx.symbol);
 
       const price = meta.regularMarketPrice;
-      const prevClose = meta.chartPreviousClose;
+      const prevClose = previousSessionClose(data.chart.result[0]);
       const change = price - prevClose;
       const changePercent = (change / prevClose) * 100;
 
@@ -250,7 +267,7 @@ export async function fetchLiveTrendingTickers(): Promise<TrendingData> {
   
   const promises = allTickers.map(async (ticker) => {
     try {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(getYahooSymbol(ticker.symbol))}?range=1d&interval=1d`;
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(getYahooSymbol(ticker.symbol))}?range=5d&interval=1d`;
       // Revalidate every 5 minutes to keep trending somewhat fresh but avoid aggressive limits
       const res = await fetch(url, { next: { revalidate: 300 }, headers: YAHOO_HEADERS });
       const data = await res.json();
@@ -259,7 +276,7 @@ export async function fetchLiveTrendingTickers(): Promise<TrendingData> {
       if (!meta) return ticker; // Return fallback base if unavailable
 
       const price = meta.regularMarketPrice;
-      const prevClose = meta.chartPreviousClose;
+      const prevClose = previousSessionClose(data.chart.result[0]);
       const change = price - prevClose;
       const percentChange = (change / prevClose) * 100;
 
@@ -382,13 +399,13 @@ export async function fetchLiveQuote(
 ): Promise<{ price: number; change: number; percentChange: number } | null> {
   const ySymbol = getYahooSymbol(symbol);
   try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ySymbol)}?range=1d&interval=1d`;
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ySymbol)}?range=5d&interval=1d`;
     const res  = await fetch(url, fetchInit(policy, 60));
     const data = await res.json();
     const meta = data.chart?.result?.[0]?.meta;
     if (!meta) return null;
     const price         = meta.regularMarketPrice as number;
-    const prevClose     = meta.chartPreviousClose  as number;
+    const prevClose     = previousSessionClose(data.chart.result[0]);
     const change        = price - prevClose;
     const percentChange = (change / prevClose) * 100;
     return { price, change, percentChange };
@@ -403,13 +420,13 @@ export async function fetchLiveInternationalIndices(policy?: FetchPolicy): Promi
   ];
   try {
     const promises = indices.map(async (idx) => {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(idx.yahoo)}?range=1d&interval=1d`;
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(idx.yahoo)}?range=5d&interval=1d`;
       const res  = await fetch(url, fetchInit(policy, 60));
       const data = await res.json();
       const meta = data.chart?.result?.[0]?.meta;
       if (!meta) throw new Error('Missing meta for ' + idx.symbol);
       const price      = meta.regularMarketPrice;
-      const prevClose  = meta.chartPreviousClose;
+      const prevClose  = previousSessionClose(data.chart.result[0]);
       const change     = price - prevClose;
       const percentChange = (change / prevClose) * 100;
       return {
@@ -443,13 +460,13 @@ export async function fetchLiveInternationalTrendingTickers(): Promise<TrendingD
   const tickers = getAllTickers().filter(t => t.currency === 'USD' && !t.isIndex);
   const promises = tickers.map(async (ticker) => {
     try {
-      const url  = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker.symbol)}?range=1d&interval=1d`;
+      const url  = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker.symbol)}?range=5d&interval=1d`;
       const res  = await fetch(url, { next: { revalidate: 300 }, headers: YAHOO_HEADERS });
       const data = await res.json();
       const meta = data.chart?.result?.[0]?.meta;
       if (!meta) return ticker;
       const price      = meta.regularMarketPrice;
-      const prevClose  = meta.chartPreviousClose;
+      const prevClose  = previousSessionClose(data.chart.result[0]);
       const change     = price - prevClose;
       const percentChange = (change / prevClose) * 100;
       return { ...ticker, price, change, percentChange };
@@ -497,13 +514,13 @@ export async function fetchLiveSectors(policy?: FetchPolicy): Promise<import('./
 
   const results = await Promise.allSettled(
     sectors.map(async (s) => {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s.yahoo)}?range=1d&interval=1d`;
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s.yahoo)}?range=5d&interval=1d`;
       const res  = await fetch(url, fetchInit(policy, 300));
       const data = await res.json();
       const meta = data.chart?.result?.[0]?.meta;
       if (!meta) throw new Error(`No meta for ${s.name}`);
       const price = meta.regularMarketPrice as number;
-      const prev  = meta.chartPreviousClose  as number;
+      const prev  = previousSessionClose(data.chart.result[0]);
       return { name: s.name, change: ((price - prev) / prev) * 100 };
     })
   );
@@ -531,13 +548,13 @@ export async function fetchLiveInternationalSectors(policy?: FetchPolicy): Promi
 
   const results = await Promise.allSettled(
     sectors.map(async (s) => {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s.etf)}?range=1d&interval=1d`;
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s.etf)}?range=5d&interval=1d`;
       const res  = await fetch(url, fetchInit(policy, 300));
       const data = await res.json();
       const meta = data.chart?.result?.[0]?.meta;
       if (!meta) throw new Error(`No meta for ${s.name}`);
       const price = meta.regularMarketPrice as number;
-      const prev  = meta.chartPreviousClose  as number;
+      const prev  = previousSessionClose(data.chart.result[0]);
       return { name: s.name, change: ((price - prev) / prev) * 100 };
     })
   );

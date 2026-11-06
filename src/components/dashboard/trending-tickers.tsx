@@ -19,8 +19,8 @@ const TickerTable = ({ tickers, type }: { tickers: Ticker[], type: 'gainer' | 'l
         {tickers.map((ticker) => (
           <TableRow key={ticker.symbol}>
             <TableCell className="font-medium">{ticker.symbol}</TableCell>
-            <TableCell className="text-right font-code">{formatNumber(ticker.price, {style: 'currency', currency: ticker.currency || 'INR', minimumFractionDigits: 2})}</TableCell>
-            <TableCell className={cn("text-right font-code", type === 'gainer' ? 'text-up' : 'text-down')}>
+            <TableCell className="text-right tabular-nums">{formatNumber(ticker.price, {style: 'currency', currency: ticker.currency || 'INR', minimumFractionDigits: 2})}</TableCell>
+            <TableCell className={cn("text-right tabular-nums", type === 'gainer' ? 'text-up' : 'text-down')}>
               {ticker.percentChange > 0 ? '+' : ''}{ticker.percentChange.toFixed(2)}%
             </TableCell>
           </TableRow>
@@ -32,9 +32,9 @@ const TickerTable = ({ tickers, type }: { tickers: Ticker[], type: 'gainer' | 'l
 
 export default function TrendingTickers({ trending }: { trending: TrendingData }) {
   return (
-    <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 h-full">
+    <Card className="rounded-2xl border-0 bg-card shadow-none h-full">
       <CardHeader>
-        <CardTitle>Trending Tickers</CardTitle>
+        <CardTitle className="text-base font-semibold tracking-normal">Trending Tickers</CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
         <Tabs defaultValue="gainers">

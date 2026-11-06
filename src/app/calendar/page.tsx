@@ -1,6 +1,7 @@
 import Header from '@/components/dashboard/header';
 import Disclaimer from '@/components/dashboard/disclaimer';
-import { CALENDAR_EVENTS, type CalendarEvent } from '@/lib/calendar-data';
+import CalendarAutoRefresh from '@/components/calendar-auto-refresh';
+import { CALENDAR_EVENTS, SCHEDULE_CHECKED_ON, type CalendarEvent } from '@/lib/calendar-data';
 import { Badge } from '@/components/ui/badge';
 import { CalendarDays, Circle, IndianRupee, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -29,23 +30,36 @@ const IMPACT_LABEL: Record<CalendarEvent['impact'], string> = {
   Low:    'Low Impact',
 };
 
-function getTodayStr(): string {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString().split('T')[0];
+// An event stays listed until its day has ended where it happens. International events use New York,
+// the latest of their time zones, so a US decision is not hidden before it comes out.
+const MARKET_TIME_ZONE: Record<CalendarEvent['market'], string> = {
+  India: 'Asia/Kolkata',
+  International: 'America/New_York',
+};
+
+const WINDOW_DAYS = 183;
+
+function getTodayStr(timeZone: string): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone }).format(new Date());
 }
 
 function daysFromToday(dateStr: string, today: string): number {
-  const t = new Date(today + 'T00:00:00');
-  const e = new Date(dateStr + 'T00:00:00');
-  return Math.round((e.getTime() - t.getTime()) / 86_400_000);
+  return Math.round((Date.parse(dateStr) - Date.parse(today)) / 86_400_000);
+}
+
+function upcomingEvents(events: CalendarEvent[], market: CalendarEvent['market']) {
+  const today = getTodayStr(MARKET_TIME_ZONE[market]);
+  return events
+    .filter(e => e.market === market)
+    .map(e => ({ ...e, diff: daysFromToday(e.date, today) }))
+    .filter(e => e.diff >= 0 && e.diff <= WINDOW_DAYS)
+    .sort((a, b) => a.diff - b.diff);
 }
 
 function DaysLabel({ diff }: { diff: number }) {
   if (diff === 0) return <span className="text-xs font-bold text-primary">Today</span>;
   if (diff === 1) return <span className="text-xs text-muted-foreground">Tomorrow</span>;
-  if (diff > 0)  return <span className="text-xs text-muted-foreground">In {diff}d</span>;
-  return <span className="text-xs text-muted-foreground/50">{Math.abs(diff)}d ago</span>;
+  return <span className="text-xs text-muted-foreground">In {diff}d</span>;
 }
 
 function groupByMonth(events: (CalendarEvent & { diff: number })[]) {
@@ -62,6 +76,14 @@ function groupByMonth(events: (CalendarEvent & { diff: number })[]) {
 function EventTable({ events }: { events: (CalendarEvent & { diff: number })[] }) {
   const grouped = groupByMonth(events);
 
+  if (events.length === 0) {
+    return (
+      <p className="rounded-xl border border-border/50 p-6 text-sm text-muted-foreground">
+        No upcoming events are listed right now. The next official schedule still needs to be added.
+      </p>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {[...grouped.entries()].map(([month, monthEvents]) => (
@@ -70,13 +92,11 @@ function EventTable({ events }: { events: (CalendarEvent & { diff: number })[] }
             {month}
           </h2>
           <div className="overflow-hidden rounded-xl border border-border/50">
-            <table className="w-full text-sm">
+            <table className="w-full table-fixed text-sm">
               <thead>
                 <tr className="border-b border-border/50 bg-secondary/30">
                   <th className="px-4 py-2.5 text-left text-xs font-semibold text-muted-foreground w-24">Date</th>
                   <th className="px-4 py-2.5 text-left text-xs font-semibold text-muted-foreground">Event</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-muted-foreground w-32 hidden sm:table-cell">Category</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-muted-foreground w-28 hidden md:table-cell">Impact</th>
                   <th className="px-4 py-2.5 text-right text-xs font-semibold text-muted-foreground w-24">When</th>
                 </tr>
               </thead>
@@ -86,7 +106,6 @@ function EventTable({ events }: { events: (CalendarEvent & { diff: number })[] }
                   const day     = d.toLocaleDateString('en-IN', { day: '2-digit' });
                   const month   = d.toLocaleDateString('en-IN', { month: 'short' });
                   const weekday = d.toLocaleDateString('en-IN', { weekday: 'short' });
-                  const isPast  = event.diff < 0;
                   const isToday = event.diff === 0;
 
                   return (
@@ -95,8 +114,7 @@ function EventTable({ events }: { events: (CalendarEvent & { diff: number })[] }
                       className={cn(
                         'transition-colors',
                         isToday  && 'bg-primary/5',
-                        !isToday && !isPast && 'hover:bg-secondary/30',
-                        isPast   && 'opacity-40',
+                        !isToday && 'hover:bg-secondary/30',
                       )}
                     >
                       <td className="px-4 py-3">
@@ -109,27 +127,23 @@ function EventTable({ events }: { events: (CalendarEvent & { diff: number })[] }
                       </td>
 
                       <td className="px-4 py-3">
-                        <p className={cn('font-medium leading-snug', isPast && 'line-through')}>
+                        <p className="font-medium leading-snug">
                           {event.title}
                         </p>
                         {event.description && (
                           <p className="mt-0.5 text-xs text-muted-foreground">{event.description}</p>
                         )}
-                      </td>
-
-                      <td className="px-4 py-3 hidden sm:table-cell">
-                        <Badge
-                          variant="outline"
-                          className={cn('text-[10px] font-semibold border px-1.5 py-0', CATEGORY_COLORS[event.category])}
-                        >
-                          {event.category}
-                        </Badge>
-                      </td>
-
-                      <td className="px-4 py-3 hidden md:table-cell">
-                        <div className="flex items-center gap-1.5">
-                          <Circle className={cn('h-2 w-2 shrink-0', IMPACT_COLORS[event.impact])} />
-                          <span className="text-xs text-muted-foreground">{IMPACT_LABEL[event.impact]}</span>
+                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                          <Badge
+                            variant="outline"
+                            className={cn('text-[10px] font-semibold border px-1.5 py-0', CATEGORY_COLORS[event.category])}
+                          >
+                            {event.category}
+                          </Badge>
+                          <div className="flex items-center gap-1.5">
+                            <Circle className={cn('h-2 w-2 shrink-0', IMPACT_COLORS[event.impact])} />
+                            <span className="text-xs text-muted-foreground">{IMPACT_LABEL[event.impact]}</span>
+                          </div>
                         </div>
                       </td>
 
@@ -202,7 +216,7 @@ async function fetchLiveEarnings(today: string): Promise<CalendarEvent[]> {
           category: 'Earnings',
           market: isIndia ? 'India' : 'International',
           impact: 'High',
-          description: e.eps_estimate ? `EPS estimate: $${e.eps_estimate}` : 'Quarterly earnings announcement',
+          description: e.eps_estimate ? `EPS estimate: ${isIndia ? '₹' : '$'}${e.eps_estimate}` : 'Quarterly earnings announcement',
         });
       }
     };
@@ -226,28 +240,15 @@ async function fetchLiveEarnings(today: string): Promise<CalendarEvent[]> {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function CalendarPage() {
-  const TODAY = getTodayStr();
-  const liveEarnings = await fetchLiveEarnings(TODAY);
+  const liveEarnings = await fetchLiveEarnings(getTodayStr(MARKET_TIME_ZONE.India));
 
-  // If Twelve Data returned earnings, use live earnings + static macro events.
-  // Otherwise fall back to fully static data so the page is never empty.
-  const staticMacro = CALENDAR_EVENTS.filter(e => e.category !== 'Earnings');
-  const allEvents = liveEarnings.length > 0
-    ? [...staticMacro, ...liveEarnings]
-    : [...CALENDAR_EVENTS];
-
-  const india = allEvents
-    .filter(e => e.market === 'India')
-    .map(e => ({ ...e, diff: daysFromToday(e.date, TODAY) }))
-    .sort((a, b) => a.diff - b.diff);
-
-  const international = allEvents
-    .filter(e => e.market === 'International')
-    .map(e => ({ ...e, diff: daysFromToday(e.date, TODAY) }))
-    .sort((a, b) => a.diff - b.diff);
+  const allEvents = [...CALENDAR_EVENTS, ...liveEarnings];
+  const india = upcomingEvents(allEvents, 'India');
+  const international = upcomingEvents(allEvents, 'International');
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
+      <CalendarAutoRefresh />
       <Header />
       <main className="flex-1 space-y-8 p-4 md:p-6">
 
@@ -281,6 +282,13 @@ export default async function CalendarPage() {
             <EventTable events={international} />
           </div>
         </div>
+
+        <p className="text-xs text-muted-foreground">
+          Dates come from the published schedules of RBI, MoSPI, the Federal Reserve, the US Bureau of Labor Statistics,
+          the ECB, the Bank of England and the Bank of Japan, checked on {SCHEDULE_CHECKED_ON}. They can change, so
+          confirm with the source before relying on one.
+          {liveEarnings.length === 0 && ' Company earnings dates are not currently shown.'}
+        </p>
 
       </main>
       <Disclaimer />

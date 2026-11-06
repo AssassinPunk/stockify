@@ -7,20 +7,20 @@
     --background: 0 0% 0%; /* Pure pitch black */
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 3%; /* Barely visible distinction, extremely clean */
+    --card: 0 0% 7%; /* Barely visible distinction, extremely clean */
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 3%;
+    --popover: 0 0% 7%;
     --popover-foreground: 0 0% 98%;
 
     --primary: 0 0% 98%; /* White accents instead of blue */
     --primary-foreground: 0 0% 0%;
 
-    --secondary: 0 0% 9%; /* Subtle dark gray */
+    --secondary: 0 0% 13%; /* Subtle dark gray */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 9%;
-    --muted-foreground: 0 0% 63.9%;
+    --muted: 0 0% 13%;
+    --muted-foreground: 0 0% 71%;
 
     --accent: 0 0% 9%;
     --accent-foreground: 0 0% 98%;
@@ -28,7 +28,7 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 0 0% 12%; /* Very subtle clean minimalist borders */
+    --border: 0 0% 15%; /* Very subtle clean minimalist borders */
     --input: 0 0% 12%;
     --ring: 0 0% 80%;
     

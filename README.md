@@ -63,7 +63,7 @@ Market data is sourced from Yahoo Finance's public chart endpoints through a ded
 | **Commodities & forex** | Gold, silver, platinum, copper, crude, Brent, natural gas plus five currency pairs, each with a detail page |
 | **International dashboard** | S&P 500, NASDAQ and FTSE 100 with their own trending tickers, sectors and news |
 | **News feed** | Live financial headlines from Yahoo Finance, auto-categorised into Indices / Stocks / Macro |
-| **Economic calendar** | Static macro, RBI and central-bank events combined with live earnings dates from Twelve Data |
+| **Economic calendar** | The next six months of RBI, MoSPI, Fed, BLS, ECB, BoE and BoJ dates from `src/lib/calendar-data.ts`. Finished events drop off automatically; the schedules are updated by hand |
 | **AI market briefs** | On-demand Gemini-generated market summaries with headline, outlook, sentiment label and three key risks |
 | **Authentication** | Email/password and Google OAuth via NextAuth, with bcrypt password hashing |
 
@@ -178,7 +178,7 @@ stockify/
 
 The application separates market data from user data into two distinct paths.
 
-**Market data (read path)** — anonymous and cache-heavy. Pages such as `src/app/page.tsx` are async Server Components that fetch from the Yahoo adapter inside a single `Promise.all`, so six upstream calls resolve in parallel rather than as a waterfall. The HTML is rendered server-side with data already populated. Client components then poll route handlers for live updates.
+**Market data (read path)** — anonymous and cache-heavy. Pages such as `src/app/dashboard/page.tsx` are async Server Components that fetch from the Yahoo adapter inside a single `Promise.all`, so six upstream calls resolve in parallel rather than as a waterfall. The HTML is rendered server-side with data already populated. Client components then poll route handlers for live updates.
 
 **User data (write path)** — authenticated and never cached. Client components call `/api/wishlist`, which resolves the session via `getServerSession`, validates the request body with Zod, and queries Prisma scoped to `session.user.id`.
 
@@ -194,7 +194,7 @@ The application separates market data from user data into two distinct paths.
 - **npm** (the repository uses `package-lock.json`)
 - **A PostgreSQL database** — local or hosted (Neon, Supabase, Railway, etc.)
 - **A Google Gemini API key** — required for the AI brief features
-- **A Twelve Data API key** — optional; used for the earnings calendar
+- **A Twelve Data API key on a paid plan** — optional; used for earnings dates in the calendar
 - **Google OAuth credentials** — optional; required only for Google sign-in
 
 ## Environment Variables
@@ -207,7 +207,7 @@ Create a `.env` file in the project root. This file is gitignored and is never c
 | `NEXTAUTH_SECRET` | Yes | Secret used to sign NextAuth JWTs. Generate with `openssl rand -base64 32` |
 | `NEXTAUTH_URL` | Yes | Base URL of the app — `http://localhost:9002` in development |
 | `GEMINI_API_KEY` | Yes (for AI features) | Google Gemini API key used by the Genkit `googleAI` plugin |
-| `TWELVE_DATA_API_KEY` | Optional | Enables the live earnings calendar. The feature degrades silently when absent |
+| `TWELVE_DATA_API_KEY` | Optional | Adds live earnings to the calendar. Needs a paid Twelve Data plan: the free plan returns 403 for earnings |
 | `GOOGLE_CLIENT_ID` | Optional | Google OAuth client ID; required for Google sign-in |
 | `GOOGLE_CLIENT_SECRET` | Optional | Google OAuth client secret |
 

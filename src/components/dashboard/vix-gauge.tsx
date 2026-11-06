@@ -148,15 +148,15 @@ export default function VixGauge({
       <circle cx={CX} cy={CY} r={4} fill={risk.hex} opacity={0.9} />
 
       {/* ── Zone edge labels (always shown, small) ── */}
-      {(() => {
+      {size !== 'sm' && (() => {
         const [lx, ly] = polar(vixToMathAngle(0),      R + SW + 10);
         const [rx, ry] = polar(vixToMathAngle(MAX_VIX), R + SW + 10);
         return (
           <>
             <text x={lx} y={ly + 3} textAnchor="middle"
-              fontSize={6.5} fill="#10b981" fontFamily="monospace" opacity={0.8}>Low</text>
+              fontSize={11} fill="#10b981">Low</text>
             <text x={rx} y={ry + 3} textAnchor="middle"
-              fontSize={6.5} fill="#ef4444" fontFamily="monospace" opacity={0.8}>Extreme</text>
+              fontSize={11} fill="#ef4444">Extreme</text>
           </>
         );
       })()}

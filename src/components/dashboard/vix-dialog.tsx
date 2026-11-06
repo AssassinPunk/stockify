@@ -29,7 +29,7 @@ const TIP_ICONS: Record<StrategyTip['icon'], React.ElementType> = {
 };
 const TIP_COLORS: Record<StrategyTip['icon'], string> = {
   shield: 'text-emerald-400', trend: 'text-blue-400', warn: 'text-yellow-400',
-  ban: 'text-red-400', clock: 'text-purple-400', target: 'text-sky-400',
+  ban: 'text-red-400', clock: 'text-muted-foreground', target: 'text-sky-400',
   cash: 'text-emerald-300', trophy: 'text-yellow-300',
 };
 
@@ -44,7 +44,7 @@ function Stat({ label, value, color }: { label: string; value: string; color?: s
   return (
     <div className="flex flex-col gap-1.5 px-5 py-4 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
       <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/30">{label}</p>
-      <p className={cn('text-2xl font-bold font-mono leading-none', color ?? 'text-white')}>{value}</p>
+      <p className={cn('text-2xl font-bold tabular-nums leading-none', color ?? 'text-white')}>{value}</p>
     </div>
   );
 }
@@ -99,7 +99,7 @@ export default function VixDialog({
         <div
           className="relative flex flex-col items-center pt-10 pb-8 px-8 overflow-hidden"
           style={{
-            background: `radial-gradient(ellipse 70% 120% at 50% 0%, ${risk.hex}20 0%, transparent 70%)`,
+            background: `${risk.hex}14`,
           }}
         >
           {/* Close button */}
@@ -122,7 +122,7 @@ export default function VixDialog({
 
           {/* Value + zone displayed as HTML (cleaner than SVG text) */}
           <div className="flex flex-col items-center gap-1 -mt-2">
-            <span className="text-5xl font-bold font-mono text-white tracking-tight">
+            <span className="text-5xl font-bold tabular-nums text-white tracking-tight">
               {formatNumber(vixData.value, { minimumFractionDigits: 2 })}
             </span>
             <div className="flex items-center gap-2 mt-1">
@@ -162,7 +162,7 @@ export default function VixDialog({
               <div key={label}
                 className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs">
                 <span className="text-white/35">{label}</span>
-                <span className="font-mono font-semibold text-white">
+                <span className="tabular-nums font-semibold text-white">
                   ±{formatNumber(val, { minimumFractionDigits: 2 })}%
                 </span>
               </div>
@@ -236,8 +236,8 @@ export default function VixDialog({
                   <div className="flex flex-col items-center justify-center gap-4 py-8">
                     <div className="flex gap-1.5">
                       {[0, 1, 2].map(i => (
-                        <div key={i} className="h-2 w-2 rounded-full animate-bounce"
-                          style={{ background: risk.hex, animationDelay: `${i * 0.18}s` }} />
+                        <div key={i} className="h-2 w-2 rounded-full"
+                          style={{ background: risk.hex }} />
                       ))}
                     </div>
                     <p className="text-xs text-white/30">Analysing market conditions…</p>

@@ -20,10 +20,10 @@ export default function NewsFeed({ news }: { news: NewsArticle[] }) {
   const filteredNews = filter === 'All' ? uniqueNews : uniqueNews.filter(n => n.category === filter);
 
   return (
-    <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 h-full">
+    <Card className="rounded-2xl border-0 bg-card shadow-none h-full">
       <CardHeader>
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <CardTitle>Market News</CardTitle>
+            <CardTitle className="text-base font-semibold tracking-normal">Market News</CardTitle>
             <Tabs defaultValue="All" onValueChange={setFilter}>
                 <TabsList>
                     <TabsTrigger value="All">All</TabsTrigger>
@@ -35,7 +35,7 @@ export default function NewsFeed({ news }: { news: NewsArticle[] }) {
         </div>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[300px]">
+        <ScrollArea className="h-[220px]">
           <div className="space-y-4 pr-4">
             {filteredNews.length === 0 && (
               <p className="py-12 text-center text-sm text-muted-foreground">

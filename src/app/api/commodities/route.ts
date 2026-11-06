@@ -1,3 +1,4 @@
+import { previousSessionClose } from '@/lib/yahoo-finance';
 import { NextResponse } from 'next/server';
 import { COMMODITIES } from '@/lib/commodities-data';
 
@@ -5,13 +6,13 @@ export async function GET() {
   try {
     const results = await Promise.all(
       COMMODITIES.map(async c => {
-        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(c.symbol)}?range=1d&interval=1d`;
+        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(c.symbol)}?range=5d&interval=1d`;
         const res  = await fetch(url, { cache: 'no-store' });
         const data = await res.json();
         const meta = data.chart?.result?.[0]?.meta;
         if (!meta) throw new Error('No meta for ' + c.symbol);
         const price: number = meta.regularMarketPrice;
-        const prev: number  = meta.chartPreviousClose;
+        const prev: number  = previousSessionClose(data.chart.result[0]);
         return {
           ...c,
           price,

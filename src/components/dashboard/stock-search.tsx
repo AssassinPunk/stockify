@@ -68,7 +68,7 @@ export default function StockSearch() {
 
       {open && results.length > 0 && (
         <div className="absolute right-0 top-full z-50 mt-1 w-[280px] overflow-hidden rounded-lg border border-border/50 bg-popover shadow-xl sm:w-[320px]">
-          <p className="border-b border-border/30 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <p className="border-b border-border/30 px-3 py-2 text-xs text-muted-foreground">
             {debouncedQuery ? 'Results' : 'Popular'}
           </p>
           {results.map(ticker => (
@@ -82,18 +82,18 @@ export default function StockSearch() {
               }}
             >
               <div className="flex flex-col items-start">
-                <span className="font-mono font-semibold">{ticker.symbol}</span>
+                <span className="tabular-nums font-semibold">{ticker.symbol}</span>
                 <span className="text-[11px] text-muted-foreground">{ticker.name}</span>
               </div>
               <div className="flex flex-col items-end">
-                <span className="font-mono text-sm font-medium">
+                <span className="tabular-nums text-sm font-medium">
                   {formatNumber(ticker.price, {
                     style: 'currency',
                     currency: ticker.currency || 'INR',
                     minimumFractionDigits: 2,
                   })}
                 </span>
-                <span className={cn('font-mono text-[11px]', ticker.percentChange >= 0 ? 'text-up' : 'text-down')}>
+                <span className={cn('tabular-nums text-[11px]', ticker.percentChange >= 0 ? 'text-up' : 'text-down')}>
                   {ticker.percentChange > 0 ? '+' : ''}
                   {ticker.percentChange.toFixed(2)}%
                 </span>

@@ -1,5 +1,5 @@
 export type CalendarEvent = {
-  date: string; // ISO YYYY-MM-DD
+  date: string; // ISO YYYY-MM-DD, the day the decision or data comes out
   title: string;
   category: 'RBI' | 'Earnings' | 'Global' | 'Index' | 'Macro' | 'Central Bank' | 'Forex';
   market: 'India' | 'International';
@@ -7,84 +7,106 @@ export type CalendarEvent = {
   description?: string;
 };
 
-// Static macro / central-bank / index events.
-// Earnings events are fetched live from Twelve Data in the calendar page;
-// the entries below serve as fallback when the API is unavailable.
+// Published schedules, checked on the date below. Nothing here updates itself: when a list runs out,
+// add the next schedule from the same source. The calendar page hides each event once its day ends.
+//   RBI      https://www.rbi.org.in/Scripts/BS_PressReleaseDisplay.aspx?prid=62422
+//   MoSPI    https://www.mospi.gov.in/uploads/documents/releaseCalender/1791356248513-ARC_2026_27_Sept_2026.pdf
+//   Fed      https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+//   BLS      https://www.bls.gov/schedule/news_release/cpi.htm and /empsit.htm
+//   ECB      https://www.ecb.europa.eu/press/calendars/mgcgc/html/index.en.html
+//   BoE      https://www.bankofengland.co.uk/monetary-policy/upcoming-mpc-dates
+//   BoJ      https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm
+export const SCHEDULE_CHECKED_ON = '6 November 2026';
+
+const india = (
+  date: string,
+  title: string,
+  category: CalendarEvent['category'],
+  impact: CalendarEvent['impact'],
+  description: string,
+): CalendarEvent => ({ date, title, category, market: 'India', impact, description });
+
+const global = (
+  date: string,
+  title: string,
+  category: CalendarEvent['category'],
+  impact: CalendarEvent['impact'],
+  description: string,
+): CalendarEvent => ({ date, title, category, market: 'International', impact, description });
+
+const usCpi = ([date, month]: [string, string]) =>
+  global(date, `US CPI Inflation (${month})`, 'Macro', 'High', `US Consumer Price Index for ${month}`);
+
+const usJobs = ([date, month]: [string, string]) =>
+  global(date, `US Non-Farm Payrolls (${month})`, 'Macro', 'High', `US Employment Situation report for ${month}`);
+
+const fomc = ([date, days]: [string, string]) =>
+  global(date, 'US FOMC Rate Decision', 'Central Bank', 'High', `Federal Reserve meeting on ${days}. Dates stay tentative until the previous meeting confirms them`);
+
+const ecb = ([date, days]: [string, string]) =>
+  global(date, 'ECB Rate Decision', 'Central Bank', 'High', `European Central Bank Governing Council meeting on ${days}`);
+
+const boe = (date: string) =>
+  global(date, 'Bank of England Decision', 'Central Bank', 'Medium', 'Monetary Policy Committee announcement');
+
+const boj = ([date, days]: [string, string]) =>
+  global(date, 'Bank of Japan Decision', 'Central Bank', 'Medium', `Monetary Policy Meeting on ${days}`);
+
+// Company earnings are not listed here because no verified free source for their dates exists.
+// The calendar page adds them from Twelve Data on plans that include its earnings endpoint.
 export const CALENDAR_EVENTS: CalendarEvent[] = [
+  // India: RBI, through February 2027
+  india('2026-12-04', 'RBI MPC Rate Decision', 'RBI', 'High', 'Monetary Policy Committee meeting on 2, 3 and 4 December'),
+  india('2027-02-05', 'RBI MPC Rate Decision', 'RBI', 'High', 'Monetary Policy Committee meeting on 3, 4 and 5 February'),
 
-  // ── India — April 2026 ───────────────────────────────────────────────────
-  { date: '2026-04-09', title: 'RBI MPC Rate Decision',               category: 'RBI',      market: 'India',         impact: 'High',   description: 'Rate held at 6.25% — accommodative stance maintained' },
-  { date: '2026-04-14', title: 'Wipro Q4 FY26 Results',               category: 'Earnings', market: 'India',         impact: 'High',   description: 'Q4 FY26 earnings announcement' },
-  { date: '2026-04-17', title: 'HDFC Life Q4 Results',                category: 'Earnings', market: 'India',         impact: 'Medium', description: 'Q4 FY26 earnings announcement' },
-  { date: '2026-04-23', title: 'TCS Q4 FY26 Results',                 category: 'Earnings', market: 'India',         impact: 'High',   description: 'Q4 FY26 earnings announcement' },
-  { date: '2026-04-25', title: 'Infosys Q4 FY26 Results',             category: 'Earnings', market: 'India',         impact: 'High',   description: 'Q4 FY26 earnings announcement' },
-  { date: '2026-04-28', title: 'HDFC Bank Q4 FY26 Results',           category: 'Earnings', market: 'India',         impact: 'High',   description: 'Q4 FY26 earnings announcement' },
-  { date: '2026-04-30', title: 'Reliance Industries Q4 Results',      category: 'Earnings', market: 'India',         impact: 'High',   description: 'Q4 FY26 earnings announcement' },
-  { date: '2026-04-30', title: 'India Fiscal Deficit Data (FY26)',     category: 'Macro',    market: 'India',         impact: 'Medium', description: 'Full-year fiscal deficit vs 4.9% GDP target' },
+  // India: Union Budget. February 1 is the usual date, but no 2027 date has been announced yet.
+  india('2027-02-01', 'Union Budget 2027-28 (expected)', 'Macro', 'High', 'Usually presented on 1 February. The date is not yet officially confirmed'),
 
-  // ── International — April 2026 ───────────────────────────────────────────
-  { date: '2026-04-10', title: 'US CPI Inflation (March)',             category: 'Macro',        market: 'International', impact: 'High',   description: 'US Consumer Price Index — March reading' },
-  { date: '2026-04-17', title: 'ECB Rate Decision',                    category: 'Central Bank',  market: 'International', impact: 'High',   description: 'European Central Bank monetary policy decision' },
-  { date: '2026-04-18', title: 'China Q1 GDP',                         category: 'Macro',         market: 'International', impact: 'Medium', description: 'China first quarter GDP growth rate' },
-  { date: '2026-04-23', title: 'US FOMC Meeting',                      category: 'Global',        market: 'International', impact: 'High',   description: 'Federal Reserve rate decision — held at 4.25–4.50%' },
+  // India: MoSPI, through March 2027. MoSPI releases weekend dates on the next working day, as it did
+  // with the CPI scheduled for Saturday 12 September 2026, so those dates are moved here too.
+  india('2026-11-12', 'India CPI Inflation', 'Macro', 'High', 'All India Consumer Price Index'),
+  india('2026-12-14', 'India CPI Inflation', 'Macro', 'High', 'All India Consumer Price Index. Scheduled for Saturday 12 December, so expected on the next working day'),
+  india('2027-01-12', 'India CPI Inflation', 'Macro', 'High', 'All India Consumer Price Index'),
+  india('2027-02-12', 'India CPI Inflation', 'Macro', 'High', 'All India Consumer Price Index'),
+  india('2027-03-12', 'India CPI Inflation', 'Macro', 'High', 'All India Consumer Price Index'),
+  india('2026-11-30', 'India GDP Q2 FY27', 'Macro', 'High', 'Quarterly estimates of GDP for Q2, FY 2026-27'),
+  india('2027-01-07', 'India GDP First Advance Estimates', 'Macro', 'High', 'First advance estimates of GDP for FY 2026-27'),
+  india('2027-02-26', 'India GDP Q3 FY27', 'Macro', 'High', 'Quarterly estimates for Q3 and second advance estimates for FY 2026-27'),
+  india('2026-11-30', 'India Industrial Production (IIP)', 'Macro', 'Medium', 'All India Index of Industrial Production. Scheduled for Saturday 28 November, so expected on the next working day'),
+  india('2026-12-28', 'India Industrial Production (IIP)', 'Macro', 'Medium', 'All India Index of Industrial Production'),
+  india('2027-01-28', 'India Industrial Production (IIP)', 'Macro', 'Medium', 'All India Index of Industrial Production'),
+  india('2027-03-01', 'India Industrial Production (IIP)', 'Macro', 'Medium', 'All India Index of Industrial Production. Scheduled for Sunday 28 February, so expected on the next working day'),
+  india('2027-03-29', 'India Industrial Production (IIP)', 'Macro', 'Medium', 'All India Index of Industrial Production. Scheduled for Sunday 28 March, so expected on the next working day'),
 
-  // ── India — May 2026 ─────────────────────────────────────────────────────
-  { date: '2026-05-05', title: 'ICICI Bank Q4 Results',               category: 'Earnings', market: 'India', impact: 'High',   description: 'Q4 FY26 earnings announcement' },
-  { date: '2026-05-07', title: 'Axis Bank Q4 Results',                category: 'Earnings', market: 'India', impact: 'Medium', description: 'Q4 FY26 earnings announcement' },
-  { date: '2026-05-08', title: 'SBI Q4 FY26 Results',                 category: 'Earnings', market: 'India', impact: 'High',   description: 'Q4 FY26 earnings announcement' },
-  { date: '2026-05-15', title: 'Maruti Suzuki Q4 Results',            category: 'Earnings', market: 'India', impact: 'Medium', description: 'Q4 FY26 earnings announcement' },
-  { date: '2026-05-20', title: 'India WPI Inflation (April)',          category: 'Macro',    market: 'India', impact: 'Low',    description: 'Wholesale Price Index — April 2026' },
-  { date: '2026-05-22', title: 'India CPI Inflation (April)',          category: 'Macro',    market: 'India', impact: 'Medium', description: 'Consumer Price Index — April 2026 reading' },
-  { date: '2026-05-30', title: 'India GDP Q4 FY26',                   category: 'Macro',    market: 'India', impact: 'High',   description: 'Final quarter GDP growth for FY2025-26' },
-
-  // ── International — May 2026 ─────────────────────────────────────────────
-  { date: '2026-05-02', title: 'US Non-Farm Payrolls (April)',         category: 'Macro',        market: 'International', impact: 'High',   description: 'US jobs report — April 2026' },
-  { date: '2026-05-07', title: 'US FOMC Meeting',                      category: 'Global',       market: 'International', impact: 'High',   description: 'Federal Reserve interest rate decision' },
-  { date: '2026-05-08', title: 'Bank of England Decision',             category: 'Central Bank', market: 'International', impact: 'Medium', description: 'BoE monetary policy rate decision' },
-  { date: '2026-05-13', title: 'US CPI Inflation (April)',             category: 'Macro',        market: 'International', impact: 'High',   description: 'US Consumer Price Index — April 2026 reading' },
-  { date: '2026-05-22', title: 'UK CPI Inflation (April)',             category: 'Macro',        market: 'International', impact: 'Medium', description: 'UK Consumer Price Index — April 2026' },
-  { date: '2026-05-28', title: 'US GDP Q1 2026 (Final)',               category: 'Macro',        market: 'International', impact: 'Medium', description: 'US Q1 2026 GDP final estimate' },
-
-  // ── India — June 2026 ────────────────────────────────────────────────────
-  { date: '2026-06-05', title: 'RBI MPC Rate Decision',               category: 'RBI',   market: 'India', impact: 'High',   description: 'Bi-monthly monetary policy committee decision' },
-  { date: '2026-06-09', title: 'NIFTY 50 Semi-Annual Rebalancing',    category: 'Index', market: 'India', impact: 'Medium', description: 'NSE semi-annual index reconstitution effective date' },
-  { date: '2026-06-12', title: 'India CPI Inflation (May)',            category: 'Macro', market: 'India', impact: 'Medium', description: 'Consumer Price Index — May 2026 reading' },
-  { date: '2026-06-19', title: 'India WPI Inflation (May)',            category: 'Macro', market: 'India', impact: 'Low',    description: 'Wholesale Price Index — May 2026' },
-  { date: '2026-06-30', title: 'RBI Annual Report FY26',              category: 'RBI',   market: 'India', impact: 'Medium', description: 'Reserve Bank of India full-year annual report' },
-
-  // ── International — June 2026 ────────────────────────────────────────────
-  { date: '2026-06-05', title: 'ECB Rate Decision',                    category: 'Central Bank', market: 'International', impact: 'High',   description: 'European Central Bank monetary policy decision' },
-  { date: '2026-06-06', title: 'US Non-Farm Payrolls (May)',           category: 'Macro',        market: 'International', impact: 'High',   description: 'US jobs report — May 2026' },
-  { date: '2026-06-11', title: 'US CPI Inflation (May)',               category: 'Macro',        market: 'International', impact: 'High',   description: 'US Consumer Price Index — May 2026 reading' },
-  { date: '2026-06-17', title: 'US FOMC Meeting',                      category: 'Global',       market: 'International', impact: 'High',   description: 'Federal Reserve interest rate decision' },
-  { date: '2026-06-19', title: 'Bank of Japan Decision',               category: 'Central Bank', market: 'International', impact: 'Medium', description: 'Bank of Japan monetary policy decision' },
-  { date: '2026-06-26', title: 'US GDP Q1 2026 (Third Estimate)',      category: 'Macro',        market: 'International', impact: 'Low',    description: 'US Q1 2026 third/final GDP revision' },
-
-  // ── India — July 2026 ────────────────────────────────────────────────────
-  { date: '2026-07-01', title: 'India Union Budget FY27',              category: 'Macro', market: 'India', impact: 'High',   description: 'Annual Union Budget presentation to Parliament' },
-  { date: '2026-07-14', title: 'India CPI Inflation (June)',           category: 'Macro', market: 'India', impact: 'Medium', description: 'Consumer Price Index — June 2026 reading' },
-  { date: '2026-07-17', title: 'India WPI Inflation (June)',           category: 'Macro', market: 'India', impact: 'Low',    description: 'Wholesale Price Index — June 2026' },
-  { date: '2026-07-21', title: 'TCS Q1 FY27 Results',                 category: 'Earnings', market: 'India', impact: 'High',   description: 'Q1 FY27 earnings announcement' },
-  { date: '2026-07-23', title: 'Infosys Q1 FY27 Results',             category: 'Earnings', market: 'India', impact: 'High',   description: 'Q1 FY27 earnings announcement' },
-  { date: '2026-07-28', title: 'RBI MPC Rate Decision',               category: 'RBI',   market: 'India', impact: 'High',   description: 'Bi-monthly monetary policy committee decision' },
-
-  // ── International — July 2026 ────────────────────────────────────────────
-  { date: '2026-07-04', title: 'US Non-Farm Payrolls (June)',          category: 'Macro',        market: 'International', impact: 'High',   description: 'US jobs report — June 2026' },
-  { date: '2026-07-10', title: 'US CPI Inflation (June)',              category: 'Macro',        market: 'International', impact: 'High',   description: 'US Consumer Price Index — June 2026 reading' },
-  { date: '2026-07-15', title: 'China Q2 GDP',                         category: 'Macro',        market: 'International', impact: 'Medium', description: 'China second quarter GDP growth rate' },
-  { date: '2026-07-24', title: 'ECB Rate Decision',                    category: 'Central Bank', market: 'International', impact: 'High',   description: 'European Central Bank monetary policy decision' },
-  { date: '2026-07-29', title: 'US FOMC Meeting',                      category: 'Global',       market: 'International', impact: 'High',   description: 'Federal Reserve interest rate decision' },
-  { date: '2026-07-30', title: 'US GDP Q2 2026 (Advance)',             category: 'Macro',        market: 'International', impact: 'High',   description: 'US Q2 2026 advance GDP estimate' },
-
-  // ── India — August 2026 ──────────────────────────────────────────────────
-  { date: '2026-08-12', title: 'India CPI Inflation (July)',           category: 'Macro', market: 'India', impact: 'Medium', description: 'Consumer Price Index — July 2026 reading' },
-  { date: '2026-08-14', title: 'India WPI Inflation (July)',           category: 'Macro', market: 'India', impact: 'Low',    description: 'Wholesale Price Index — July 2026' },
-  { date: '2026-08-18', title: 'Reliance Industries Q1 FY27 Results', category: 'Earnings', market: 'India', impact: 'High',   description: 'Q1 FY27 earnings announcement' },
-  { date: '2026-08-20', title: 'HDFC Bank Q1 FY27 Results',           category: 'Earnings', market: 'India', impact: 'High',   description: 'Q1 FY27 earnings announcement' },
-
-  // ── International — August 2026 ──────────────────────────────────────────
-  { date: '2026-08-07', title: 'US Non-Farm Payrolls (July)',          category: 'Macro',        market: 'International', impact: 'High',   description: 'US jobs report — July 2026' },
-  { date: '2026-08-12', title: 'US CPI Inflation (July)',              category: 'Macro',        market: 'International', impact: 'High',   description: 'US Consumer Price Index — July 2026 reading' },
-  { date: '2026-08-20', title: 'Bank of England Decision',             category: 'Central Bank', market: 'International', impact: 'Medium', description: 'BoE monetary policy rate decision' },
-  { date: '2026-08-27', title: 'Jackson Hole Symposium',               category: 'Global',       market: 'International', impact: 'High',   description: 'Fed Chair annual speech at Jackson Hole — policy signals' },
+  // International: through December 2027
+  ...([
+    ['2026-11-10', 'October 2026'], ['2026-12-10', 'November 2026'], ['2027-01-13', 'December 2026'],
+    ['2027-02-11', 'January 2027'], ['2027-03-10', 'February 2027'], ['2027-04-13', 'March 2027'],
+    ['2027-05-12', 'April 2027'], ['2027-06-10', 'May 2027'], ['2027-07-14', 'June 2027'],
+    ['2027-08-11', 'July 2027'], ['2027-09-14', 'August 2027'], ['2027-10-14', 'September 2027'],
+    ['2027-11-10', 'October 2027'], ['2027-12-10', 'November 2027'],
+  ] as [string, string][]).map(usCpi),
+  ...([
+    ['2026-12-04', 'November 2026'], ['2027-01-08', 'December 2026'], ['2027-02-05', 'January 2027'],
+    ['2027-03-05', 'February 2027'], ['2027-04-02', 'March 2027'], ['2027-05-07', 'April 2027'],
+    ['2027-06-04', 'May 2027'], ['2027-07-02', 'June 2027'], ['2027-08-06', 'July 2027'],
+    ['2027-09-03', 'August 2027'], ['2027-10-08', 'September 2027'], ['2027-11-05', 'October 2027'],
+    ['2027-12-03', 'November 2027'],
+  ] as [string, string][]).map(usJobs),
+  ...([
+    ['2026-12-09', '8-9 December'], ['2027-01-27', '26-27 January'], ['2027-03-17', '16-17 March'],
+    ['2027-04-28', '27-28 April'], ['2027-06-09', '8-9 June'], ['2027-07-28', '27-28 July'],
+    ['2027-09-15', '14-15 September'], ['2027-10-27', '26-27 October'], ['2027-12-08', '7-8 December'],
+  ] as [string, string][]).map(fomc),
+  ...([
+    ['2026-12-17', '16-17 December'], ['2027-02-04', '3-4 February'], ['2027-03-18', '17-18 March'],
+    ['2027-04-29', '28-29 April'], ['2027-06-10', '9-10 June'], ['2027-07-22', '21-22 July'],
+    ['2027-09-09', '8-9 September'], ['2027-10-28', '27-28 October'], ['2027-12-16', '15-16 December'],
+  ] as [string, string][]).map(ecb),
+  ...['2026-12-17', '2027-02-04', '2027-03-18', '2027-04-29', '2027-06-17', '2027-07-29', '2027-09-16', '2027-11-04', '2027-12-16'].map(boe),
+  ...([
+    ['2026-12-18', '17-18 December'], ['2027-01-22', '21-22 January'], ['2027-03-18', '17-18 March'],
+    ['2027-04-28', '27-28 April'], ['2027-06-11', '10-11 June'], ['2027-07-22', '21-22 July'],
+    ['2027-09-22', '21-22 September'], ['2027-10-29', '28-29 October'], ['2027-12-17', '16-17 December'],
+  ] as [string, string][]).map(boj),
 ];

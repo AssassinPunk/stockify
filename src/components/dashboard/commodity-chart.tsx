@@ -120,7 +120,7 @@ export default function CommodityChart({
       } else {
         const areaData = points.map(d => ({ time: toTime(d.date), value: d.value }));
         const s = chart.addSeries(AreaSeries, {
-          lineColor: '#6366f1',
+          lineColor: '#d4d4d4',
           topColor: 'rgba(99,102,241,0.35)',
           bottomColor: 'rgba(99,102,241,0)',
           lineWidth: 2,
@@ -139,7 +139,7 @@ export default function CommodityChart({
   }, [data, timeframe, chartType]);
 
   return (
-    <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 overflow-hidden flex flex-col">
+    <Card className="rounded-2xl border-0 bg-card shadow-none overflow-hidden flex flex-col">
       <CardHeader className="shrink-0 pb-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <p className="text-sm font-semibold text-muted-foreground">{label} — Price Chart</p>

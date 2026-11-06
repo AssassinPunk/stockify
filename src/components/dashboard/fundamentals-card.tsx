@@ -75,7 +75,7 @@ export default function FundamentalsCard({
   ];
 
   return (
-    <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10">
+    <Card className="rounded-2xl border-0 bg-card shadow-none">
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Key Metrics
@@ -91,7 +91,7 @@ export default function FundamentalsCard({
               {loading ? (
                 <Skeleton className="mt-1.5 h-5 w-20" />
               ) : (
-                <p className="mt-1 font-mono text-sm font-semibold">
+                <p className="mt-1 tabular-nums text-sm font-semibold">
                   {formatMetric(value, type, currency)}
                 </p>
               )}

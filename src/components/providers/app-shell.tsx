@@ -13,7 +13,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset className="min-w-0">{children}</SidebarInset>
     </SidebarProvider>
   );
 }

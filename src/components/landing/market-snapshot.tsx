@@ -2,15 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { formatNumber } from '@/lib/format';
+import { INDEX_MEANINGS } from '@/lib/index-meanings';
 import type { IndexData, VixData } from '@/lib/types';
 import { calculateVixMoves, getRiskLevel } from '@/lib/vix';
 
 const POLL_MS = 30_000;
-const MEANINGS: Record<string, string> = {
-  'NIFTY 50': '50 of India\'s large companies on the NSE, tracked as one number.',
-  SENSEX: '30 large companies on the BSE, and one of India\'s oldest market measures.',
-  'BANK NIFTY': 'Large banking stocks on the NSE, a quick read on how banks are doing.',
-};
 
 function Change({ percent }: { percent?: number }) {
   if (percent === undefined || !Number.isFinite(percent)) return <p className="snap-change">No change data</p>;
@@ -84,7 +80,7 @@ export default function MarketSnapshot({
           <li key={index.symbol} data-reveal>
             <div className="snap-name">
               <h3>{index.symbol}</h3>
-              <p>{MEANINGS[index.symbol]}</p>
+              <p>{INDEX_MEANINGS[index.symbol]}</p>
             </div>
             <p className="snap-value">{index.value > 0 ? formatNumber(index.value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'Unavailable'}</p>
             {index.value > 0 ? <Change percent={index.percentChange} /> : <p className="snap-change">No data</p>}

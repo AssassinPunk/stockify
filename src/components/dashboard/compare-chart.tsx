@@ -224,7 +224,7 @@ export default function CompareChart({ ticker }: { ticker: Ticker }) {
   const isLoading = loadingA || loadingB;
 
   return (
-    <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10 overflow-hidden flex flex-col">
+    <Card className="rounded-2xl border-0 bg-card shadow-none overflow-hidden flex flex-col">
       <CardHeader className="shrink-0 pb-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
@@ -240,7 +240,7 @@ export default function CompareChart({ ticker }: { ticker: Ticker }) {
               <SelectContent>
                 {candidates.map(t => (
                   <SelectItem key={t.symbol} value={t.symbol}>
-                    <span className="font-mono font-semibold">{t.symbol}</span>
+                    <span className="tabular-nums font-semibold">{t.symbol}</span>
                     <span className="ml-2 text-xs text-muted-foreground">{t.name}</span>
                   </SelectItem>
                 ))}

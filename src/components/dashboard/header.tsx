@@ -163,7 +163,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur-sm md:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
         <Separator orientation="vertical" className="h-6" />
@@ -172,8 +172,8 @@ export default function Header() {
         </Link>
       </div>
 
-      <nav className="flex flex-1 items-center gap-4 md:gap-6">
-        <div className="hidden md:flex items-center gap-1 md:gap-2 overflow-x-auto no-scrollbar">
+      <nav className="flex min-w-0 flex-1 items-center gap-4 md:gap-6">
+        <div className="hidden min-w-0 xl:flex items-center gap-1 md:gap-2 overflow-x-auto no-scrollbar">
             <div className="flex items-center gap-1 md:gap-2">
               {pinnedStocks.map(stock => (
                   <Link key={stock.symbol} href={`/stock/${stock.symbol}`} className={getLinkClass(`/stock/${stock.symbol}`)}>
@@ -184,7 +184,7 @@ export default function Header() {
             </div>
         </div>
 
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex min-w-0 items-center gap-2 ml-auto">
           <StockSearch />
 
           {user ? (
@@ -225,7 +225,7 @@ export default function Header() {
                 <Link href="/login">Sign In</Link>
               </Button>
               <Button asChild>
-                <Link href="/signup">Sign Up</Link>
+                <Link href="/signup" className="whitespace-nowrap">Sign Up</Link>
               </Button>
             </div>
           )}

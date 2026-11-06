@@ -1,4 +1,3 @@
-import { ArrowDown, ArrowUp } from 'lucide-react';
 import VixGauge from '@/components/dashboard/vix-gauge';
 import { formatChange, formatNumber } from '@/lib/format';
 import type { ChartDataPoint, IndexData, SectorData, VixData } from '@/lib/types';
@@ -8,12 +7,11 @@ const money = (value: number) => formatNumber(value, { minimumFractionDigits: 2,
 
 function IndexTile({ index }: { index: IndexData }) {
   const up = index.change >= 0;
-  const Icon = up ? ArrowUp : ArrowDown;
   return (
     <div className="ui-panel ui-tile">
       <div className="ui-row">
         <span className="ui-label">{index.symbol}</span>
-        <Icon className={up ? 'ui-up' : 'ui-down'} aria-hidden="true" />
+        <span className={up ? 'ui-up' : 'ui-down'} aria-hidden="true">{up ? '▲' : '▼'}</span>
       </div>
       {index.value > 0 ? (
         <>

@@ -28,7 +28,7 @@ const REASONS = [
 export default async function LandingPage() {
   const [indices, vix, chart, sectors] = await Promise.all([
     fetchLiveIndianIndices(),
-    fetchIndiaVix(),
+    fetchIndiaVix({ policy: { revalidate: 300 } }),
     fetchYahooChart('NIFTY 50').catch(() => null),
     fetchLiveSectors().catch(() => []),
   ]);
