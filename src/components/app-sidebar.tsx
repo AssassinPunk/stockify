@@ -40,13 +40,13 @@ const data = {
   navMain: [
     {
       title: 'Dashboard',
-      url: '/',
+      url: '/dashboard',
       icon: LayoutDashboard,
       isActive: true,
       items: [
         {
           title: 'India Markets',
-          url: '/',
+          url: '/dashboard',
           icon: Flag,
         },
         {
@@ -119,14 +119,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 {item.items ? (
                   <Collapsible
                     asChild
-                    defaultOpen={item.items?.some(s => s.url === pathname) || pathname === '/' || pathname === '/international'}
+                    defaultOpen={item.items?.some(s => s.url === pathname) || pathname === '/dashboard' || pathname === '/international'}
                     className="group/collapsible"
                   >
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton
                           tooltip={item.title}
-                          isActive={item.items?.some(s => s.url === pathname) || pathname === '/' || pathname === '/international'}
+                          isActive={item.items?.some(s => s.url === pathname) || pathname === '/dashboard' || pathname === '/international'}
                         >
                           {item.icon && <item.icon />}
                           <span>{item.title}</span>

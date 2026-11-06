@@ -1,0 +1,2578 @@
+{
+ "url": "http://localhost:9002/",
+ "at": "2026-11-06T08:57:38.350Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 8,
+   "filled": [
+    1,
+    1,
+    0.98,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "motion": {
+    "elements": 39,
+    "css": 3,
+    "transitions": 35,
+    "scripted": 1,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 6672,
+     "screens": 7.4,
+     "words": 851,
+     "img": 8,
+     "video": 0,
+     "canvas": 0,
+     "svg": 21,
+     "sections": 7,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 13,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 10,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Understand the market. Make smarter decisions.",
+     "words": 6,
+     "chars": 46,
+     "lines": 2,
+     "size": 83.5,
+     "vw": 5.8,
+     "font": "Inter",
+     "weight": 500,
+     "tracking": -0.04,
+     "leading": 1.06,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "center",
+     "widthRatio": 0.94,
+     "top": 120,
+     "tag": "h1",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Understand the market. Make smarter decisions.",
+     "words": 6,
+     "lines": 2,
+     "size": 83.5,
+     "font": "Inter"
+    },
+    "headings": [
+     {
+      "text": "Understand the market. Make smarter decisions.",
+      "words": 6,
+      "chars": 46,
+      "lines": 2,
+      "size": 83.5,
+      "vw": 5.8,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.04,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 120,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "24,823.90",
+      "words": 1,
+      "chars": 9,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Inter",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.35,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.2,
+      "top": 479,
+      "tag": "strong",
+      "kind": "heading"
+     },
+     {
+      "text": "80,347.40",
+      "words": 1,
+      "chars": 9,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Inter",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.35,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.2,
+      "top": 479,
+      "tag": "strong",
+      "kind": "heading"
+     },
+     {
+      "text": "58,673.10",
+      "words": 1,
+      "chars": 9,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Inter",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.35,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.2,
+      "top": 479,
+      "tag": "strong",
+      "kind": "heading"
+     },
+     {
+      "text": "17.08 Low Extreme",
+      "words": 3,
+      "chars": 17,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Inter",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.35,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.2,
+      "top": 479,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "The market, in plain words",
+      "words": 5,
+      "chars": 26,
+      "lines": 1,
+      "size": 57.6,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.53,
+      "top": 1185,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "24,823.90",
+      "words": 1,
+      "chars": 9,
+      "lines": 1,
+      "size": 57.6,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.36,
+      "top": 1350,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "80,347.40",
+      "words": 1,
+      "chars": 9,
+      "lines": 1,
+      "size": 57.6,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.36,
+      "top": 1514,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "58,673.10",
+      "words": 1,
+      "chars": 9,
+      "lines": 1,
+      "size": 57.6,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.36,
+      "top": 1678,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "17.08",
+      "words": 1,
+      "chars": 5,
+      "lines": 1,
+      "size": 57.6,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.36,
+      "top": 1842,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "Explore what Stockify does",
+      "words": 4,
+      "chars": 26,
+      "lines": 1,
+      "size": 57.6,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.53,
+      "top": 2135,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Meet FinPilot. Your personal finance companion.",
+      "words": 6,
+      "chars": 47,
+      "lines": 1,
+      "size": 57.6,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 3116,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "How Stockify and FinPilot work together",
+      "words": 6,
+      "chars": 39,
+      "lines": 2,
+      "size": 57.6,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.53,
+      "top": 4172,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "+",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 32,
+      "vw": 2.2,
+      "font": "Inter",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.04,
+      "top": 4523,
+      "tag": "span",
+      "kind": "statement"
+     },
+     {
+      "text": "24,823.90",
+      "words": 1,
+      "chars": 9,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Inter",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.55,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.21,
+      "top": 4611,
+      "tag": "strong",
+      "kind": "statement"
+     },
+     {
+      "text": "Make informed decisions",
+      "words": 3,
+      "chars": 23,
+      "lines": 1,
+      "size": 57.6,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.025,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.88,
+      "top": 4801,
+      "tag": "h3",
+      "kind": "heading"
+     },
+     {
+      "text": "Why Stockify?",
+      "words": 2,
+      "chars": 13,
+      "lines": 1,
+      "size": 57.6,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.37,
+      "top": 5115,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Your financial journey, made simpler.",
+      "words": 5,
+      "chars": 37,
+      "lines": 2,
+      "size": 57.6,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.53,
+      "top": 5887,
+      "tag": "h2",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 18,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 6,
+     "centered": 0,
+     "medianWords": 1,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      14,
+      15,
+      16,
+      18,
+      19,
+      20,
+      24,
+      32,
+      58,
+      84
+     ],
+     "sizeCount": 10,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter",
+      "size": 18.7,
+      "leading": 1.55,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 18.5
+     },
+     "measureChars": 139,
+     "max": {
+      "size": 83.5,
+      "vw": 5.8,
+      "font": "Inter",
+      "text": "Understand the market."
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0.01,
+     "centerShare": 0,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#000000",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 0
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#060807",
+       "top": 0,
+       "hsl": {
+        "h": 150,
+        "s": 0.14,
+        "l": 0.03
+       }
+      },
+      {
+       "color": "#0f1312",
+       "top": 427,
+       "hsl": {
+        "h": 165,
+        "s": 0.12,
+        "l": 0.07
+       }
+      },
+      {
+       "color": "#0a1e24",
+       "top": 3001,
+       "hsl": {
+        "h": 194,
+        "s": 0.57,
+        "l": 0.09
+       }
+      },
+      {
+       "color": "#10b981",
+       "top": 5757,
+       "hsl": {
+        "h": 160,
+        "s": 0.84,
+        "l": 0.39
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#f3f6f4",
+       "share": 0.68
+      },
+      {
+       "color": "#aeb8b3",
+       "share": 0.14
+      },
+      {
+       "color": "#c5d6da",
+       "share": 0.05
+      },
+      {
+       "color": "#03130d",
+       "share": 0.04
+      },
+      {
+       "color": "#67e8f9",
+       "share": 0.03
+      }
+     ],
+     "button": {
+      "bg": "#10b981",
+      "hsl": {
+       "h": 160,
+       "s": 0.84,
+       "l": 0.39
+      },
+      "fg": "#03130d"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 6,
+     "inHero": 3,
+     "radius": "pill",
+     "height": 48,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Get Started",
+      "Explore Stockify",
+      "Discover FinPilot"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 17,
+     "boxRadius": 12,
+     "squareMedia": 0,
+     "roundedMedia": 8,
+     "mediaRadius": 12,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": true,
+       "rounded": true,
+       "top": 439
+      }
+     ]
+    },
+    "heroMedia": [
+     {
+      "type": "svg",
+      "ratio": 0.18
+     }
+    ],
+    "nav": {
+     "links": 8,
+     "fixed": true,
+     "height": 72,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "inter"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 6672,
+    "margins": {
+     "left": 40,
+     "right": 58
+    },
+    "sections": [
+     {
+      "sel": "section.hero",
+      "tag": "section",
+      "top": 72,
+      "height": 929,
+      "words": 103,
+      "media": 1,
+      "middle": 22,
+      "heading": {
+       "text": "Understand the market.",
+       "size": 84,
+       "tag": "h1"
+      },
+      "left": 40,
+      "right": 66,
+      "textLeft": 40,
+      "textRight": 66,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#markets.band",
+      "tag": "section",
+      "top": 1001,
+      "height": 950,
+      "words": 97,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "The market, in plain words",
+       "size": 58,
+       "tag": "h2"
+      },
+      "left": 40,
+      "right": 50,
+      "textLeft": 40,
+      "textRight": 50,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#features.band",
+      "tag": "section",
+      "top": 1951,
+      "height": 892,
+      "words": 83,
+      "media": 1,
+      "middle": 0,
+      "heading": {
+       "text": "Explore what Stockify does",
+       "size": 58,
+       "tag": "h2"
+      },
+      "left": 40,
+      "right": 40,
+      "textLeft": 40,
+      "textRight": 41,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#finpilot.field-pilot",
+      "tag": "section",
+      "top": 3001,
+      "height": 1012,
+      "words": 190,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Meet FinPilot. Your personal finance companion.",
+       "size": 58,
+       "tag": "h2"
+      },
+      "left": 40,
+      "right": 58,
+      "textLeft": 40,
+      "textRight": 58,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#how.band",
+      "tag": "section",
+      "top": 4013,
+      "height": 944,
+      "words": 100,
+      "media": 0,
+      "middle": 1,
+      "heading": {
+       "text": "How Stockify and FinPilot work together",
+       "size": 58,
+       "tag": "h2"
+      },
+      "left": 40,
+      "right": 78,
+      "textLeft": 40,
+      "textRight": 78,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#about.band.why",
+      "tag": "section",
+      "top": 4957,
+      "height": 642,
+      "words": 149,
+      "media": 0,
+      "middle": 88,
+      "heading": {
+       "text": "Why Stockify?",
+       "size": 58,
+       "tag": "h2"
+      },
+      "left": 40,
+      "right": 69,
+      "textLeft": 40,
+      "textRight": 69,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section.field-cta",
+      "tag": "section",
+      "top": 5757,
+      "height": 455,
+      "words": 34,
+      "media": 0,
+      "middle": 202,
+      "heading": {
+       "text": "Your financial journey, made simpler.",
+       "size": 58,
+       "tag": "h2"
+      },
+      "left": 40,
+      "right": 53,
+      "textLeft": 40,
+      "textRight": 53,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "footer.footer",
+      "tag": "footer",
+      "top": 6212,
+      "height": 459,
+      "words": 101,
+      "media": 0,
+      "middle": 133,
+      "heading": {
+       "text": "Explore",
+       "size": 15,
+       "tag": "h2"
+      },
+      "left": 40,
+      "right": 126,
+      "textLeft": 40,
+      "textRight": 126,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Understand the market. Make smarter decisions.",
+      "size": 84,
+      "top": 120,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 40,
+      "n": 14
+     },
+     {
+      "x": 853,
+      "n": 3
+     }
+    ],
+    "leftBlocks": 17,
+    "bodySize": 19,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0.07,
+    "voidBox": {
+     "x": 960,
+     "y": 120,
+     "w": 480,
+     "h": 180
+    }
+   },
+   "app": null,
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 11,
+   "filled": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "motion": {
+    "elements": 35,
+    "css": 3,
+    "transitions": 31,
+    "scripted": 1,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 10513,
+     "screens": 10.3,
+     "words": 846,
+     "img": 8,
+     "video": 0,
+     "canvas": 0,
+     "svg": 21,
+     "sections": 7,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 13,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 11,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Understand the market. Make smarter decisions.",
+     "words": 6,
+     "chars": 46,
+     "lines": 2,
+     "size": 44.5,
+     "vw": 5.8,
+     "font": "Inter",
+     "weight": 500,
+     "tracking": -0.04,
+     "leading": 1.06,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "center",
+     "widthRatio": 0.94,
+     "top": 98,
+     "tag": "h1",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Understand the market. Make smarter decisions.",
+     "words": 6,
+     "lines": 2,
+     "size": 44.5,
+     "font": "Inter"
+    },
+    "headings": [
+     {
+      "text": "Understand the market. Make smarter decisions.",
+      "words": 6,
+      "chars": 46,
+      "lines": 2,
+      "size": 44.5,
+      "vw": 5.8,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.04,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 98,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "The market, in plain words",
+      "words": 5,
+      "chars": 26,
+      "lines": 1,
+      "size": 30.7,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 1471,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "24,823.90",
+      "words": 1,
+      "chars": 9,
+      "lines": 1,
+      "size": 30.7,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.34,
+      "top": 1663,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "80,347.40",
+      "words": 1,
+      "chars": 9,
+      "lines": 1,
+      "size": 30.7,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.34,
+      "top": 1820,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "58,673.10",
+      "words": 1,
+      "chars": 9,
+      "lines": 1,
+      "size": 30.7,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.34,
+      "top": 1977,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "17.08",
+      "words": 1,
+      "chars": 5,
+      "lines": 1,
+      "size": 30.7,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.34,
+      "top": 2147,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "Explore what Stockify does",
+      "words": 4,
+      "chars": 26,
+      "lines": 1,
+      "size": 30.7,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 2339,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Meet FinPilot. Your personal finance companion.",
+      "words": 6,
+      "chars": 47,
+      "lines": 1,
+      "size": 30.7,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 6936,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "How Stockify and FinPilot work together",
+      "words": 6,
+      "chars": 39,
+      "lines": 1,
+      "size": 30.7,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 8188,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "+",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 32,
+      "vw": 4.2,
+      "font": "Inter",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.07,
+      "top": 8487,
+      "tag": "span",
+      "kind": "statement"
+     },
+     {
+      "text": "Make informed decisions",
+      "words": 3,
+      "chars": 23,
+      "lines": 1,
+      "size": 30.7,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.025,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.88,
+      "top": 8734,
+      "tag": "h3",
+      "kind": "heading"
+     },
+     {
+      "text": "Why Stockify?",
+      "words": 2,
+      "chars": 13,
+      "lines": 1,
+      "size": 30.7,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 8922,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Your financial journey, made simpler.",
+      "words": 5,
+      "chars": 37,
+      "lines": 1,
+      "size": 30.7,
+      "vw": 4,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 9637,
+      "tag": "h2",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 13,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 5,
+     "centered": 0,
+     "medianWords": 3,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      14,
+      15,
+      16,
+      17,
+      18,
+      20,
+      31,
+      32,
+      45
+     ],
+     "sizeCount": 9,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter",
+      "size": 17,
+      "leading": 1.55,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 18.5
+     },
+     "measureChars": 104,
+     "max": {
+      "size": 44.5,
+      "vw": 5.8,
+      "font": "Inter",
+      "text": "Understand the market."
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0.01,
+     "centerShare": 0,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#000000",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 0
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#060807",
+       "top": 0,
+       "hsl": {
+        "h": 150,
+        "s": 0.14,
+        "l": 0.03
+       }
+      },
+      {
+       "color": "#0f1312",
+       "top": 361,
+       "hsl": {
+        "h": 165,
+        "s": 0.12,
+        "l": 0.07
+       }
+      },
+      {
+       "color": "#0a1e24",
+       "top": 6872,
+       "hsl": {
+        "h": 194,
+        "s": 0.57,
+        "l": 0.09
+       }
+      },
+      {
+       "color": "#102a31",
+       "top": 7528,
+       "hsl": {
+        "h": 193,
+        "s": 0.51,
+        "l": 0.13
+       }
+      },
+      {
+       "color": "#10b981",
+       "top": 9568,
+       "hsl": {
+        "h": 160,
+        "s": 0.84,
+        "l": 0.39
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#f3f6f4",
+       "share": 0.68
+      },
+      {
+       "color": "#aeb8b3",
+       "share": 0.14
+      },
+      {
+       "color": "#c5d6da",
+       "share": 0.05
+      },
+      {
+       "color": "#03130d",
+       "share": 0.04
+      },
+      {
+       "color": "#67e8f9",
+       "share": 0.03
+      }
+     ],
+     "button": {
+      "bg": "#10b981",
+      "hsl": {
+       "h": 160,
+       "s": 0.84,
+       "l": 0.39
+      },
+      "fg": "#03130d"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 5,
+     "inHero": 3,
+     "radius": "pill",
+     "height": 48,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Get Started",
+      "Explore Stockify",
+      "Discover FinPilot"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 17,
+     "boxRadius": 12,
+     "squareMedia": 0,
+     "roundedMedia": 8,
+     "mediaRadius": 12,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": true,
+       "rounded": true,
+       "top": 373
+      }
+     ]
+    },
+    "heroMedia": [
+     {
+      "type": "svg",
+      "ratio": 0.21
+     }
+    ],
+    "nav": {
+     "links": 3,
+     "fixed": true,
+     "height": 72,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "inter"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 10513,
+    "margins": {
+     "left": 22,
+     "right": 22
+    },
+    "sections": [
+     {
+      "sel": "section.hero",
+      "tag": "section",
+      "top": 72,
+      "height": 1311,
+      "words": 103,
+      "media": 1,
+      "middle": 0,
+      "heading": {
+       "text": "Understand the market.",
+       "size": 45,
+       "tag": "h1"
+      },
+      "left": 22,
+      "right": 51,
+      "textLeft": 22,
+      "textRight": 51,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#markets.band",
+      "tag": "section",
+      "top": 1383,
+      "height": 868,
+      "words": 97,
+      "media": 0,
+      "middle": 27,
+      "heading": {
+       "text": "The market, in plain words",
+       "size": 31,
+       "tag": "h2"
+      },
+      "left": 22,
+      "right": 61,
+      "textLeft": 22,
+      "textRight": 61,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#features.band",
+      "tag": "section",
+      "top": 2251,
+      "height": 4533,
+      "words": 83,
+      "media": 8,
+      "middle": 0,
+      "heading": {
+       "text": "Explore what Stockify does",
+       "size": 31,
+       "tag": "h2"
+      },
+      "left": 22,
+      "right": 22,
+      "textLeft": 22,
+      "textRight": 133,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#finpilot.field-pilot",
+      "tag": "section",
+      "top": 6872,
+      "height": 1227,
+      "words": 190,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Meet FinPilot. Your personal finance companion.",
+       "size": 31,
+       "tag": "h2"
+      },
+      "left": 22,
+      "right": 38,
+      "textLeft": 22,
+      "textRight": 38,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#how.band",
+      "tag": "section",
+      "top": 8100,
+      "height": 734,
+      "words": 100,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "How Stockify and FinPilot work together",
+       "size": 31,
+       "tag": "h2"
+      },
+      "left": 22,
+      "right": 65,
+      "textLeft": 22,
+      "textRight": 65,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#about.band.why",
+      "tag": "section",
+      "top": 8834,
+      "height": 647,
+      "words": 149,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Why Stockify?",
+       "size": 31,
+       "tag": "h2"
+      },
+      "left": 22,
+      "right": 35,
+      "textLeft": 22,
+      "textRight": 35,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section.field-cta",
+      "tag": "section",
+      "top": 9568,
+      "height": 370,
+      "words": 34,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Your financial journey, made simpler.",
+       "size": 31,
+       "tag": "h2"
+      },
+      "left": 22,
+      "right": 191,
+      "textLeft": 22,
+      "textRight": 191,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "footer.footer",
+      "tag": "footer",
+      "top": 9938,
+      "height": 575,
+      "words": 101,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Explore",
+       "size": 15,
+       "tag": "h2"
+      },
+      "left": 22,
+      "right": 34,
+      "textLeft": 22,
+      "textRight": 34,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Understand the market. Make smarter decisions.",
+      "size": 45,
+      "top": 98,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 22,
+      "n": 17
+     }
+    ],
+    "leftBlocks": 17,
+    "bodySize": 17,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": null,
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 12,
+   "filled": [
+    0.99,
+    1,
+    1,
+    0.98,
+    0.99,
+    0.93,
+    0.99,
+    1,
+    0.99,
+    1,
+    1,
+    1
+   ],
+   "motion": {
+    "elements": 35,
+    "css": 3,
+    "transitions": 31,
+    "scripted": 1,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 10275,
+     "screens": 12.2,
+     "words": 840,
+     "img": 8,
+     "video": 0,
+     "canvas": 0,
+     "svg": 21,
+     "sections": 7,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 13,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 10,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Understand the market. Make smarter decisions.",
+     "words": 6,
+     "chars": 46,
+     "lines": 2,
+     "size": 28.1,
+     "vw": 7.2,
+     "font": "Inter",
+     "weight": 500,
+     "tracking": -0.04,
+     "leading": 1.06,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "center",
+     "widthRatio": 0.92,
+     "top": 88,
+     "tag": "h1",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Understand the market. Make smarter decisions.",
+     "words": 6,
+     "lines": 2,
+     "size": 28.1,
+     "font": "Inter"
+    },
+    "headings": [
+     {
+      "text": "Understand the market. Make smarter decisions.",
+      "words": 6,
+      "chars": 46,
+      "lines": 2,
+      "size": 28.1,
+      "vw": 7.2,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.04,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 88,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "The market, in plain words",
+      "words": 5,
+      "chars": 26,
+      "lines": 1,
+      "size": 23.8,
+      "vw": 6.1,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 1420,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "24,825.75",
+      "words": 1,
+      "chars": 9,
+      "lines": 1,
+      "size": 30,
+      "vw": 7.7,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.49,
+      "top": 1718,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "80,363.46",
+      "words": 1,
+      "chars": 9,
+      "lines": 1,
+      "size": 30,
+      "vw": 7.7,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.49,
+      "top": 1896,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "58,666.80",
+      "words": 1,
+      "chars": 9,
+      "lines": 1,
+      "size": 30,
+      "vw": 7.7,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.49,
+      "top": 2074,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "17.08",
+      "words": 1,
+      "chars": 5,
+      "lines": 1,
+      "size": 30,
+      "vw": 7.7,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.49,
+      "top": 2278,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "Explore what Stockify does",
+      "words": 4,
+      "chars": 26,
+      "lines": 1,
+      "size": 23.8,
+      "vw": 6.1,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 2418,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Meet FinPilot. Your personal finance companion.",
+      "words": 6,
+      "chars": 47,
+      "lines": 2,
+      "size": 23.8,
+      "vw": 6.1,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 5222,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "How Stockify and FinPilot work together",
+      "words": 6,
+      "chars": 39,
+      "lines": 2,
+      "size": 23.8,
+      "vw": 6.1,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 6924,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "+",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 32,
+      "vw": 8.2,
+      "font": "Inter",
+      "weight": 400,
+      "tracking": 0,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.12,
+      "top": 7353,
+      "tag": "span",
+      "kind": "statement"
+     },
+     {
+      "text": "Make informed decisions",
+      "words": 3,
+      "chars": 23,
+      "lines": 1,
+      "size": 24,
+      "vw": 6.2,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.025,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.79,
+      "top": 7776,
+      "tag": "h3",
+      "kind": "heading"
+     },
+     {
+      "text": "Why Stockify?",
+      "words": 2,
+      "chars": 13,
+      "lines": 1,
+      "size": 23.8,
+      "vw": 6.1,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 8006,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Your financial journey, made simpler.",
+      "words": 5,
+      "chars": 37,
+      "lines": 2,
+      "size": 23.8,
+      "vw": 6.1,
+      "font": "Inter",
+      "weight": 500,
+      "tracking": -0.035,
+      "leading": 1.06,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 9112,
+      "tag": "h2",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 13,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 5,
+     "centered": 0,
+     "medianWords": 3,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      14,
+      15,
+      16,
+      17,
+      18,
+      20,
+      24,
+      28,
+      30,
+      32
+     ],
+     "sizeCount": 10,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter",
+      "size": 17,
+      "leading": 1.55,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 18.5
+     },
+     "measureChars": 51,
+     "max": {
+      "size": 32,
+      "vw": 8.2,
+      "font": "Inter",
+      "text": "+"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0.01,
+     "centerShare": 0,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#000000",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 0
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#060807",
+       "top": 0,
+       "hsl": {
+        "h": 150,
+        "s": 0.14,
+        "l": 0.03
+       }
+      },
+      {
+       "color": "#0f1312",
+       "top": 403,
+       "hsl": {
+        "h": 165,
+        "s": 0.12,
+        "l": 0.07
+       }
+      },
+      {
+       "color": "#0a1e24",
+       "top": 5158,
+       "hsl": {
+        "h": 194,
+        "s": 0.57,
+        "l": 0.09
+       }
+      },
+      {
+       "color": "#102a31",
+       "top": 5987,
+       "hsl": {
+        "h": 193,
+        "s": 0.51,
+        "l": 0.13
+       }
+      },
+      {
+       "color": "#10b981",
+       "top": 9048,
+       "hsl": {
+        "h": 160,
+        "s": 0.84,
+        "l": 0.39
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#f3f6f4",
+       "share": 0.68
+      },
+      {
+       "color": "#aeb8b3",
+       "share": 0.14
+      },
+      {
+       "color": "#c5d6da",
+       "share": 0.05
+      },
+      {
+       "color": "#03130d",
+       "share": 0.04
+      },
+      {
+       "color": "#67e8f9",
+       "share": 0.03
+      }
+     ],
+     "button": {
+      "bg": "#10b981",
+      "hsl": {
+       "h": 160,
+       "s": 0.84,
+       "l": 0.39
+      },
+      "fg": "#03130d"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 5,
+     "inHero": 3,
+     "radius": "pill",
+     "height": 48,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Get Started",
+      "Explore Stockify",
+      "Discover FinPilot"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 19,
+     "boxRadius": 12,
+     "squareMedia": 0,
+     "roundedMedia": 8,
+     "mediaRadius": 12,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": true,
+       "rounded": true,
+       "top": 411
+      }
+     ]
+    },
+    "heroMedia": [
+     {
+      "type": "svg",
+      "ratio": 0.11
+     }
+    ],
+    "nav": {
+     "links": 2,
+     "fixed": true,
+     "height": 64,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "inter"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 10275,
+    "margins": {
+     "left": 16,
+     "right": 16
+    },
+    "sections": [
+     {
+      "sel": "section.hero",
+      "tag": "section",
+      "top": 64,
+      "height": 1268,
+      "words": 101,
+      "media": 1,
+      "middle": 0,
+      "heading": {
+       "text": "Understand the market.",
+       "size": 28,
+       "tag": "h1"
+      },
+      "left": 16,
+      "right": 20,
+      "textLeft": 16,
+      "textRight": 20,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#markets.band",
+      "tag": "section",
+      "top": 1332,
+      "height": 998,
+      "words": 97,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "24,825.75",
+       "size": 30,
+       "tag": "p"
+      },
+      "left": 16,
+      "right": 31,
+      "textLeft": 16,
+      "textRight": 31,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "div.band-head",
+      "tag": "div",
+      "top": 2418,
+      "height": 147,
+      "words": 31,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Explore what Stockify does",
+       "size": 24,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 28,
+      "textLeft": 16,
+      "textRight": 28,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "ul.exhibit",
+      "tag": "ul",
+      "top": 2597,
+      "height": 2474,
+      "words": 52,
+      "media": 8,
+      "middle": 0,
+      "heading": null,
+      "left": 16,
+      "right": 16,
+      "textLeft": 52,
+      "textRight": 22,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#finpilot.field-pilot",
+      "tag": "section",
+      "top": 5158,
+      "height": 1678,
+      "words": 190,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Meet FinPilot. Your personal finance companion.",
+       "size": 24,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 16,
+      "textLeft": 16,
+      "textRight": 16,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#how.band",
+      "tag": "section",
+      "top": 6836,
+      "height": 1082,
+      "words": 100,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "How Stockify and FinPilot work together",
+       "size": 24,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 16,
+      "textLeft": 16,
+      "textRight": 16,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section#about.band.why",
+      "tag": "section",
+      "top": 7918,
+      "height": 1042,
+      "words": 149,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Why Stockify?",
+       "size": 24,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 16,
+      "textLeft": 16,
+      "textRight": 16,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section.field-cta",
+      "tag": "section",
+      "top": 9048,
+      "height": 430,
+      "words": 34,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Your financial journey, made simpler.",
+       "size": 24,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 52,
+      "textLeft": 16,
+      "textRight": 52,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "footer.footer",
+      "tag": "footer",
+      "top": 9478,
+      "height": 797,
+      "words": 101,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Explore",
+       "size": 15,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 18,
+      "textLeft": 16,
+      "textRight": 18,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Understand the market. Make smarter decisions.",
+      "size": 28,
+      "top": 88,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 16,
+      "n": 17
+     }
+    ],
+    "leftBlocks": 17,
+    "bodySize": 17,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": null,
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "FAIL",
+   "id": "icon-cards",
+   "width": 1440,
+   "message": "1 row(s) of identical cards each topped with a small icon (4 cards).",
+   "fix": "Replace with one composed section from the direction: a narrative split, a list set in large type, or real imagery per item.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "size-count",
+   "width": 1440,
+   "message": "10 different font sizes (14, 15, 16, 18, 19, 20, 24, 32, 58, 84).",
+   "fix": "A page needs about five: display, heading, lead, body, small.",
+   "alsoAt": [
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "no-real-pictures",
+   "width": 1440,
+   "message": "Only 0 real photograph(s) or clip(s); the rest are interface fragments.",
+   "fix": "Add two or more real pictures of the customer's world from scripts/assets.mjs, not stock of people at laptops."
+  },
+  {
+   "level": "WARN",
+   "id": "no-footage",
+   "width": 1440,
+   "message": "No video anywhere on the page.",
+   "fix": "Look for one honest clip with scripts/assets.mjs --video (the place, the material, the process) and use it as a muted loop with a poster frame. Defend its absence only if no clip fits the subject."
+  },
+  {
+   "level": "WARN",
+   "id": "measure",
+   "width": 1440,
+   "message": "Longest paragraph runs about 139 characters per line.",
+   "fix": "Cap paragraphs at 45–75 characters (max-width: 60ch).",
+   "alsoAt": [
+    768
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "off-centre",
+   "width": 1440,
+   "message": "The margins differ: 40px on the left, 58px on the right, at 1440px.",
+   "fix": "Put the navigation and the content on one pair of margins; check for padding on one side only, a scrollbar gutter, or a header on another inset than the page."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "E:\\Stonks(MiniProject)\\stockify\\.taste-skill\\inspect\\desktop-fold.jpg",
+   "pages": [
+    "E:\\Stonks(MiniProject)\\stockify\\.taste-skill\\inspect\\desktop-page-01.jpg",
+    "E:\\Stonks(MiniProject)\\stockify\\.taste-skill\\inspect\\desktop-page-02.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "E:\\Stonks(MiniProject)\\stockify\\.taste-skill\\inspect\\tablet-fold.jpg",
+   "pages": [
+    "E:\\Stonks(MiniProject)\\stockify\\.taste-skill\\inspect\\tablet-page-01.jpg",
+    "E:\\Stonks(MiniProject)\\stockify\\.taste-skill\\inspect\\tablet-page-02.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "E:\\Stonks(MiniProject)\\stockify\\.taste-skill\\inspect\\mobile-fold.jpg",
+   "pages": [
+    "E:\\Stonks(MiniProject)\\stockify\\.taste-skill\\inspect\\mobile-page-01.jpg",
+    "E:\\Stonks(MiniProject)\\stockify\\.taste-skill\\inspect\\mobile-page-02.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

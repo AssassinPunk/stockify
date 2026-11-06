@@ -3,8 +3,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import NextAuthSessionProvider from "@/components/providers/session-provider"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
+import AppShell from "@/components/providers/app-shell"
 
 export const metadata: Metadata = {
   title: 'Stockify',
@@ -25,12 +24,7 @@ export default function RootLayout({
       </head>
       <body className="font-body bg-background text-foreground antialiased overflow-x-hidden" suppressHydrationWarning>
         <NextAuthSessionProvider>
-          <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-              {children}
-            </SidebarInset>
-          </SidebarProvider>
+          <AppShell>{children}</AppShell>
           <Toaster />
         </NextAuthSessionProvider>
       </body>

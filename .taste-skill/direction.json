@@ -1,0 +1,460 @@
+{
+ "version": 1,
+ "at": "2026-11-06T08:50:13.710Z",
+ "seed": 617552872,
+ "redraws": 0,
+ "input": {
+  "brief": "Beginner-friendly Indian stock market analytics that simplifies market movements, with FinPilot, an upcoming personal finance assistant",
+  "sector": "finance",
+  "tone": null,
+  "have": [
+   "product-ui"
+  ],
+  "keep": [
+   "palette",
+   "type"
+  ],
+  "avoid": [],
+  "sections": [
+   "showcase",
+   "features",
+   "how-it-works",
+   "about",
+   "cta",
+   "footer"
+  ],
+  "direction": "dark-room"
+ },
+ "imagery": "interface",
+ "allow": [],
+ "direction": {
+  "id": "dark-room",
+  "name": "The dark room",
+  "sectors": [
+   "hospitality",
+   "restaurant",
+   "music",
+   "fashion",
+   "physical-product",
+   "finance",
+   "architecture",
+   "studio-portfolio",
+   "ai-product",
+   "personal-portfolio"
+  ],
+  "tones": [
+   "quiet",
+   "luxury"
+  ],
+  "needs": [],
+  "idea": "One dark field from top to bottom, and in it, lit things. Photographs and objects appear like exhibits in a dim gallery: each with space around it, each the brightest thing on its screen. Type is light, small and sparse. The darkness is not a theme switch; it is a room, and the page is a slow walk through it. It suits subjects sold on atmosphere and material: an evening restaurant, a metal card, a record, a house at dusk.",
+  "composition": "A single near-black or deep-toned ground runs the full page with no section bands. First screen: either the name at full width in a light weight along the bottom edge with one dim photograph above it, or one object or photograph centred at 40–50% of the viewport with a line of text beneath at 16–18px. Each later screen holds one or two lit items at a generous size (the main one 40–60% of the screen width) with its text set beside it at full reading size; the darkness frames the items, it does not replace content. Images vary in size but all share the same darkness at their edges so they sit in the ground without frames. Practical details come last in a simple two-column text block. The only solid light element on the page is the single primary action.",
+  "typography": "Light or regular weights; they glow on dark. Avoid heavy bold, which looks cheap on black. Headings 4–7vw at most; text 16–18px with leading 1.6 and a slightly lifted ink (not pure white).",
+  "typeClasses": [
+   "grotesk-light",
+   "serif-light-large",
+   "serif-display",
+   "extended-heavy"
+  ],
+  "colour": "A dark ground with a tint (blue-black, green-black, brown-black), a soft light ink, a dimmer ink for secondary text, and one warm or bright accent used once per screen at most.",
+  "paletteTags": [
+   "dark-neutral"
+  ],
+  "imagery": "Low-key photographs: dark backgrounds, one light source, subjects emerging from shadow. Their dark edges should blend into the page ground.",
+  "photoTreatment": "If a photograph's background is lighter than the page, darken the image slightly (`filter: brightness(0.85) contrast(1.05)`) rather than adding a frame.",
+  "sectionTags": [
+   "photo-led",
+   "quiet",
+   "object-led"
+  ],
+  "motion": "slow-crossfade",
+  "richness": "Light against dark, and the slow pacing.",
+  "pitfalls": "Grey text on black fails contrast quickly: check it. No glow effects, no neon accent, no coloured light blobs. A dark page with a bright busy photograph is not this direction; choose low-key images. Dark does not mean empty: every screen still carries its content at a readable size, and running text is a light ink at 7:1 or more, not a dim grey.",
+  "seenIn": [
+   "opl-kereliott",
+   "aww-moto-finance",
+   "aww-izanami",
+   "aww-cipher",
+   "opl-deeo-studio-2"
+  ],
+  "allow": [],
+  "photoTone": "dark"
+ },
+ "hero": {
+  "id": "navigation-on-the-midline",
+  "name": "Navigation on the midline",
+  "archetype": "fullbleed-media",
+  "directions": [
+   "place-carries-it",
+   "quiet-instrument",
+   "dark-room"
+  ],
+  "needs": [],
+  "blueprint": "One photograph or muted film fills the viewport at 100vw by 100svh, `object-fit: cover`, framed so the middle of the screen cuts the subject: a face or a skyline in the upper half, hands or ground in the lower. There is no headline block and nothing in the top or bottom bands. One rail 64px tall runs across the exact vertical centre (its top at 418px) and carries everything on one baseline in the paper colour: the `h1` on the 24px left margin, the name with what it is in two to five words at clamp(32px, 2.6vw, 40px) in medium weight, doing the job of the wordmark; from column 6, one supporting sentence at 18px, max 44ch; at the right margin, two text links at 15px and the single action as a small solid button in the paper colour. If the frame is light behind the rail, give the rail alone a neutral dark scrim at 35%. The rail is `position: sticky; top: 0` in the hero's flow, so as the page scrolls it rises with the content and docks as the header bar without changing size or layout, taking the page ground once the pictures have passed. A second full-bleed photograph, a closer detail of the same subject, follows directly beneath, so the rail is seen crossing two pictures before it reaches the top. On a black ground with one photographed object instead of a film, stand the object on the rail at about 17% of the width, between the sentence and the links, so the line seems to pass behind it.",
+  "mobile": "A portrait crop keeps the subject's middle on the screen's middle. The rail stays on the vertical centre, as tall as the `h1` needs at 28px on up to two lines, with the `h1` on the left and Menu on the right. The sentence leaves the rail and sits at 17px in the bottom-left on a 20px margin with the action as a full-width button under it, over a neutral scrim limited to that corner. The rail docks at the top as on desktop.",
+  "headline": "The `h1` on the rail: the name with what it is, two to five words at 32–40px on one line, and one sentence of up to 50 characters beside it; the picture does the rest.",
+  "motion": "slow-crossfade",
+  "seenIn": [
+   "aww-odyssee",
+   "aww-milledollars",
+   "aww-twks-1"
+  ]
+ },
+ "type": null,
+ "palette": null,
+ "photos": {
+  "set": "architecture",
+  "title": "Architecture",
+  "note": "structure, lines, bridges, facades and building interiors",
+  "treatment": "If a photograph's background is lighter than the page, darken the image slightly (`filter: brightness(0.85) contrast(1.05)`) rather than adding a frame.",
+  "others": [
+   "sky-and-space",
+   "water",
+   "fog-and-quiet",
+   "texture"
+  ],
+  "photos": [
+   {
+    "id": 693,
+    "alt": "Red suspension bridge tower rising from fog above rugged cliffs",
+    "tone": "mid",
+    "colours": [
+     "rust red",
+     "grey",
+     "dark teal"
+    ],
+    "mono": false,
+    "calm": "left",
+    "quality": 5,
+    "ratio": 2.15,
+    "by": "Rob Bye",
+    "page": "https://unsplash.com/photos/bopC0sTGu-E"
+   },
+   {
+    "id": 942,
+    "alt": "White angular concrete building against a black sky",
+    "tone": "dark",
+    "colours": [
+     "black",
+     "white",
+     "pale grey"
+    ],
+    "mono": true,
+    "calm": "top",
+    "quality": 5,
+    "ratio": 1.5,
+    "by": "Carl Nenzen Loven",
+    "page": "https://unsplash.com/photos/busqfOj6i80"
+   },
+   {
+    "id": 546,
+    "alt": "Vaulted stone cloister corridor lit by warm light through arches",
+    "tone": "dark",
+    "colours": [
+     "burnt orange",
+     "dark brown",
+     "amber"
+    ],
+    "mono": false,
+    "calm": "none",
+    "quality": 4,
+    "ratio": 1.5,
+    "by": "Hartmut Tobies",
+    "page": "https://unsplash.com/photos/O9TEKuI1Icw"
+   },
+   {
+    "id": 946,
+    "alt": "Yellow brick house front with a dark green door and window",
+    "tone": "mid",
+    "colours": [
+     "ochre yellow",
+     "dark green",
+     "charcoal"
+    ],
+    "mono": false,
+    "calm": "none",
+    "quality": 4,
+    "ratio": 1.4,
+    "by": "Padurariu Alexandru",
+    "page": "https://unsplash.com/photos/2UE1givDiPM"
+   }
+  ]
+ },
+ "motion": {
+  "id": "slow-crossfade",
+  "name": "Slow crossfade",
+  "description": "The principal photograph quietly changes: three or four images of the same framing crossfade over about 1.6 seconds, holding five to six seconds each, or the fixed image changes when its matching section arrives. It should feel like light shifting in a room. Pause when the tab is hidden; under reduced motion show only the first image."
+ },
+ "sections": [
+  {
+   "id": "showcase-one-row-three-states",
+   "role": "showcase",
+   "name": "One row, three states",
+   "shape": "stack",
+   "tags": [
+    "ui-led",
+    "quiet"
+   ],
+   "directions": [
+    "quiet-instrument",
+    "product-performs",
+    "editorial-report",
+    "dark-room"
+   ],
+   "needs": [],
+   "blueprint": "The product's central row (a task, a transaction, a message, a deploy) is shown three times, one directly beneath the other, in three states: as it arrives, with the pointer on it and its actions revealed, and finished. Each copy is built at true size, 640px wide, with real names, amounts and times, its root marked data-ui; inside it the product's own control borders and radii apply. The copies sit in columns 4–9 with 56px between them and nothing framing them. In columns 1–3, right-aligned and level with each copy, one word at 22px in the soft ink names its state. Columns 10–12 stay empty. The middle copy is live: its checkbox or button works and turns it into the third state. The heading, two to four words at 28–32px, sits on column 4's left edge, 96px above the first copy, with no supporting line.",
+   "mobile": "Copies stack at full width with 16px margins and stay at true size; a row wider than the screen is cropped at its right end, never shrunk. Each state word sits beneath its copy at 17px in the soft ink, 10px away. 48px separates the three groups. Heading at 26px.",
+   "seenIn": [
+    "opl-rows"
+   ]
+  },
+  {
+   "id": "features-panel-with-margin-notes",
+   "role": "features",
+   "name": "Panel with margin notes",
+   "shape": "index",
+   "tags": [
+    "ui-led",
+    "quiet",
+    "object-led"
+   ],
+   "directions": [
+    "editorial-report",
+    "quiet-instrument",
+    "product-performs",
+    "borrowed-category",
+    "dark-room"
+   ],
+   "needs": [],
+   "blueprint": "One tall panel from the product is shown whole, like a plate in a manual, with notes in both margins. The panel (an inspector, a sidebar, a composer) is built at true size, 360–400px wide and 640–720px tall, root marked data-ui, and stands in columns 5–8 on the plain ground with no stage behind it. Six notes describe six of its parts: three in columns 1–4, right-aligned, and three in columns 9–12, left-aligned, each 24ch wide and placed by absolute top offsets so its first line is level with the control it explains. A note is a name at 18px medium and two lines at 15px in the soft ink. Hovering or focusing a note keeps its control at full strength and drops the rest of the panel to 30% opacity; the controls themselves also work. The heading, two to four words at 32–40px, sits right-aligned in columns 1–4, level with the panel's top edge.",
+   "mobile": "The panel is shown in three slices, top, middle and bottom, each at true size and centred, cut where the next begins. Under each slice its two notes sit side by side in two columns at 15px. 56px between slices. The heading leads at 26px on the left margin.",
+   "seenIn": [
+    "aww-the-watch",
+    "opl-specia1ne"
+   ]
+  },
+  {
+   "id": "how-it-works-drag-through-the-stages",
+   "role": "how-it-works",
+   "name": "Drag through the stages",
+   "shape": "split",
+   "tags": [
+    "ui-led",
+    "colour-field"
+   ],
+   "directions": [
+    "split-stage",
+    "product-performs",
+    "colour-chapters",
+    "sentence-as-layout",
+    "dark-room",
+    "one-motif"
+   ],
+   "needs": [],
+   "blueprint": "A 50/50 split, 88svh tall: two flat fields meeting on a clean vertical edge, and one slider that drives both. Left field: the current stage as a clause of three to six words at clamp(40px, 4.6vw, 76px) on two lines, top-left from column 1, starting with its order word; it serves as the heading. Right field: one fragment of the product at true size, about 440px wide, centred, root marked data-ui, in the state that matches the clause. Along the bottom, crossing both fields inside 28px margins, a real range `<input>` with four stops: a solid track 8px tall, the part already passed in full ink, and a square thumb 32px across in the accent. Under the track, four stage names at 16px, the current one in full ink. Dragging, or the arrow keys, swaps the clause and the fragment's state with a 200ms crossfade; nothing depends on scroll.",
+   "mobile": "The fragment's field comes first, 46svh, the fragment at true size and cropped to its active region. The slider follows directly beneath on the seam, thumb 40px. Then the clause field: the clause at 9vw on two lines, with the four stage names under it in a two-by-two block at 15px.",
+   "seenIn": [
+    "opl-textmode-overlay",
+    "opl-vessa",
+    "opl-juggle"
+   ]
+  },
+  {
+   "id": "about-pinned-title-portraits",
+   "role": "about",
+   "name": "Pinned title, portraits pass",
+   "shape": "pinned",
+   "tags": [
+    "photo-led",
+    "poster",
+    "type-led"
+   ],
+   "directions": [
+    "pinned-poster",
+    "name-as-monument",
+    "loud-flat-poster",
+    "dark-room",
+    "uneven-photographs"
+   ],
+   "needs": [],
+   "blueprint": "A wrapper tall enough for its portraits: about 90svh per person, up to six people. A `position: sticky; top: 0` layer of 100svh holds the heading, two words at clamp(88px, 12vw, 180px), leading 0.85, centred at mid-height, in white with `mix-blend-mode: difference` so it reads over ground and photographs alike. Beneath it in the stacking order, portraits scroll past in normal flow: each a 4:5 photograph 26–30vw wide, alternately starting at column 2 and ending at column 11, 60svh apart, so each one passes behind a different half of the heading. Under each portrait's left corner: the name at 18px, the role at 14px in the soft ink, and one sentence of up to 30 words in a 280px measure. The last portrait is followed by 40svh of empty ground before the heading releases. Square corners. Nothing else is on screen.",
+   "mobile": "The heading shrinks to 17vw and pins 16px from the top instead of at mid-height. Portraits become 72% wide, alternating between the left and right margins, 48px apart, each with name, role and sentence beneath at the portrait's width.",
+   "seenIn": [
+    "aww-glitch-grit",
+    "opl-the-deep-end"
+   ]
+  },
+  {
+   "id": "cta-first-step-already-open",
+   "role": "cta",
+   "name": "First step, already open",
+   "shape": "split",
+   "tags": [
+    "ui-led",
+    "colour-field"
+   ],
+   "directions": [
+    "product-performs",
+    "colour-chapters",
+    "loud-flat-poster",
+    "split-stage",
+    "dark-room",
+    "one-motif"
+   ],
+   "needs": [],
+   "blueprint": "The page ends with the product's first screen already open. A full-bleed field in the accent colour, 90svh tall. Right, in columns 7–11, vertically centred: the product's own create dialog at true size, 440px wide, root marked data-ui, with its real title ('Name your workspace'), one text field holding an editable, believable example, one two-option segmented choice and its primary button. Inside the fragment the product's conventions apply, including the shadow its dialog normally casts. The field accepts typing, the choice switches, and the primary button is the page's only action: it carries the typed value into sign-up. Left, in columns 1–5, anchored to the bottom with 40px margins: the closing line, two to four words at clamp(56px, 7vw, 112px), leading 0.92, on two lines, and under it one sentence at 17px saying what happens after the button. The upper-left stays empty.",
+   "mobile": "The closing line leads at 13vw on two lines, top-left, with its sentence beneath at 16px. The dialog follows at full width inside 16px margins, at true size, its primary button 52px tall and full width. The field is at least 84svh; the dialog sits in its lower half.",
+   "seenIn": [
+    "opl-near",
+    "opl-midnight-2"
+   ]
+  },
+  {
+   "id": "footer-single-quiet-line",
+   "role": "footer",
+   "name": "A single quiet line",
+   "shape": "strip",
+   "tags": [
+    "quiet"
+   ],
+   "directions": [
+    "quiet-instrument",
+    "contact-sheet",
+    "product-performs",
+    "split-stage",
+    "dark-room",
+    "pinned-poster"
+   ],
+   "needs": [],
+   "blueprint": "No footer block at all. After at least 30svh of empty page ground, one baseline 30px above the bottom edge carries three items in the page's ordinary small text size (14–16px), the same size and weight as the navigation: at the left margin, what this is in three or four words; centred, two to five links separated by 24px of space; at the right margin, the year and a privacy link. Use a three-column grid (1fr auto 1fr) so the centre group is truly centred whatever the side lengths. No logo, no background change, no line above it, no columns. Links are in the full ink; the rest in the softer ink. If the page has a narrow text column, the three items may instead sit on that column's left edge as one wrapped line. The restraint only works if the page above has already made its invitation.",
+   "mobile": "Three short lines at 14px on the left margin with 8px between them: the description, the links on one wrapped line, then year and privacy. Links stay in the full ink. Leave 20svh of empty ground above and 24px below.",
+   "seenIn": [
+    "aww-studio-k95-3",
+    "aww-gil-huybrecht",
+    "opl-rows",
+    "opl-compile",
+    "opl-tiny-computer-co"
+   ]
+  }
+ ],
+ "references": [
+  {
+   "id": "aww-cipher",
+   "name": "Cipher",
+   "url": "https://cipher.tv/",
+   "source": "Awwwards Site of the Day",
+   "kind": "studio-portfolio",
+   "score": 7,
+   "idea": "The showreel as a slowly turning wreath: a dozen film stills overlap in an elliptical ring around a tiny emblem on a black screen, with almost no text.",
+   "mood": [
+    "cinematic",
+    "nocturnal",
+    "minimal",
+    "glossy"
+   ],
+   "archetype": "other: orbiting-image-ring",
+   "hero": "The first capture is the preloader: a black screen textured with a fine grid of grey dots that thins out towards the right, the wordmark top-left and a tiny copyright glyph dead centre. Once loaded, the black screen holds a ring of about fourteen landscape film stills, each roughly 10% of the viewport wide, overlapping one another around an ellipse about 35% of the width; the centre is empty except for a 20px white emblem. The wordmark, about 11% wide, stays top-left. Four 9px uppercase links are split: one at the horizontal centre, three at the far right. A partner mark sits bottom-right. There is no headline.",
+   "type": "Favorit only, and only at about 11px: uppercase nav links with slight tracking. The custom wordmark, with a macron and a schwa among its letters, is the sole large letterform. No headline and no body copy; one type size on the page.",
+   "colour": "#070604 #ffffff #c9a45a #2f55c8 #c96a1e — Near-black ground with white micro-type. All colour comes from the stills: gold, cobalt blue, orange, garden green, plus one black-and-white frame.",
+   "imagery": "Stills from fashion, beauty and fragrance films in 3:2 landscape crops, square-cornered and unframed, layered so each overlaps its neighbour by about a third. No captions or titles on them.",
+   "layout": "A single non-scrolling stage. Navigation is pushed to the corners at tiny size and the ring of stills occupies the middle third; over half the screen is empty black. Scrolling rotates the ring instead of moving the page.",
+   "sections": [],
+   "steal": [
+    "Arrange work thumbnails as an overlapping elliptical ring with an empty centre, and bind scroll to rotation instead of vertical travel.",
+    "Shrink all text to one 11px uppercase size and let a custom wordmark be the only large type.",
+    "Give the preloader its own texture (a dot grid fading across the screen) rather than a spinner or percentage."
+   ],
+   "media": "There is no document: one fixed canvas holds every picture as a texture, a ring of overlapping 16:9 film stills (about 240x135, overlapping their neighbours by 20-40%) round a tiny emblem, covering about 62% by 69% of the viewport, with the tiles themselves on 35-40% of the area and warm black between. No video elements; at least 35 distinct stills cycle through the ring.",
+   "motion": "The dot-grid loader with a spinning chrome letter is still up at 4.5s. After that the wheel turns the ring instead of the page, sliding new stills in along the circular path with no fade or mask; nav letters roll on hover, and the few CSS transitions are transform .45s cubic-bezier(.83,.12,.35,.96) and opacity .2-.3s."
+  },
+  {
+   "id": "opl-kereliott",
+   "name": "Kereliott",
+   "url": "https://kereliott.com/",
+   "source": "One Page Love",
+   "kind": "hospitality",
+   "score": 7.3,
+   "idea": "A quiet house gets a quiet page: one dark field, one typeface, the name set as wide as the screen and photographs left to drift in generous darkness.",
+   "mood": [
+    "calm",
+    "understated",
+    "nocturnal",
+    "refined"
+   ],
+   "archetype": "giant-wordmark",
+   "hero": "Very dark green-black field with cream type. A two-line introductory sentence at about 30px sits top-left inside 30px margins; a small cream rectangular button sits top-right. The upper half is otherwise empty. The house name fills the full content width in a flared humanist sans, mixed case, with capitals about 19vw tall, its baseline at roughly 87% of the viewport height. Immediately beneath, separated by a gap of a few pixels, the top sliver of a full-width landscape photograph enters from the bottom edge.",
+   "type": "A single face, Trust, in regular weight: a humanist sans with flared terminals and old-style figures. The wordmark is an oversized graphic; all other text is one size of about 20-30px plus tiny 10px photo captions. Hierarchy is position, not weight.",
+   "colour": "#161c1a #eae8dc #222926 #1f2926 — Cream on green-black from top to bottom with no accent colour. The map is drawn in a tone barely lighter than the ground, so photographs supply all the colour.",
+   "imagery": "Natural-light photos of a stone cottage, garden and deck with square corners, in mixed portrait and landscape crops at differing sizes. One full-width opener, then small images placed singly with tiny captions under the left corner.",
+   "layout": "30px margins, text held to the left 60% in one size. Photographs are staggered left and right at different widths with large dark gaps between, like pictures passed on a wall. The name and a booking button stay fixed in the top corners.",
+   "sections": [
+    {
+     "role": "intro",
+     "description": "A full-width landscape photograph runs margin to margin directly under the wordmark, followed after a gap by a four-line paragraph in the single text size, left-aligned and spanning about 85% of the width. There is no heading or label; the text simply continues the sentence begun at the top of the page."
+    },
+    {
+     "role": "other",
+     "description": "After a left-aligned paragraph, a silhouette map of the region sits centre-left, about half the viewport wide, filled in a green only a few percent lighter than the background. Five towns are marked with small ring dots and tiny labels; only the house's town has a solid cream dot. No border, legend or frame."
+    },
+    {
+     "role": "gallery",
+     "description": "Photographs are placed one or two per screen in a stagger: a portrait image about 30% wide against the left margin, a larger near-square one starting lower against the right margin, later a landscape image top-right of centre and a smaller one bottom-left. Each has a 10px caption under its left corner. More than half of every screen is empty dark ground."
+    },
+    {
+     "role": "contact",
+     "description": "Two short left-aligned sentences in the standard text size with underlined inline links to booking platforms and an email address, then a small cream certification badge. The footer is a single line at the very bottom: social link left, copyright centre, three underlined utility links right, with a tall empty gap above."
+    }
+   ],
+   "steal": [
+    "Size the wordmark to fill the content width exactly and let the first photograph tuck directly under its baseline.",
+    "Draw a location map as a tone-on-tone silhouette with one filled dot among ring dots.",
+    "Use a single typeface in one weight and essentially one text size, creating hierarchy through placement and emptiness."
+   ]
+  },
+  {
+   "id": "opl-fynza",
+   "name": "Fynza",
+   "url": "https://fynza.com",
+   "source": "One Page Love",
+   "kind": "finance",
+   "score": 7.3,
+   "idea": "Bookings are drawn as avatar dots whose orange flow lines merge into a single vertical spine, which then runs down the page as the axis for the partner list, the cash-flow timeline and the step cards.",
+   "mood": [
+    "friendly",
+    "energetic",
+    "clear",
+    "warm"
+   ],
+   "archetype": "centred-statement-media-below",
+   "hero": "Warm grey ground with a fine white dot texture and a peach gradient bleeding down from the top edge. A floating white pill navbar 80% wide holds the logo left and a language switch plus outlined and orange pill buttons right. Centred stack: a white pill badge with overlapping partner-logo dots, a two-line extra-bold uppercase headline at 4.2vw in slate navy with two words in orange, two lines of grey 18px text, an orange pill button. Around the button five round avatar photos with small booking labels sit at staggered heights across the full width; thin orange curves, two dashed, flow down from each and converge at bottom centre.",
+   "type": "Golos Text only: weight 800 uppercase at 60px for every section headline with slight negative tracking, 18px regular grey body, about 24px semibold for card titles, tiny uppercase captions. A wide extended logo wordmark. Roughly four sizes; hierarchy relies on weight and colour.",
+   "colour": "#edecea #ffffff #f4bba8 #f2561d #3f4f6e #1a2e7a — Warm grey and white with peach gradients fading in at section tops and bottoms; orange carries buttons, flow lines and highlighted headline words; one deep royal-navy slab near the end.",
+   "imagery": "Round avatar photos, partner logo discs, sunny travel photographs inside rounded cards with white UI snippets floating on top, and illustrated vintage postage stamps tilted and scattered around the final call to action.",
+   "layout": "Centred container of about 1150px; every section opens with a small white pill label and a two-line uppercase headline. A single orange vertical line runs through the page centre linking hero, logo list, timeline and step cards. Sections alternate grey, peach fade and one navy slab.",
+   "sections": [
+    {
+     "role": "proof",
+     "description": "Directly under the hero the converged orange line becomes a vertical spine and partner brands hang off it in two columns: logo then name on the left, name then logo on the right. Rows are separated by dashed horizontal rules with small orange dots where they cross the spine. There is no heading, so it reads as a continuation of the hero diagram."
+    },
+    {
+     "role": "other",
+     "description": "Problem timeline on the centre spine: small rounded-square chips labelled by week sit on the line. Events alternate left and right, each joined to its chip by a dashed horizontal line ending in a small coloured amount tag (red for outflow, green for income), with a bold label and two lines of grey text. A red-tinted rounded note sits on the spine as the conclusion while the background fades to saturated peach."
+    },
+    {
+     "role": "how-it-works",
+     "description": "Three large white rounded cards stacked on the spine, each a two-column split that alternates sides: on one side an orange numbered disc, a three-line semibold title and a small grey paragraph; on the other a rounded travel photograph with a white UI card or a cluster of logo discs floating over it. The orange line passes behind the gaps between cards."
+    },
+    {
+     "role": "cta",
+     "description": "Dotted peach-to-white field with a centred two-line uppercase headline, one word in orange, and an orange pill button. Six illustrated vintage travel stamps and round stickers are scattered around it at slight rotations, three above and three below, some tucked under the navbar. A tiny two-line legal footer sits directly underneath, centred, with no separate footer band."
+    }
+   ],
+   "steal": [
+    "Turn the hero illustration's lines into a page-long spine: let the curves converge at the fold and continue as the axis for the next section's list and timeline.",
+    "Show the customer's own unit of value (a booking with name, party size and price) as small avatar chips instead of a dashboard screenshot.",
+    "End on a themed sticker scatter (illustrated stamps at varied tilt) around the last call to action rather than a plain coloured band."
+   ]
+  }
+ ],
+ "scenes": []
+}

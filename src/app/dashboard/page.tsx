@@ -1,0 +1,71 @@
+import Header from '@/components/dashboard/header';
+import MainChart from '@/components/dashboard/main-chart';
+import SectorHeatmap from '@/components/dashboard/sector-heatmap';
+import TrendingTickers from '@/components/dashboard/trending-tickers';
+import NewsFeed from '@/components/dashboard/news-feed';
+import Disclaimer from '@/components/dashboard/disclaimer';
+import LiveDashboard from '@/components/dashboard/live-dashboard';
+import CommodityStrip from '@/components/dashboard/commodity-strip';
+import GlowPanel from '@/components/dashboard/glow-panel';
+import { getAllTickers } from '@/lib/data';
+import {
+  fetchIndiaVix, fetchLiveIndianIndices, fetchLiveTrendingTickers,
+  fetchLiveNews, fetchLiveSectors, fetchYahooChart,
+} from '@/lib/yahoo-finance';
+
+export default async function Home() {
+  const allTickers = getAllTickers();
+  const nifty50Ticker = allTickers.find(t => t.symbol === 'NIFTY 50');
+
+  if (!nifty50Ticker) return <div>Loading...</div>;
+
+  const [liveIndices, { vixData, chartData: vixChartData }, trending, news, sectors, mainChartData] =
+    await Promise.all([
+      fetchLiveIndianIndices(),
+      fetchIndiaVix(),
+      fetchLiveTrendingTickers(),
+      fetchLiveNews(),
+      fetchLiveSectors(),
+      fetchYahooChart(nifty50Ticker.symbol),
+    ]);
+
+  return (
+    <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
+      <Header />
+      <main className="flex-1 space-y-6 p-4 md:p-6">
+
+        {/* Live indices */}
+        <LiveDashboard
+          initialIndices={liveIndices}
+          initialVixData={vixData}
+          initialVixChartData={vixChartData}
+        />
+
+        {/* Commodity & forex strip */}
+        <GlowPanel><CommodityStrip /></GlowPanel>
+
+        {/* Main chart + sector heatmap */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8">
+            <GlowPanel className="h-full"><MainChart ticker={nifty50Ticker} chartData={mainChartData} /></GlowPanel>
+          </div>
+          <div className="lg:col-span-4">
+            <GlowPanel className="h-full"><SectorHeatmap sectors={sectors} /></GlowPanel>
+          </div>
+        </div>
+
+        {/* Trending + news */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <GlowPanel className="h-full"><TrendingTickers trending={trending} /></GlowPanel>
+          </div>
+          <div className="lg:col-span-7">
+            <GlowPanel className="h-full"><NewsFeed news={news} /></GlowPanel>
+          </div>
+        </div>
+
+      </main>
+      <Disclaimer />
+    </div>
+  );
+}

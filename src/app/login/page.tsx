@@ -35,7 +35,7 @@ export default function LoginPage() {
           description: 'Invalid email or password.',
         });
       } else {
-        router.push('/');
+        router.push('/dashboard');
         router.refresh();
       }
     } catch {
@@ -52,7 +52,7 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
     try {
-      await signIn('google', { callbackUrl: '/' });
+      await signIn('google', { callbackUrl: '/dashboard' });
     } catch {
       toast({
         variant: 'destructive',

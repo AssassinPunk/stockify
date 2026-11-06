@@ -65,7 +65,7 @@ export default function SignUpPage() {
         router.push('/login');
       } else {
         toast({ title: 'Welcome to Stockify!', description: 'Your account has been created.' });
-        router.push('/');
+        router.push('/dashboard');
         router.refresh();
       }
     } catch {

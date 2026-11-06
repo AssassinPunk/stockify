@@ -167,7 +167,7 @@ export default function Header() {
       <div className="flex items-center gap-4">
         <SidebarTrigger />
         <Separator orientation="vertical" className="h-6" />
-        <Link href="/" className="flex items-center gap-2 font-semibold flex-shrink-0 md:hidden">
+        <Link href="/dashboard" className="flex items-center gap-2 font-semibold flex-shrink-0 md:hidden">
           <AreaChart className="h-6 w-6 text-primary" />
         </Link>
       </div>
