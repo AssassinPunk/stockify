@@ -11,7 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import {
@@ -134,40 +133,16 @@ export default function SectorHeatmap({ sectors }: { sectors: SectorData[] }) {
                       {sector.name} Details
                     </DialogTitle>
                     <DialogDescription>
-                      Macro performance breakdown and contributing factors.
+                      Today&apos;s performance for this sector.
                     </DialogDescription>
                   </DialogHeader>
                   <div className="py-2">
-                    <div className="flex items-center justify-between mb-4 bg-secondary/50 p-3 rounded-lg">
-                      <span className="text-sm font-medium">Sector Sentiment</span>
-                      <Badge variant="outline" className={cn("border", isPositive ? 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10' : 'border-red-500/30 text-red-500 bg-red-500/10')}>
-                        {isPositive ? 'Bullish' : 'Bearish'}
+                    <div className="flex items-center justify-between bg-secondary/50 p-3 rounded-lg">
+                      <span className="text-sm font-medium">Daily Change</span>
+                      <Badge variant="outline" className={cn("border font-code", isPositive ? 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10' : 'border-red-500/30 text-red-500 bg-red-500/10')}>
+                        {isPositive ? '+' : ''}{sector.change.toFixed(2)}%
                       </Badge>
                     </div>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Factor</TableHead>
-                          <TableHead className="text-right">Impact</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>Global Markets</TableCell>
-                          <TableCell className="text-right text-emerald-500">+0.45%</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Institutional Flow</TableCell>
-                          <TableCell className="text-right text-emerald-500">+0.80%</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-semibold border-t">Net Performance</TableCell>
-                          <TableCell className={cn("text-right font-bold border-t", isPositive ? 'text-emerald-500' : 'text-red-500')}>
-                            {isPositive ? '+' : ''}{sector.change.toFixed(2)}%
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
                   </div>
                 </DialogContent>
               </Dialog>

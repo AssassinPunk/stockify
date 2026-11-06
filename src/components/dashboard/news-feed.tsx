@@ -37,6 +37,13 @@ export default function NewsFeed({ news }: { news: NewsArticle[] }) {
       <CardContent>
         <ScrollArea className="h-[300px]">
           <div className="space-y-4 pr-4">
+            {filteredNews.length === 0 && (
+              <p className="py-12 text-center text-sm text-muted-foreground">
+                {uniqueNews.length === 0
+                  ? 'News is unavailable right now. Please check back shortly.'
+                  : `No ${filter} headlines right now.`}
+              </p>
+            )}
             {filteredNews.map((article, index) => (
               <div key={`${article.id}-${index}`}>
                 <div className="space-y-1">

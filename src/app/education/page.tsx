@@ -4,7 +4,14 @@
 import Header from '@/components/dashboard/header';
 import Disclaimer from '@/components/dashboard/disclaimer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { GraduationCap } from 'lucide-react';
+import { GlowCard } from '@/components/ui/spotlight-card';
+import { BookOpen, CandlestickChart, GraduationCap, Target } from 'lucide-react';
+
+const UPCOMING_TOPICS = [
+  { title: 'Stock Market Fundamentals', icon: BookOpen, glowColor: 'blue' },
+  { title: 'Chart Patterns', icon: CandlestickChart, glowColor: 'purple' },
+  { title: 'Trading Strategies', icon: Target, glowColor: 'green' },
+] as const;
 
 export default function EducationPage() {
   return (
@@ -29,6 +36,19 @@ export default function EducationPage() {
             </p>
           </CardContent>
         </Card>
+        <div className="grid gap-6 md:grid-cols-3">
+          {UPCOMING_TOPICS.map(({ title, icon: Icon, glowColor }) => (
+            <GlowCard key={title} glowColor={glowColor} customSize className="min-h-40">
+              <div className="flex flex-col justify-between gap-6">
+                <Icon className="h-8 w-8 text-primary" />
+                <div>
+                  <h2 className="text-lg font-semibold">{title}</h2>
+                  <p className="text-sm text-muted-foreground">Coming soon</p>
+                </div>
+              </div>
+            </GlowCard>
+          ))}
+        </div>
       </main>
       <Disclaimer />
     </div>

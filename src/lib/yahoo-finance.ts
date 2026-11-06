@@ -212,6 +212,11 @@ export async function fetchLiveIndianIndices(policy?: FetchPolicy): Promise<impo
         value: price,
         change: change,
         percentChange: changePercent,
+        previousClose: prevClose,
+        dayHigh: meta.regularMarketDayHigh,
+        dayLow: meta.regularMarketDayLow,
+        fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh,
+        fiftyTwoWeekLow: meta.fiftyTwoWeekLow,
         lastUpdated: new Date(meta.regularMarketTime * 1000).toLocaleString('en-IN', {
           timeZone: 'Asia/Kolkata',
           month: 'short',
@@ -280,6 +285,72 @@ export async function fetchLiveTrendingTickers(): Promise<TrendingData> {
 
 import type { NewsArticle } from './types';
 
+function timeAgo(epochSeconds: number): string {
+  const secondsAgo = Math.floor(Date.now() / 1000 - epochSeconds);
+  if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)} min ago`;
+  if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)} hours ago`;
+  return `${Math.floor(secondsAgo / 86400)} days ago`;
+}
+
+function categorizeIndianNews(title: string): NewsArticle['category'] {
+  const t = title.toLowerCase();
+  if (t.match(/nifty|sensex|index|dow jones|nasdaq|s&p|nse|bse|markets/)) return 'Indices';
+  if (t.match(/shares|stock|earnings|revenue|profit|dividend|tata|reliance|hdfc|infosys|wipro|buy|sell|target/)) return 'Stocks';
+  return 'Macro';
+}
+
+function categorizeInternationalNews(title: string): NewsArticle['category'] {
+  const t = title.toLowerCase();
+  if (t.match(/s&p|nasdaq|dow|ftse|index|markets/)) return 'Indices';
+  if (t.match(/stock|shares|earnings|profit|apple|nvidia|microsoft|tesla|amazon|meta|google/)) return 'Stocks';
+  return 'Macro';
+}
+
+function decodeXmlEntities(text: string): string {
+  return text
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;|&#39;/g, "'")
+    .replace(/&amp;/g, '&');
+}
+
+// Yahoo's news search can come back empty or rate limited, so headlines fall back to Google News RSS
+async function fetchGoogleNews(
+  query: string,
+  locale: string,
+  categorize: (title: string) => NewsArticle['category'],
+): Promise<NewsArticle[]> {
+  try {
+    const url = `https://news.google.com/rss/search?q=${encodeURIComponent(`${query} when:2d`)}&${locale}`;
+    const res = await fetch(url, { next: { revalidate: 600 } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const xml = await res.text();
+
+    const tag = (item: string, name: string) => {
+      const value = item.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`))?.[1];
+      return value ? decodeXmlEntities(value) : '';
+    };
+
+    return (xml.match(/<item>[\s\S]*?<\/item>/g) ?? []).slice(0, 8).map((item, index) => {
+      const source = tag(item, 'source');
+      // Google appends " - Publisher" to every headline
+      const title = tag(item, 'title').replace(new RegExp(` - ${source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`), '');
+      return {
+        id: tag(item, 'guid') || `google-news-${index}`,
+        title,
+        source: source || 'Google News',
+        timestamp: timeAgo(Date.parse(tag(item, 'pubDate')) / 1000),
+        url: tag(item, 'link'),
+        category: categorize(title),
+      };
+    });
+  } catch (error) {
+    console.error('Failed to fetch Google News:', error);
+    return [];
+  }
+}
+
 // Fetch real-time market news
 export async function fetchLiveNews(): Promise<NewsArticle[]> {
   try {
@@ -287,44 +358,21 @@ export async function fetchLiveNews(): Promise<NewsArticle[]> {
     const res = await fetch(url, { next: { revalidate: 600 }, headers: YAHOO_HEADERS });
     const data = await res.json();
 
-    if (!data.news || !Array.isArray(data.news)) {
-      throw new Error("Invalid news format returned from Yahoo");
+    if (!Array.isArray(data.news) || data.news.length === 0) {
+      throw new Error("No news returned from Yahoo");
     }
 
-    return data.news.map((item: any, index: number) => {
-      // Calculate human-readable 'time ago'
-      const secondsAgo = Math.floor(Date.now() / 1000 - item.providerPublishTime);
-      let timestamp = '';
-      if (secondsAgo < 3600) timestamp = `${Math.floor(secondsAgo / 60)} min ago`;
-      else if (secondsAgo < 86400) timestamp = `${Math.floor(secondsAgo / 3600)} hours ago`;
-      else timestamp = `${Math.floor(secondsAgo / 86400)} days ago`;
-
-      // Categorize based on keywords in title
-      const lowerTitle = item.title.toLowerCase();
-      let category: 'Indices' | 'Stocks' | 'Macro' = 'Macro';
-      
-      if (lowerTitle.match(/nifty|sensex|index|dow jones|nasdaq|s&p|nse|bse|markets/)) {
-        category = 'Indices';
-      } else if (lowerTitle.match(/shares|stock|earnings|revenue|profit|dividend|tata|reliance|hdfc|infosys|wipro|buy|sell|target/)) {
-        category = 'Stocks';
-      }
-
-      return {
-        id: item.uuid || `news-${index}`,
-        title: item.title,
-        source: item.publisher || 'Yahoo Finance',
-        timestamp: timestamp,
-        url: item.link,
-        category: category
-      };
-    });
+    return data.news.map((item: any, index: number) => ({
+      id: item.uuid || `news-${index}`,
+      title: item.title,
+      source: item.publisher || 'Yahoo Finance',
+      timestamp: timeAgo(item.providerPublishTime),
+      url: item.link,
+      category: categorizeIndianNews(item.title),
+    }));
   } catch (error) {
-    console.error("Failed to fetch live news:", error);
-    // Fallback static array if network fails completely
-    return [
-      { id: '1', title: 'Market faces turbulent session amidst global cues', source: 'MarketWire', timestamp: '2 hours ago', url: '#', category: 'Macro' as const },
-      { id: '2', title: 'IT sector sees massive selloff ahead of earnings', source: 'Financial Express', timestamp: '3 hours ago', url: '#', category: 'Stocks' as const },
-    ];
+    console.warn("Falling back to Google News for Indian market news:", error);
+    return fetchGoogleNews('Indian stock market', 'hl=en-IN&gl=IN&ceid=IN:en', categorizeIndianNews);
   }
 }
 
@@ -369,7 +417,13 @@ export async function fetchLiveInternationalIndices(policy?: FetchPolicy): Promi
         value:  price,
         change,
         percentChange,
+        previousClose: prevClose,
+        dayHigh: meta.regularMarketDayHigh,
+        dayLow: meta.regularMarketDayLow,
+        fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh,
+        fiftyTwoWeekLow: meta.fiftyTwoWeekLow,
         lastUpdated: new Date(meta.regularMarketTime * 1000).toLocaleString('en-US', {
+          timeZone: 'America/New_York',
           month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true,
         }) + ' ET',
       };
@@ -411,22 +465,18 @@ export async function fetchLiveInternationalNews(): Promise<import('./types').Ne
     const url  = 'https://query2.finance.yahoo.com/v1/finance/search?q=US+Stock+Market+Wall+Street&newsCount=8';
     const res  = await fetch(url, { next: { revalidate: 600 }, headers: YAHOO_HEADERS });
     const data = await res.json();
-    if (!data.news || !Array.isArray(data.news)) throw new Error('Bad format');
-    return data.news.map((item: { uuid?: string; title: string; publisher?: string; providerPublishTime: number; link: string }, index: number) => {
-      const secondsAgo = Math.floor(Date.now() / 1000 - item.providerPublishTime);
-      let timestamp = '';
-      if (secondsAgo < 3600)       timestamp = `${Math.floor(secondsAgo / 60)} min ago`;
-      else if (secondsAgo < 86400) timestamp = `${Math.floor(secondsAgo / 3600)} hours ago`;
-      else                         timestamp = `${Math.floor(secondsAgo / 86400)} days ago`;
-      const t = item.title.toLowerCase();
-      let category: 'Indices' | 'Stocks' | 'Macro' = 'Macro';
-      if (t.match(/s&p|nasdaq|dow|ftse|index|markets/)) category = 'Indices';
-      else if (t.match(/stock|shares|earnings|profit|apple|nvidia|microsoft|tesla|amazon|meta|google/)) category = 'Stocks';
-      return { id: item.uuid ?? `intl-${index}`, title: item.title, source: item.publisher ?? 'Yahoo Finance', timestamp, url: item.link, category };
-    });
+    if (!Array.isArray(data.news) || data.news.length === 0) throw new Error('No news returned from Yahoo');
+    return data.news.map((item: { uuid?: string; title: string; publisher?: string; providerPublishTime: number; link: string }, index: number) => ({
+      id: item.uuid ?? `intl-${index}`,
+      title: item.title,
+      source: item.publisher ?? 'Yahoo Finance',
+      timestamp: timeAgo(item.providerPublishTime),
+      url: item.link,
+      category: categorizeInternationalNews(item.title),
+    }));
   } catch (error) {
-    console.error('Failed to fetch international news:', error);
-    return [];
+    console.warn('Falling back to Google News for international market news:', error);
+    return fetchGoogleNews('US stock market Wall Street', 'hl=en-US&gl=US&ceid=US:en', categorizeInternationalNews);
   }
 }
 

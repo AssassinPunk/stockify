@@ -6,6 +6,7 @@ import NewsFeed from '@/components/dashboard/news-feed';
 import Disclaimer from '@/components/dashboard/disclaimer';
 import LiveDashboard from '@/components/dashboard/live-dashboard';
 import CommodityStrip from '@/components/dashboard/commodity-strip';
+import GlowPanel from '@/components/dashboard/glow-panel';
 import { getAllTickers } from '@/lib/data';
 import {
   fetchIndiaVix, fetchLiveIndianIndices, fetchLiveTrendingTickers,
@@ -41,25 +42,25 @@ export default async function Home() {
         />
 
         {/* Commodity & forex strip */}
-        <CommodityStrip />
+        <GlowPanel><CommodityStrip /></GlowPanel>
 
         {/* Main chart + sector heatmap */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <div className="lg:col-span-8">
-            <MainChart ticker={nifty50Ticker} chartData={mainChartData} />
+            <GlowPanel className="h-full"><MainChart ticker={nifty50Ticker} chartData={mainChartData} /></GlowPanel>
           </div>
           <div className="lg:col-span-4">
-            <SectorHeatmap sectors={sectors} />
+            <GlowPanel className="h-full"><SectorHeatmap sectors={sectors} /></GlowPanel>
           </div>
         </div>
 
         {/* Trending + news */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <TrendingTickers trending={trending} />
+            <GlowPanel className="h-full"><TrendingTickers trending={trending} /></GlowPanel>
           </div>
           <div className="lg:col-span-7">
-            <NewsFeed news={news} />
+            <GlowPanel className="h-full"><NewsFeed news={news} /></GlowPanel>
           </div>
         </div>
 

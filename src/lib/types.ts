@@ -4,6 +4,11 @@ export type IndexData = {
   change: number;
   percentChange: number;
   lastUpdated: string;
+  previousClose?: number;
+  dayHigh?: number;
+  dayLow?: number;
+  fiftyTwoWeekHigh?: number;
+  fiftyTwoWeekLow?: number;
 };
 
 export type VixData = {

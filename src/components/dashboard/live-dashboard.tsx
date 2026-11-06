@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { ChartDataPoint, IndexData, VixData } from '@/lib/types';
 import IndexCard from '@/components/dashboard/index-card';
 import VixCard from '@/components/dashboard/vix-card';
+import GlowPanel from '@/components/dashboard/glow-panel';
 
 export default function LiveDashboard({
   initialIndices,
@@ -66,10 +67,10 @@ export default function LiveDashboard({
 
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      {nifty50 && <IndexCard index={nifty50} />}
-      {sensex && <IndexCard index={sensex} />}
-      {bankNifty && <IndexCard index={bankNifty} />}
-      {vixData && <VixCard vixData={vixData} chartData={vixChartData} />}
+      {nifty50 && <GlowPanel><IndexCard index={nifty50} /></GlowPanel>}
+      {sensex && <GlowPanel><IndexCard index={sensex} /></GlowPanel>}
+      {bankNifty && <GlowPanel><IndexCard index={bankNifty} /></GlowPanel>}
+      {vixData && <GlowPanel><VixCard vixData={vixData} chartData={vixChartData} /></GlowPanel>}
     </div>
   );
 }

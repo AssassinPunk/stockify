@@ -103,6 +103,7 @@ Market data is sourced from Yahoo Finance's public chart endpoints through a ded
 | bcryptjs | Password hashing at cost factor 12 |
 | Zod 3.24 | Runtime validation of API request bodies and AI output schemas |
 | Yahoo Finance (public endpoints) | Primary market data source — quotes, OHLCV, news, fundamentals |
+| Google News RSS | Market news headlines when Yahoo's news search returns nothing |
 | Twelve Data | Live earnings calendar data |
 
 ### AI

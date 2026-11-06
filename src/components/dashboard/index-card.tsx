@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatChange, formatNumber } from "@/lib/format";
 import type { IndexData } from "@/lib/types";
-import { ArrowDown, ArrowUp, Info, TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowDown, ArrowUp, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -16,8 +16,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function IndexCard({ index }: { index: IndexData }) {
   const [isUpdating, setIsUpdating] = useState(false);
@@ -35,12 +33,21 @@ export default function IndexCard({ index }: { index: IndexData }) {
 
   const isPositive = index.change >= 0;
 
-  const contributors = [
-    { symbol: 'RELIANCE', impact: 12.5, type: 'up' },
-    { symbol: 'TCS', impact: 8.2, type: 'up' },
-    { symbol: 'HDFCBANK', impact: -15.4, type: 'down' },
-    { symbol: 'INFY', impact: 5.1, type: 'up' },
-    { symbol: 'ICICIBANK', impact: -4.3, type: 'down' },
+  const formatStat = (value?: number) =>
+    value === undefined ? '—' : formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const { previousClose, dayLow, dayHigh, fiftyTwoWeekLow, fiftyTwoWeekHigh } = index;
+  const fiftyTwoWeekPosition =
+    fiftyTwoWeekLow !== undefined && fiftyTwoWeekHigh !== undefined && fiftyTwoWeekHigh > fiftyTwoWeekLow
+      ? `${(((index.value - fiftyTwoWeekLow) / (fiftyTwoWeekHigh - fiftyTwoWeekLow)) * 100).toFixed(1)}%`
+      : '—';
+
+  const stats = [
+    { label: 'Previous Close', value: formatStat(previousClose) },
+    { label: 'Day Range', value: `${formatStat(dayLow)} – ${formatStat(dayHigh)}` },
+    { label: '52-Week Range', value: `${formatStat(fiftyTwoWeekLow)} – ${formatStat(fiftyTwoWeekHigh)}` },
+    { label: 'Position in 52-Week Range', value: fiftyTwoWeekPosition },
+    { label: 'Last Updated', value: index.lastUpdated },
   ];
 
   return (
@@ -96,7 +103,7 @@ export default function IndexCard({ index }: { index: IndexData }) {
         <DialogHeader>
           <DialogTitle>{index.symbol} Detailed Breakdown</DialogTitle>
           <DialogDescription>
-            Key drivers and top movers currently influencing {index.symbol}.
+            Today&apos;s session and 52-week range for {index.symbol}.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
@@ -113,51 +120,14 @@ export default function IndexCard({ index }: { index: IndexData }) {
             </div>
           </div>
 
-          <Tabs defaultValue="movers">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="movers">Top Contributors</TabsTrigger>
-              <TabsTrigger value="stats">Index Stats</TabsTrigger>
-            </TabsList>
-            <TabsContent value="movers" className="mt-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Stock</TableHead>
-                    <TableHead className="text-right">Index Impact (pts)</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {contributors.map((c) => (
-                    <TableRow key={c.symbol}>
-                      <TableCell className="font-medium flex items-center gap-2">
-                        {c.type === 'up' ? <TrendingUp className="h-3 w-3 text-up" /> : <TrendingDown className="h-3 w-3 text-down" />}
-                        {c.symbol}
-                      </TableCell>
-                      <TableCell className={cn("text-right font-code", c.type === 'up' ? 'text-up' : 'text-down')}>
-                        {c.impact > 0 ? '+' : ''}{c.impact.toFixed(1)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TabsContent>
-            <TabsContent value="stats" className="mt-4">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Advance/Decline Ratio</span>
-                  <span className="font-semibold">32 : 18</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Volume Trend</span>
-                  <span className="font-semibold text-up">Above Average</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">52-Week High Range</span>
-                  <span className="font-semibold">94.5%</span>
-                </div>
+          <div className="space-y-4">
+            {stats.map(({ label, value }) => (
+              <div key={label} className="flex justify-between items-center gap-4 text-sm">
+                <span className="text-muted-foreground">{label}</span>
+                <span className="font-semibold font-code text-right">{value}</span>
               </div>
-            </TabsContent>
-          </Tabs>
+            ))}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
