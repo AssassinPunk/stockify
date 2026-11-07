@@ -12,7 +12,6 @@ import {
   fetchLiveSectors,
   fetchLiveInternationalSectors,
 } from '@/lib/yahoo-finance';
-import { Lightbulb } from 'lucide-react';
 
 export default async function InsightsPage() {
   const [
@@ -42,17 +41,14 @@ export default async function InsightsPage() {
   });
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
+    <div className="flex min-h-svh w-full flex-col bg-background text-foreground">
       <Header />
-      <main className="flex-1 space-y-6 p-4 md:p-6">
+      <main className="flex-1 space-y-4 p-4 md:p-6">
 
         {/* Page title */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <Lightbulb className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold">Market Insights</h1>
-          </div>
-          <span className="text-xs text-muted-foreground">{dateLabel}</span>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">Market Insights</h1>
+          <span className="text-sm text-muted-foreground">{dateLabel}</span>
         </div>
 
         <InsightsTabs

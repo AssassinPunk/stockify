@@ -18,7 +18,6 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -169,11 +168,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border p-4">
-        <p className="text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
-          © 2024 Stockify AI
-        </p>
-      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

@@ -78,18 +78,27 @@ export default async function CommodityPage({ params }: { params: Promise<{ id: 
                 <span className="ml-3 text-sm font-normal text-muted-foreground">{commodity.symbol}</span>
               </CardTitle>
             </div>
-            {isPos
+            {quote && (isPos
               ? <ArrowUp className="h-6 w-6 text-up" />
-              : <ArrowDown className="h-6 w-6 text-down" />}
+              : <ArrowDown className="h-6 w-6 text-down" />)}
           </CardHeader>
           <CardContent>
-            <div className="font-mono text-3xl font-bold">
-              {fmt(price)}
-              <span className="ml-2 text-base font-normal text-muted-foreground">{commodity.unit}</span>
-            </div>
-            <p className={cn('font-mono text-lg', isPos ? 'text-up' : 'text-down')}>
-              {isPos ? '+' : ''}{fmt(Math.abs(change))} ({isPos ? '+' : ''}{pct.toFixed(2)}%)
-            </p>
+            {quote ? (
+              <>
+                <div className="font-mono text-3xl font-bold">
+                  {fmt(price)}
+                  <span className="ml-2 text-base font-normal text-muted-foreground">{commodity.unit}</span>
+                </div>
+                <p className={cn('font-mono text-lg', isPos ? 'text-up' : 'text-down')}>
+                  {isPos ? '+' : '-'}{fmt(Math.abs(change))} ({isPos ? '+' : ''}{pct.toFixed(2)}%)
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-3xl font-bold text-muted-foreground">—</div>
+                <p className="text-lg text-muted-foreground">Price unavailable right now</p>
+              </>
+            )}
           </CardContent>
         </Card>
 

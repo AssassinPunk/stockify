@@ -17,6 +17,7 @@ import { GitCompare, TrendingUp, TrendingDown, AreaChart as AreaIcon, Candlestic
 import { getAllTickers } from '@/lib/data';
 import type { Ticker, MainChartData, ChartDataPoint } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import ChartUnavailable from './chart-unavailable';
 
 type Timeframe = '1M' | '6M' | '1Y';
 type ChartType = 'line' | 'candle';
@@ -296,11 +297,10 @@ export default function CompareChart({ ticker }: { ticker: Ticker }) {
             <p className="text-[11px] opacity-60">Both stocks normalised to 100 at period start</p>
           </div>
         ) : (
-          <div
-            ref={containerRef}
-            style={{ height: 280, background: CHART_BG }}
-            className="w-full rounded-b-2xl"
-          />
+          <div className="relative w-full rounded-b-2xl" style={{ height: 280, background: CHART_BG }}>
+            <div ref={containerRef} className="h-full w-full" />
+            {(!dataA?.[timeframe]?.length || !dataB?.[timeframe]?.length) && <ChartUnavailable />}
+          </div>
         )}
       </CardContent>
     </Card>

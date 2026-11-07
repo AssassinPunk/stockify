@@ -5,7 +5,9 @@ import { formatNumber } from "@/lib/format";
 import type { Ticker, TrendingData } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const TickerTable = ({ tickers, type }: { tickers: Ticker[], type: 'gainer' | 'loser' }) => (
+const TickerTable = ({ tickers, type }: { tickers: Ticker[], type: 'gainer' | 'loser' }) => tickers.length === 0 ? (
+  <p className="py-6 text-center text-sm text-muted-foreground">Prices are unavailable right now.</p>
+) : (
   <div className="overflow-x-auto">
     <Table>
       <TableHeader>

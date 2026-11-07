@@ -71,23 +71,32 @@ export default async function StockPage({ params }: { params: Promise<{ symbol: 
                 {displayTicker.name} ({displayTicker.symbol})
               </CardTitle>
             </div>
-            {isPositive ? (
+            {liveQuote && (isPositive ? (
               <ArrowUp className="h-6 w-6 text-up" />
             ) : (
               <ArrowDown className="h-6 w-6 text-down" />
-            )}
+            ))}
           </CardHeader>
           <CardContent>
-            <div className="font-code text-3xl font-bold">
-              {formatNumber(displayTicker.price, {
-                style: 'currency',
-                currency: displayTicker.currency || 'INR',
-                minimumFractionDigits: 2,
-              })}
-            </div>
-            <p className={cn('font-code text-lg', isPositive ? 'text-up' : 'text-down')}>
-              {formatChange(displayTicker.change, displayTicker.percentChange)}
-            </p>
+            {liveQuote ? (
+              <>
+                <div className="font-code text-3xl font-bold">
+                  {formatNumber(displayTicker.price, {
+                    style: 'currency',
+                    currency: displayTicker.currency || 'INR',
+                    minimumFractionDigits: 2,
+                  })}
+                </div>
+                <p className={cn('font-code text-lg', isPositive ? 'text-up' : 'text-down')}>
+                  {formatChange(displayTicker.change, displayTicker.percentChange)}
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-3xl font-bold text-muted-foreground">—</div>
+                <p className="text-lg text-muted-foreground">Price unavailable right now</p>
+              </>
+            )}
           </CardContent>
         </Card>
 

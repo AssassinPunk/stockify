@@ -1,54 +1,57 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { Ticker } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { formatNumber } from '@/lib/format';
 
-function MoverRow({ ticker, isGainer, currency }: { ticker: Ticker; isGainer: boolean; currency: 'INR' | 'USD' }) {
-  const color  = isGainer ? 'text-emerald-400' : 'text-red-400';
-  const pct    = ticker.percentChange.toFixed(2);
+function MoverRow({ ticker, currency }: { ticker: Ticker; currency: 'INR' | 'USD' }) {
+  const pct    = ticker.percentChange;
   const symbol = currency === 'USD' ? '$' : '₹';
 
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b border-border/30 last:border-0">
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium truncate">{ticker.name}</p>
-        <p className="text-[10px] text-muted-foreground font-mono mt-0.5">
-          {symbol}{formatNumber(ticker.price, { minimumFractionDigits: 2 })}
+    <li className="flex items-start justify-between gap-3 py-2.5">
+      <div className="min-w-0">
+        <p className="text-sm font-medium leading-snug">{ticker.name}</p>
+        <p className="text-[13px] tabular-nums text-muted-foreground">
+          {symbol}{formatNumber(ticker.price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </p>
       </div>
-      <span className={cn('text-xs font-mono font-bold shrink-0', color)}>
-        {isGainer ? '+' : ''}{pct}%
+      <span className={cn(
+        'shrink-0 text-sm font-medium tabular-nums',
+        pct > 0 ? 'text-up' : pct < 0 ? 'text-down' : 'text-muted-foreground',
+      )}>
+        {pct > 0 ? '+' : ''}{pct.toFixed(2)}%
       </span>
+    </li>
+  );
+}
+
+function MoverList({ title, tickers, currency }: { title: string; tickers: Ticker[]; currency: 'INR' | 'USD' }) {
+  return (
+    <div className="min-w-0">
+      <h3 className="text-sm text-muted-foreground">{title}</h3>
+      <ul className="mt-1 divide-y divide-border/60">
+        {tickers.map(t => <MoverRow key={t.symbol} ticker={t} currency={currency} />)}
+      </ul>
     </div>
   );
 }
 
 export default function MoversCard({ gainers, losers, currency = 'INR' }: { gainers: Ticker[]; losers: Ticker[]; currency?: 'INR' | 'USD' }) {
-  return (
-    <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Today&apos;s Movers</CardTitle>
-      </CardHeader>
-      <CardContent className="grid grid-cols-2 gap-6">
-        {/* Gainers */}
-        <div>
-          <div className="flex items-center gap-1.5 mb-1">
-            <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
-            <p className="text-xs font-semibold text-emerald-400">Top Gainers</p>
-          </div>
-          {gainers.map(t => <MoverRow key={t.symbol} ticker={t} isGainer currency={currency} />)}
-        </div>
+  // A stock whose quote failed has no price, and it would otherwise read as a real 0.00% move.
+  const liveGainers = gainers.filter(t => t.price > 0);
+  const liveLosers  = losers.filter(t => t.price > 0);
+  const hasData     = liveGainers.length > 0 || liveLosers.length > 0;
 
-        {/* Losers */}
-        <div>
-          <div className="flex items-center gap-1.5 mb-1">
-            <TrendingDown className="h-3.5 w-3.5 text-red-400" />
-            <p className="text-xs font-semibold text-red-400">Top Losers</p>
-          </div>
-          {losers.map(t => <MoverRow key={t.symbol} ticker={t} isGainer={false} currency={currency} />)}
+  return (
+    <section className="flex h-full flex-col gap-3 rounded-2xl bg-card p-5" aria-label="Today's movers">
+      <h2 className="text-base font-semibold">Today&apos;s Movers</h2>
+      {hasData ? (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-1">
+          <MoverList title="Top Gainers" tickers={liveGainers} currency={currency} />
+          <MoverList title="Top Losers" tickers={liveLosers} currency={currency} />
         </div>
-      </CardContent>
-    </Card>
+      ) : (
+        <p className="text-sm text-muted-foreground">Movers are unavailable right now. Please check back shortly.</p>
+      )}
+    </section>
   );
 }

@@ -38,7 +38,7 @@ export function previousSessionClose(result: any): number {
 }
 
 // Fallback data
-const FALLBACK_VIX: VixData = { value: 26.80, lastUpdated: new Date().toLocaleTimeString() };
+const FALLBACK_VIX: VixData = { value: 0, lastUpdated: 'Data unavailable' };
 
 export async function fetchIndiaVix(options?: {
   range?: string;
@@ -93,34 +93,15 @@ export async function fetchIndiaVix(options?: {
 
     return { 
         vixData: { value: currentVix, lastUpdated }, 
-        chartData: chartData.length > 0 ? chartData : generateFallbackChartData(currentVix) 
+        chartData 
     };
   } catch (error) {
     console.error("Failed to fetch India VIX from Yahoo Finance:", error);
-    return { vixData: FALLBACK_VIX, chartData: generateFallbackChartData(FALLBACK_VIX.value) };
+    return { vixData: FALLBACK_VIX, chartData: [] };
   }
 }
 
 // Minimal fallback generator for chart data
-function generateFallbackChartData(baseValue: number, points: number = 30): ChartDataPoint[] {
-    const data: ChartDataPoint[] = [];
-    let lastValue = baseValue;
-    const today = new Date();
-    for(let i=points; i>=0; i--) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - i);
-        data.push({
-            date: d.toISOString(),
-            open: lastValue,
-            high: lastValue + 1,
-            low: lastValue - 1,
-            close: lastValue,
-            value: lastValue,
-        });
-    }
-    return data;
-}
-
 // Convert app symbols to Yahoo Finance symbols.
 // Uses TICKER_REGISTRY to determine currency — no hardcoded international list needed.
 function getYahooSymbol(symbol: string): string {
@@ -192,14 +173,8 @@ export async function fetchYahooChart(
     fetchTimeframe('1y', '1d')
   ]);
 
-  // Provide fallback logic if it fails
-  return {
-    '1D': day.length > 0 ? day : generateFallbackChartData(100, 96),
-    '5D': week.length > 0 ? week : generateFallbackChartData(100, 60),
-    '1M': month.length > 0 ? month : generateFallbackChartData(100, 30),
-    '6M': sixMonths.length > 0 ? sixMonths : generateFallbackChartData(100, 120),
-    '1Y': year.length > 0 ? year : generateFallbackChartData(100, 250),
-  };
+  // A period that fails stays empty, and the chart says so. Prices are never invented.
+  return { '1D': day, '5D': week, '1M': month, '6M': sixMonths, '1Y': year };
 }
 
 // Fetch live quotes for Indian indices
@@ -229,6 +204,7 @@ export async function fetchLiveIndianIndices(policy?: FetchPolicy): Promise<impo
         value: price,
         change: change,
         percentChange: changePercent,
+        lastTradeAt: meta.regularMarketTime,
         previousClose: prevClose,
         dayHigh: meta.regularMarketDayHigh,
         dayLow: meta.regularMarketDayLow,
@@ -292,7 +268,8 @@ export async function fetchLiveTrendingTickers(): Promise<TrendingData> {
   });
 
   const updatedTickers = await Promise.all(promises);
-  const sorted = updatedTickers.sort((a, b) => b.percentChange - a.percentChange);
+  // A ticker whose fetch failed still carries the registry's price of 0, which isn't a market move
+  const sorted = updatedTickers.filter(t => t.price > 0).sort((a, b) => b.percentChange - a.percentChange);
   
   return {
     gainers: sorted.slice(0, 4),
@@ -304,9 +281,11 @@ import type { NewsArticle } from './types';
 
 function timeAgo(epochSeconds: number): string {
   const secondsAgo = Math.floor(Date.now() / 1000 - epochSeconds);
+  const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? '' : 's'} ago`;
+  if (secondsAgo < 60) return 'Just now';
   if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)} min ago`;
-  if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)} hours ago`;
-  return `${Math.floor(secondsAgo / 86400)} days ago`;
+  if (secondsAgo < 86400) return plural(Math.floor(secondsAgo / 3600), 'hour');
+  return plural(Math.floor(secondsAgo / 86400), 'day');
 }
 
 function categorizeIndianNews(title: string): NewsArticle['category'] {
@@ -434,6 +413,7 @@ export async function fetchLiveInternationalIndices(policy?: FetchPolicy): Promi
         value:  price,
         change,
         percentChange,
+        lastTradeAt: meta.regularMarketTime,
         previousClose: prevClose,
         dayHigh: meta.regularMarketDayHigh,
         dayLow: meta.regularMarketDayLow,
@@ -473,7 +453,7 @@ export async function fetchLiveInternationalTrendingTickers(): Promise<TrendingD
     } catch { return ticker; }
   });
   const updated = await Promise.all(promises);
-  const sorted  = [...updated].sort((a, b) => b.percentChange - a.percentChange);
+  const sorted  = updated.filter(t => t.price > 0).sort((a, b) => b.percentChange - a.percentChange);
   return { gainers: sorted.slice(0, 4), losers: sorted.slice().reverse().slice(0, 4) };
 }
 
@@ -525,9 +505,7 @@ export async function fetchLiveSectors(policy?: FetchPolicy): Promise<import('./
     })
   );
 
-  return results.map((r, i) =>
-    r.status === 'fulfilled' ? r.value : { name: sectors[i].name, change: 0 }
-  );
+  return results.flatMap(r => (r.status === 'fulfilled' ? [r.value] : []));
 }
 
 export async function fetchLiveInternationalSectors(policy?: FetchPolicy): Promise<import('./types').SectorData[]> {
@@ -559,7 +537,5 @@ export async function fetchLiveInternationalSectors(policy?: FetchPolicy): Promi
     })
   );
 
-  return results.map((r, i) =>
-    r.status === 'fulfilled' ? r.value : { name: sectors[i].name, change: 0 }
-  );
+  return results.flatMap(r => (r.status === 'fulfilled' ? [r.value] : []));
 }

@@ -18,6 +18,7 @@ import { formatNumber } from '@/lib/format';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { calculateADL, calculateMA, calculateRSI } from '@/lib/indicators';
 import { cn } from '@/lib/utils';
+import ChartUnavailable from './chart-unavailable';
 
 const CHART_BG    = '#000000';
 const GRID_COLOR  = '#1f1f1f';
@@ -44,7 +45,7 @@ export default function FullChartDialog({
   onOpenChange: (open: boolean) => void;
   chartData: MainChartData;
 }) {
-  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [chartEl, setChartEl] = useState<HTMLDivElement | null>(null);
   const rsiContainerRef   = useRef<HTMLDivElement>(null);
   const adlContainerRef   = useRef<HTMLDivElement>(null);
 
@@ -64,14 +65,20 @@ export default function FullChartDialog({
   useEffect(() => { latestChartDataRef.current = chartData; }, [chartData]);
 
   const baseDataPoints = useMemo(() => {
-    return chartData[timeframe]
+    return (chartData[timeframe] ?? [])
       .map(d => ({ ...d }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [chartData, timeframe]);
 
+  const lastPoint  = baseDataPoints[baseDataPoints.length - 1];
+  const firstPoint = baseDataPoints[0];
+  const periodChange = lastPoint && firstPoint?.close > 0
+    ? ((lastPoint.close - firstPoint.close) / firstPoint.close) * 100
+    : null;
+
   // ── chart initialisation ──────────────────────────────────────────────────
   useEffect(() => {
-    if (!isOpen || !chartContainerRef.current) return;
+    if (!isOpen || !chartEl) return;
 
     let destroyed = false;
     let initOnce  = false;
@@ -89,8 +96,7 @@ export default function FullChartDialog({
 
     const initIfReady = () => {
       if (destroyed || initOnce) return;
-      const el = chartContainerRef.current;
-      if (!el) return;
+      const el = chartEl;
       const rect = el.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
       initOnce = true;
@@ -196,7 +202,7 @@ export default function FullChartDialog({
     };
 
     const ro = new ResizeObserver(initIfReady);
-    ro.observe(chartContainerRef.current);
+    ro.observe(chartEl);
     initIfReady();
 
     return () => {
@@ -204,7 +210,7 @@ export default function FullChartDialog({
       ro.disconnect();
       cleanupCharts();
     };
-  }, [isOpen, showRSI, showADL, showMA, timeframe, chartType]);
+  }, [isOpen, chartEl, showRSI, showADL, showMA, timeframe, chartType]);
 
   // ── incremental data updates (preserve zoom) ──────────────────────────────
   useEffect(() => {
@@ -306,10 +312,18 @@ export default function FullChartDialog({
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-bold text-white tracking-tight">{ticker.symbol}</h2>
             <div className="h-4 w-px bg-white/20" />
-            <span className="text-sm font-medium text-emerald-400">
-              {formatNumber(ticker.price)}&nbsp;
-              <span className="text-emerald-500/60">({ticker.percentChange > 0 ? '+' : ''}{ticker.percentChange}%)</span>
-            </span>
+            {lastPoint ? (
+              <span className="text-sm font-medium text-white tabular-nums">
+                {formatNumber(lastPoint.close)}
+                {periodChange !== null && (
+                  <span className={cn('ml-2', periodChange >= 0 ? 'text-up' : 'text-down')}>
+                    {periodChange >= 0 ? '+' : ''}{periodChange.toFixed(2)}% over {timeframe}
+                  </span>
+                )}
+              </span>
+            ) : (
+              <span className="text-sm text-muted-foreground">Price unavailable</span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -376,7 +390,10 @@ export default function FullChartDialog({
 
         {/* ── chart area ────────────────────────────────────────────────────── */}
         <div className="flex-1 w-full bg-[#000000] flex flex-col overflow-hidden min-h-0">
-          <div className="flex-1 w-full relative min-h-0" ref={chartContainerRef} />
+          <div className="flex-1 w-full relative min-h-0">
+            <div className="absolute inset-0" ref={setChartEl} />
+            {!chartData[timeframe]?.length && <ChartUnavailable />}
+          </div>
 
           {showRSI && (
             <div className="h-40 w-full border-t border-[#1f1f1f] relative flex flex-col shrink-0">

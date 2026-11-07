@@ -1,7 +1,8 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // The dev badge sat on top of the footer and sidebar text.
+  devIndicators: false,
   typescript: {
     ignoreBuildErrors: true,
   },

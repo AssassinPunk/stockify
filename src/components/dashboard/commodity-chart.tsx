@@ -14,6 +14,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { CandlestickChart, AreaChart as AreaChartIcon, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { MainChartData } from '@/lib/types';
+import ChartUnavailable from './chart-unavailable';
+import { mergeChartData } from '@/lib/chart-data';
 
 const CHART_BG   = '#050505';
 const GRID_COLOR = '#1c1c1c';
@@ -60,7 +62,7 @@ export default function CommodityChart({
       try {
         const r = await fetch(`/api/chart?symbol=${encodeURIComponent(symbol)}`, { cache: 'no-store' });
         const d = await r.json();
-        if (!d.error) setData(d);
+        if (!d.error) setData(prev => (prev ? mergeChartData(prev, d) : d));
       } catch {}
     }, timeframe === '1D' ? 5000 : 30_000);
     return () => clearInterval(id);
@@ -192,11 +194,10 @@ export default function CommodityChart({
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <div
-            ref={containerRef}
-            style={{ height: 500, background: CHART_BG }}
-            className="w-full rounded-b-2xl"
-          />
+          <div className="relative w-full rounded-b-2xl" style={{ height: 500, background: CHART_BG }}>
+            <div ref={containerRef} className="h-full w-full" />
+            {!data?.[timeframe]?.length && <ChartUnavailable />}
+          </div>
         )}
       </CardContent>
     </Card>

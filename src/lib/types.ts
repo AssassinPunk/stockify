@@ -4,6 +4,7 @@ export type IndexData = {
   change: number;
   percentChange: number;
   lastUpdated: string;
+  lastTradeAt?: number; // epoch seconds
   previousClose?: number;
   dayHigh?: number;
   dayLow?: number;

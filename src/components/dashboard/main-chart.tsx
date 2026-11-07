@@ -29,6 +29,8 @@ import { getAllTickers } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import FullChartDialog from './full-chart-dialog';
+import ChartUnavailable from './chart-unavailable';
+import { mergeChartData } from '@/lib/chart-data';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { calculateMA, calculateRSI } from '@/lib/indicators';
 
@@ -253,7 +255,7 @@ export default function MainChart({
         const res = await fetch(`/api/chart?symbol=${encodeURIComponent(currentTicker.symbol)}`, { cache: 'no-store' });
         if (!res.ok) return;
         const data = await res.json();
-        if (!cancelled && !data?.error) setCurrentData(data);
+        if (!cancelled && !data?.error) setCurrentData(prev => mergeChartData(prev, data));
       } catch {} finally { inFlight = false; }
     };
 
@@ -412,7 +414,10 @@ export default function MainChart({
 
       {/* ── chart area ──────────────────────────────────────────────────────── */}
       <CardContent className="p-0 flex flex-col overflow-hidden rounded-b-2xl">
-        <div className="relative h-[280px] w-full xl:h-[400px]" style={{ background: CHART_BG }} ref={chartContainerRef} />
+        <div className="relative h-[280px] w-full xl:h-[400px]" style={{ background: CHART_BG }}>
+          <div className="h-full w-full" ref={chartContainerRef} />
+          {!currentData[timeframe]?.length && <ChartUnavailable />}
+        </div>
         {showRSI && (
           <div className="h-28 shrink-0 border-t border-[#1c1c1c] relative">
             <span className="absolute top-1.5 left-3 z-10 text-xs font-medium text-muted-foreground">RSI (14)</span>

@@ -1,22 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Sparkles, ExternalLink, RefreshCcw } from 'lucide-react';
 import type { NewsArticle } from '@/lib/types';
-import { cn } from '@/lib/utils';
 import { summarizeMarketNews } from '@/ai/flows/summarize-market-news';
 
-const CATEGORY_STYLE: Record<string, string> = {
-  Indices: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
-  Stocks:  'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
-  Macro:   'border-orange-500/30 bg-orange-500/10 text-orange-400',
-};
-
 export default function NewsDigestCard({ news }: { news: NewsArticle[] }) {
-  const [aiState, setAiState] = useState<'idle' | 'loading' | 'done'>('idle');
+  const [aiState, setAiState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [summary, setSummary] = useState('');
 
   const summarize = async () => {
@@ -33,92 +24,80 @@ export default function NewsDigestCard({ news }: { news: NewsArticle[] }) {
       setSummary(res.summary);
       setAiState('done');
     } catch {
-      setSummary('Unable to summarise news at this time. Please try again later.');
-      setAiState('done');
+      setAiState('error');
     }
   };
 
   const reset = () => { setAiState('idle'); setSummary(''); };
 
   return (
-    <Card className="rounded-2xl border-border/50 bg-card shadow-lg shadow-black/10">
-      <CardHeader className="flex flex-row items-start justify-between gap-3 pb-3">
-        <div>
-          <CardTitle className="text-base">News Digest</CardTitle>
-          <CardDescription>Latest market headlines</CardDescription>
+    <section className="flex h-full flex-col gap-3 rounded-2xl bg-card p-5" aria-label="News digest">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold">News Digest</h2>
+          <p className="text-sm text-muted-foreground">Latest market headlines</p>
         </div>
-        {aiState === 'idle' && (
-          <Button size="sm" variant="outline" onClick={summarize}
-            className="shrink-0 gap-1.5 text-xs border-border/50">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-            AI Summary
+        {(aiState === 'idle' || aiState === 'error') && news.length > 0 && (
+          <Button size="sm" variant="outline" onClick={summarize} className="shrink-0 gap-1.5">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+            {aiState === 'error' ? 'Try again' : 'AI Summary'}
           </Button>
         )}
         {aiState === 'done' && (
-          <Button size="sm" variant="ghost" onClick={reset}
-            className="shrink-0 gap-1.5 text-xs text-muted-foreground hover:text-foreground">
-            <RefreshCcw className="h-3 w-3" />
+          <Button size="sm" variant="ghost" onClick={reset} className="shrink-0 gap-1.5 text-muted-foreground hover:text-foreground">
+            <RefreshCcw className="h-3.5 w-3.5" aria-hidden="true" />
             Reset
           </Button>
         )}
-      </CardHeader>
+      </div>
 
-      <CardContent className="flex flex-col gap-4">
-        {/* AI loading */}
-        {aiState === 'loading' && (
-          <div className="flex items-center gap-3 rounded-xl bg-primary/5 border border-primary/10 px-4 py-3">
-            <div className="flex gap-1">
-              {[0, 1, 2].map(i => (
-                <div key={i} className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce"
-                  style={{ animationDelay: `${i * 0.18}s` }} />
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground">Summarising headlines…</p>
-          </div>
-        )}
+      {aiState === 'error' && (
+        <p role="alert" className="text-sm text-down">Couldn&apos;t summarise the news. Please try again.</p>
+      )}
 
-        {/* AI summary result */}
-        {aiState === 'done' && summary && (
-          <div className="rounded-xl bg-primary/5 border border-primary/10 p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary/60 mb-2">AI Summary</p>
-            <p className="text-xs leading-[1.85] text-foreground/70">{summary}</p>
-          </div>
-        )}
-
-        {/* Article list */}
-        <div className="flex flex-col">
-          {news.slice(0, 7).map((article, i) => (
-            <a
-              key={article.id}
-              href={article.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                'flex items-start gap-3 py-3 group hover:bg-accent/30 -mx-2 px-2 rounded-lg transition-colors',
-                i < news.slice(0, 7).length - 1 && 'border-b border-border/30',
-              )}
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                  {article.title}
-                </p>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="text-[10px] text-muted-foreground">{article.source}</span>
-                  <span className="text-[10px] text-muted-foreground/40">·</span>
-                  <span className="text-[10px] text-muted-foreground">{article.timestamp}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0 mt-0.5">
-                <Badge variant="outline"
-                  className={cn('text-[9px] h-4 px-1.5 font-normal border', CATEGORY_STYLE[article.category] ?? CATEGORY_STYLE.Macro)}>
-                  {article.category}
-                </Badge>
-                <ExternalLink className="h-3 w-3 text-muted-foreground/25 group-hover:text-muted-foreground/60 transition-colors" />
-              </div>
-            </a>
-          ))}
+      {aiState === 'loading' && (
+        <div className="flex flex-col gap-2 rounded-lg bg-secondary/50 p-4" role="status" aria-label="Summarising headlines">
+          <p className="text-sm text-muted-foreground">Summarising headlines…</p>
+          <div className="h-3.5 w-full rounded bg-secondary" />
+          <div className="h-3.5 w-4/5 rounded bg-secondary" />
         </div>
-      </CardContent>
-    </Card>
+      )}
+
+      {aiState === 'done' && summary && (
+        <div className="rounded-lg bg-secondary/50 p-4">
+          <h3 className="text-sm font-medium">AI Summary</h3>
+          <p className="mt-1 text-sm leading-relaxed text-foreground">{summary}</p>
+        </div>
+      )}
+
+      {news.length === 0 ? (
+        <p className="text-sm text-muted-foreground">News is unavailable right now. Please check back shortly.</p>
+      ) : (
+        <ul className="divide-y divide-border/60">
+          {news.slice(0, 7).map(article => (
+            <li key={article.id}>
+              <a
+                href={article.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group -mx-2 flex items-start gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-secondary/40"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="line-clamp-2 text-sm font-medium leading-snug group-hover:underline">{article.title}</p>
+                  <p className="mt-1 text-[13px] text-muted-foreground">
+                    {article.source} · {article.timestamp}
+                  </p>
+                </div>
+                {/* The same neutral tag for every category: green and red on this page only ever mean gains and losses. */}
+                <span className="mt-0.5 flex shrink-0 items-center gap-2">
+                  <span className="rounded bg-secondary px-1.5 py-0.5 text-xs text-foreground">{article.category}</span>
+                  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
