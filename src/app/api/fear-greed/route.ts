@@ -7,6 +7,9 @@ export type FGIComponent = {
   label: string;
   value: string;
   description: string;
+  weight: number;     // percent; the same weights the composite below uses
+  capped?: string;    // the end of the scale the raw value went past, when it did
+  usedDefault?: boolean; // the source returned nothing, so the score comes from the default input
 };
 
 export type FearGreedData = {
@@ -14,6 +17,8 @@ export type FearGreedData = {
   label: string;
   components: FGIComponent[];
   updatedAt: string;
+  asOf: string | null;        // when NIFTY last traded, from the same response the score uses
+  marketOpen: boolean | null; // null when the response does not say
 };
 
 function scoreToLabel(s: number): string {
@@ -47,7 +52,8 @@ export async function GET() {
     ]);
 
     // ── 1. Volatility: India VIX ─────────────────────────────────────────────
-    const vix: number = vixJson?.chart?.result?.[0]?.meta?.regularMarketPrice ?? 20;
+    const vixPrice: number | undefined = vixJson?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    const vix: number = vixPrice ?? 20;
     let vixScore: number;
     if      (vix >= 30) vixScore = 5;
     else if (vix >= 25) vixScore = 20;
@@ -103,6 +109,16 @@ export async function GET() {
       safeHavenScore * 0.15,
     );
 
+    // Reported alongside the score. Nothing below this line feeds the calculation above.
+    const niftyMeta = nifty3mJson?.chart?.result?.[0]?.meta;
+    const lastTrade: number | undefined = niftyMeta?.regularMarketTime;
+    const session = niftyMeta?.currentTradingPeriod?.regular;
+    const nowSeconds = Date.now() / 1000;
+    const marketOpen = session?.start && session?.end
+      ? nowSeconds >= session.start && nowSeconds < session.end
+      : null;
+    const cappedAt = (raw: number) => (raw > 5 ? '+5%' : raw < -5 ? '-5%' : undefined);
+
     const components: FGIComponent[] = [
       {
         name: 'Volatility (India VIX)',
@@ -110,6 +126,8 @@ export async function GET() {
         label: scoreToLabel(vixScore),
         value: vix.toFixed(2),
         description: 'Measures implied market volatility. Values above 25 signal elevated fear; below 12 suggest complacency.',
+        weight: 30,
+        usedDefault: vixPrice === undefined,
       },
       {
         name: 'Market Momentum',
@@ -117,6 +135,9 @@ export async function GET() {
         label: scoreToLabel(momentumScore),
         value: `${momentumPct >= 0 ? '+' : ''}${momentumPct.toFixed(2)}% vs MA${Math.min(50, close3m.length)}`,
         description: 'NIFTY 50 relative to its moving average. Prices above the MA signal bullish momentum.',
+        weight: 30,
+        capped: cappedAt(momentumPct),
+        usedDefault: close3m.length < 20,
       },
       {
         name: 'Sector Breadth',
@@ -124,6 +145,7 @@ export async function GET() {
         label: scoreToLabel(breadthScore),
         value: `${positiveCount} / ${sectors.length} sectors positive`,
         description: 'Broad participation across Nifty sectors signals a healthy rally; narrow breadth = caution.',
+        weight: 25,
       },
       {
         name: 'Safe Haven Demand',
@@ -131,6 +153,9 @@ export async function GET() {
         label: scoreToLabel(safeHavenScore),
         value: `Equities ${diff >= 0 ? '+' : ''}${diff.toFixed(1)}% vs Gold (30d)`,
         description: 'Gold outperforming equities signals risk aversion. Equities outperforming gold signals confidence.',
+        weight: 15,
+        capped: cappedAt(diff),
+        usedDefault: nifty1m.length < 2 || gold1m.length < 2,
       },
     ];
 
@@ -139,6 +164,8 @@ export async function GET() {
       label: scoreToLabel(composite),
       components,
       updatedAt: new Date().toISOString(),
+      asOf: lastTrade ? new Date(lastTrade * 1000).toISOString() : null,
+      marketOpen,
     } satisfies FearGreedData);
   } catch (err) {
     console.error('Fear & Greed error:', err);

@@ -1,155 +1,100 @@
 'use client';
 
-// Semicircular gauge: score 0 (left) → 50 (top) → 100 (right)
-// Angle formula: angleDeg = score * 1.8 − 180
-//   score=0  → −180° → left  (cos=−1, sin=0)
-//   score=50 → −90°  → top   (cos=0,  sin=−1 → y decreases → up in SVG)
-//   score=100→   0°  → right (cos=+1, sin=0)
-// Arc drawn with sweep=1 (clockwise in SVG) which traces the upper semicircle.
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ZONES } from '@/lib/fear-greed';
 
-const CX = 160, CY = 148, R = 116, SW = 20;
+const BAND = 18;
+const SIDE = 30;    // room for the 0 and 100 labels beside the arc
+const TOP = 26;     // room for the labels above it
+const BELOW = 14;   // room for the hub under the pivot
+const MAX_RADIUS = 236;
 
-const ZONES = [
-  { from: 0,  to: 20,  color: '#dc2626' }, // Extreme Fear
-  { from: 20, to: 40,  color: '#f97316' }, // Fear
-  { from: 40, to: 60,  color: '#eab308' }, // Neutral
-  { from: 60, to: 80,  color: '#84cc16' }, // Greed
-  { from: 80, to: 100, color: '#22c55e' }, // Extreme Greed
-] as const;
+const angleOf = (score: number) => Math.PI * (1 - score / 100);
 
-const LABEL_COLOR: Record<string, string> = {
-  'Extreme Fear': '#dc2626',
-  Fear:           '#f97316',
-  Neutral:        '#eab308',
-  Greed:          '#84cc16',
-  'Extreme Greed':'#22c55e',
-};
+// Drawn at the width it really has, so the labels stay 12px on a phone and on a desktop.
+export default function FearGreedGauge({ score, label }: { score: number | null; label: string | null }) {
+  const box = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+  const [settled, setSettled] = useState(false);
 
-function scoreToAngleDeg(score: number) {
-  return score * 1.8 - 180;
-}
+  useLayoutEffect(() => {
+    const element = box.current;
+    if (!element) return;
+    setWidth(element.clientWidth);
+    const observer = new ResizeObserver(() => setWidth(element.clientWidth));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
-function toXY(angleDeg: number, r: number) {
-  const rad = (angleDeg * Math.PI) / 180;
-  return { x: CX + r * Math.cos(rad), y: CY + r * Math.sin(rad) };
-}
+  // The needle starts at 0 and swings to the reading once it has been painted there.
+  const hasReading = score !== null;
+  useEffect(() => {
+    if (!hasReading) return;
+    const frame = requestAnimationFrame(() => requestAnimationFrame(() => setSettled(true)));
+    return () => cancelAnimationFrame(frame);
+  }, [hasReading]);
 
-// Arc path from fromScore to toScore (sweep=1 → upper semicircle)
-function arcD(fromScore: number, toScore: number, r: number) {
-  const p1 = toXY(scoreToAngleDeg(fromScore), r);
-  const p2 = toXY(scoreToAngleDeg(toScore),   r);
-  return `M ${p1.x.toFixed(3)} ${p1.y.toFixed(3)} A ${r} ${r} 0 0 1 ${p2.x.toFixed(3)} ${p2.y.toFixed(3)}`;
-}
+  const radius = Math.max(90, Math.min(MAX_RADIUS, (width - SIDE * 2) / 2));
+  const cx = width / 2;
+  const cy = TOP + radius;
+  const height = cy + BELOW;
+  const at = (s: number, r: number) => ({ x: cx + r * Math.cos(angleOf(s)), y: cy - r * Math.sin(angleOf(s)) });
+  const arc = (from: number, to: number, r: number) => {
+    const a = at(from, r);
+    const b = at(to, r);
+    return `M ${a.x.toFixed(2)} ${a.y.toFixed(2)} A ${r} ${r} 0 0 1 ${b.x.toFixed(2)} ${b.y.toFixed(2)}`;
+  };
 
-// Tick marks at zone boundaries
-const TICK_SCORES = [0, 20, 40, 60, 80, 100];
-const TICK_LABELS = ['0', '20', '40', '60', '80', '100'];
-
-export default function FearGreedGauge({
-  score,
-  label,
-}: {
-  score: number;
-  label: string;
-}) {
-  const clampedScore = Math.max(0, Math.min(100, score));
-  const needleAngle  = scoreToAngleDeg(clampedScore);
-  const needleTip    = toXY(needleAngle, R - SW / 2 - 3);
-  const accentColor  = LABEL_COLOR[label] ?? '#eab308';
+  const middle = radius - BAND / 2;
+  const clamped = score === null ? 0 : Math.max(0, Math.min(100, score));
+  const needleLength = radius - BAND - 8;
+  const description = score === null ? 'Gauge with no reading yet' : `Gauge reading ${score} out of 100, ${label}`;
 
   return (
-    <svg viewBox="0 0 320 185" className="w-full max-w-sm select-none">
-      {/* ── Background track ─────────────────────────────────────── */}
-      <path
-        d={arcD(0, 100, R)}
-        fill="none"
-        stroke="#111"
-        strokeWidth={SW + 6}
-        strokeLinecap="round"
-      />
+    <div ref={box} className="w-full" style={{ height: width ? height : 2 * MAX_RADIUS * 0.6 }}>
+      {width > 0 && (
+        <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={description} className="block select-none">
+          {ZONES.map(zone => {
+            const active = zone.name === label;
+            return (
+              <path
+                key={zone.name}
+                d={arc(zone.from + (zone.from === 0 ? 0 : 0.5), zone.to - (zone.to === 100 ? 0 : 0.5), middle)}
+                fill="none"
+                strokeWidth={BAND}
+                style={{ stroke: score === null ? 'hsl(var(--secondary))' : zone.color }}
+                opacity={score === null || active ? 1 : 0.32}
+              />
+            );
+          })}
 
-      {/* ── Colored zone arcs ────────────────────────────────────── */}
-      {ZONES.map(z => (
-        <path
-          key={z.from}
-          d={arcD(z.from, z.to, R)}
-          fill="none"
-          stroke={z.color}
-          strokeWidth={SW}
-          strokeLinecap="butt"
-          opacity={0.9}
-        />
-      ))}
+          {Array.from({ length: 21 }, (_, i) => i * 5).map(s => {
+            const major = s % 20 === 0;
+            const a = at(s, radius - BAND - 3);
+            const b = at(s, radius - BAND - (major ? 11 : 7));
+            return <line key={s} x1={a.x} y1={a.y} x2={b.x} y2={b.y} strokeWidth={1} style={{ stroke: major ? 'hsl(var(--muted-foreground))' : 'hsl(var(--border))' }} />;
+          })}
 
-      {/* ── Tick marks and labels at zone boundaries ─────────────── */}
-      {TICK_SCORES.map((s, i) => {
-        const outer = toXY(scoreToAngleDeg(s), R + SW / 2 + 6);
-        const inner = toXY(scoreToAngleDeg(s), R - SW / 2 - 2);
-        const lbl   = toXY(scoreToAngleDeg(s), R + SW / 2 + 17);
-        return (
-          <g key={s}>
-            <line
-              x1={inner.x.toFixed(2)} y1={inner.y.toFixed(2)}
-              x2={outer.x.toFixed(2)} y2={outer.y.toFixed(2)}
-              stroke="#333" strokeWidth={1.5}
-            />
-            <text
-              x={lbl.x.toFixed(2)} y={lbl.y.toFixed(2)}
-              textAnchor="middle" dominantBaseline="middle"
-              fill="#444" fontSize={8} fontFamily="monospace"
+          {[0, 20, 40, 60, 80, 100].map(s => {
+            const p = at(s, radius + 13);
+            return (
+              <text key={s} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize={12} style={{ fill: 'hsl(var(--muted-foreground))', fontVariantNumeric: 'tabular-nums' }}>
+                {s}
+              </text>
+            );
+          })}
+
+          {score !== null && (
+            <g
+              className="transition-transform duration-1000 ease-out motion-reduce:transition-none"
+              style={{ transform: `rotate(${(settled ? clamped : 0) * 1.8}deg)`, transformOrigin: `${cx}px ${cy}px` }}
             >
-              {TICK_LABELS[i]}
-            </text>
-          </g>
-        );
-      })}
-
-      {/* ── Needle shadow ────────────────────────────────────────── */}
-      <line
-        x1={CX} y1={CY}
-        x2={(needleTip.x + 1.5).toFixed(2)} y2={(needleTip.y + 1.5).toFixed(2)}
-        stroke="#000" strokeWidth={4} strokeLinecap="round" opacity={0.35}
-      />
-
-      {/* ── Needle ───────────────────────────────────────────────── */}
-      <line
-        x1={CX} y1={CY}
-        x2={needleTip.x.toFixed(2)} y2={needleTip.y.toFixed(2)}
-        stroke="white" strokeWidth={2.5} strokeLinecap="round"
-      />
-
-      {/* ── Hub ──────────────────────────────────────────────────── */}
-      <circle cx={CX} cy={CY} r={11} fill="#0a0a0a" stroke={accentColor} strokeWidth={2.5} />
-      <circle cx={CX} cy={CY} r={4}  fill={accentColor} />
-
-      {/* ── Score number ─────────────────────────────────────────── */}
-      <text
-        x={CX} y={CY + 32}
-        textAnchor="middle"
-        fill="white"
-        fontSize={34}
-        fontWeight="700"
-        fontFamily="monospace"
-      >
-        {clampedScore}
-      </text>
-
-      {/* ── Label text ───────────────────────────────────────────── */}
-      <text
-        x={CX} y={CY + 54}
-        textAnchor="middle"
-        fill={accentColor}
-        fontSize={11}
-        fontWeight="700"
-        letterSpacing="1.5"
-        fontFamily="sans-serif"
-      >
-        {label.toUpperCase()}
-      </text>
-
-      {/* ── End labels ───────────────────────────────────────────── */}
-      <text x={CX - R - SW / 2 - 8} y={CY + 10} textAnchor="end"   fill="#555" fontSize={9} fontFamily="sans-serif">Fear</text>
-      <text x={CX + R + SW / 2 + 8} y={CY + 10} textAnchor="start" fill="#555" fontSize={9} fontFamily="sans-serif">Greed</text>
-    </svg>
+              <polygon points={`${cx - needleLength},${cy} ${cx},${cy - 3.5} ${cx},${cy + 3.5}`} style={{ fill: 'hsl(var(--foreground))' }} />
+            </g>
+          )}
+          {score !== null && <circle cx={cx} cy={cy} r={7} strokeWidth={2} style={{ fill: 'hsl(var(--card))', stroke: 'hsl(var(--foreground))' }} />}
+        </svg>
+      )}
+    </div>
   );
 }

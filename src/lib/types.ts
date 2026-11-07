@@ -44,6 +44,8 @@ export type NewsArticle = {
   timestamp: string;
   url: string;
   category: 'Indices' | 'Stocks' | 'Macro';
+  publishedAt?: number; // epoch seconds
+  image?: string;
 };
 
 export type ChartDataPoint = {

@@ -288,6 +288,14 @@ function timeAgo(epochSeconds: number): string {
   return plural(Math.floor(secondsAgo / 86400), 'day');
 }
 
+type YahooThumbnail = { resolutions?: { url?: string; width?: number }[] };
+
+// Yahoo sends a few sizes of each picture. The largest is the one fit for the top story.
+function yahooThumbnail(thumbnail?: YahooThumbnail): string | undefined {
+  const sizes = thumbnail?.resolutions?.filter(size => size.url) ?? [];
+  return sizes.sort((a, b) => (b.width ?? 0) - (a.width ?? 0))[0]?.url;
+}
+
 function categorizeIndianNews(title: string): NewsArticle['category'] {
   const t = title.toLowerCase();
   if (t.match(/nifty|sensex|index|dow jones|nasdaq|s&p|nse|bse|markets/)) return 'Indices';
@@ -337,6 +345,7 @@ async function fetchGoogleNews(
         title,
         source: source || 'Google News',
         timestamp: timeAgo(Date.parse(tag(item, 'pubDate')) / 1000),
+        publishedAt: Date.parse(tag(item, 'pubDate')) / 1000 || undefined,
         url: tag(item, 'link'),
         category: categorize(title),
       };
@@ -363,6 +372,8 @@ export async function fetchLiveNews(): Promise<NewsArticle[]> {
       title: item.title,
       source: item.publisher || 'Yahoo Finance',
       timestamp: timeAgo(item.providerPublishTime),
+      publishedAt: item.providerPublishTime,
+      image: yahooThumbnail(item.thumbnail),
       url: item.link,
       category: categorizeIndianNews(item.title),
     }));
@@ -463,11 +474,13 @@ export async function fetchLiveInternationalNews(): Promise<import('./types').Ne
     const res  = await fetch(url, { next: { revalidate: 600 }, headers: YAHOO_HEADERS });
     const data = await res.json();
     if (!Array.isArray(data.news) || data.news.length === 0) throw new Error('No news returned from Yahoo');
-    return data.news.map((item: { uuid?: string; title: string; publisher?: string; providerPublishTime: number; link: string }, index: number) => ({
+    return data.news.map((item: { uuid?: string; title: string; publisher?: string; providerPublishTime: number; link: string; thumbnail?: YahooThumbnail }, index: number) => ({
       id: item.uuid ?? `intl-${index}`,
       title: item.title,
       source: item.publisher ?? 'Yahoo Finance',
       timestamp: timeAgo(item.providerPublishTime),
+      publishedAt: item.providerPublishTime,
+      image: yahooThumbnail(item.thumbnail),
       url: item.link,
       category: categorizeInternationalNews(item.title),
     }));
