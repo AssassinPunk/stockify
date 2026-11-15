@@ -68,11 +68,8 @@ export function ValueChart({ result }: { result: BacktestResult }) {
 }
 
 export function GrowthChart({ result }: { result: BacktestResult }) {
-  // The same month-over-month figure the page has always drawn.
-  const data = result.timeline.slice(1).map((point, index) => ({
-    date: point.date,
-    change: ((point.value - result.timeline[index].value) / result.timeline[index].value) * 100,
-  }));
+  // The route's own monthly figures, so the bars and Best and Worst Month always agree.
+  const data = result.monthly;
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>

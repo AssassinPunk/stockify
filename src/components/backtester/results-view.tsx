@@ -95,6 +95,8 @@ function Summary({ state, result, question, error, onRetry, type }: {
   const beat = result.totalReturn > result.benchmark.totalReturn;
   const months = result.timeline.length;
   const perRun = result.type === 'sip' ? result.totalInvested / months : result.totalInvested;
+  // A SIP's money goes in over time, so its yearly rate is XIRR; a lump sum's is plain CAGR.
+  const rate = result.type === 'sip' ? 'XIRR' : 'CAGR';
   const first = result.timeline[0].date;
   const last = result.timeline[months - 1].date;
 
@@ -115,8 +117,8 @@ function Summary({ state, result, question, error, onRetry, type }: {
       <dl className="mt-2 divide-y divide-border/60">
         <Figure label="Total Invested">{money(result.totalInvested, result.currency)}</Figure>
         <Figure label="Gain / Loss" className={tone(gain)}>{signedMoney(gain, result.currency)}</Figure>
-        <Figure label="Total Return" className={tone(result.totalReturn)} sub={`CAGR ${percent(result.cagr)}`}>{percent(result.totalReturn)}</Figure>
-        <Figure label={`vs ${result.benchmark.symbol}`} className={tone(result.benchmark.totalReturn)} sub={`CAGR ${percent(result.benchmark.cagr)}`}>{percent(result.benchmark.totalReturn)}</Figure>
+        <Figure label="Total Return" className={tone(result.totalReturn)} sub={`${rate} ${percent(result.cagr)}`}>{percent(result.totalReturn)}</Figure>
+        <Figure label={`vs ${result.benchmark.symbol}`} className={tone(result.benchmark.totalReturn)} sub={`${rate} ${percent(result.benchmark.cagr)}`}>{percent(result.benchmark.totalReturn)}</Figure>
         <Figure label={result.type === 'sip' ? `${result.period} SIP Total` : 'Deployed'}>
           {result.type === 'sip' ? `${months}× ${money(perRun, result.currency)}` : `1× ${money(perRun, result.currency)}`}
         </Figure>
@@ -174,7 +176,7 @@ export default function ResultsView({ state, result, question, error, onRetry, t
       <section aria-label="Month-over-Month Portfolio Growth" className={cn('rounded-2xl bg-card p-5 transition-opacity', dim)}>
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
           <h2 className="text-base font-semibold">Month-over-Month Portfolio Growth</h2>
-          {result?.type === 'sip' && <p className="text-xs text-muted-foreground">Includes each month&apos;s new SIP amount</p>}
+          {result?.type === 'sip' && <p className="text-xs text-muted-foreground">Return on money already invested, before each new SIP amount</p>}
         </div>
         <div className="mt-3 h-[180px]">
           {result

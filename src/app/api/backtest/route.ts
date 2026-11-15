@@ -15,9 +15,10 @@ export type BacktestResult = {
   totalInvested: number;
   finalValue:    number;
   totalReturn:   number;    // %
-  cagr:          number;    // %
-  bestMonth:     number;    // %
+  cagr:          number;    // % a year: XIRR for a SIP, CAGR over the real dates for a lump sum
+  bestMonth:     number;    // % the stock's best month, before any new SIP money
   worstMonth:    number;    // %
+  monthly:       { date: string; change: number }[]; // % per month, the same figures as best and worst
   benchmark: {
     symbol:      string;
     finalValue:  number;
@@ -28,6 +29,7 @@ export type BacktestResult = {
 };
 
 import { TICKER_REGISTRY } from '@/lib/data';
+import { alignByMonth, monthlyBars, monthlyReturns as priceReturns, xirr, type CashFlow } from '@/lib/backtest-math';
 
 function toYahoo(symbol: string): string {
   if (symbol === 'NIFTY 50')   return '^NSEI';
@@ -79,22 +81,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Price data unavailable for this symbol.' }, { status: 404 });
     }
 
-    const timestamps: number[]         = sResult.timestamp ?? [];
-    const stockClose: (number|null)[]  = sResult.indicators.quote[0].close ?? [];
-    const benchClose: (number|null)[]  = bResult.indicators.quote[0].close ?? [];
-
-    // Align valid data points where both series have values
-    type Pt = { date: string; sp: number; bp: number };
-    const pts: Pt[] = [];
-    for (let i = 0; i < timestamps.length; i++) {
-      if (stockClose[i] != null && benchClose[i] != null) {
-        pts.push({
-          date: new Date(timestamps[i] * 1000).toISOString().slice(0, 10),
-          sp:   stockClose[i]!,
-          bp:   benchClose[i]!,
-        });
-      }
-    }
+    // One close per month for each series, in its exchange's time, then paired by month.
+    const zoneOf = (r: any) => ({ timeZone: r.meta?.exchangeTimezoneName, gmtoffset: r.meta?.gmtoffset ?? 0 });
+    const stockBars = monthlyBars(sResult.timestamp ?? [], sResult.indicators?.quote?.[0]?.close ?? [], zoneOf(sResult));
+    const benchBars = monthlyBars(bResult.timestamp ?? [], bResult.indicators?.quote?.[0]?.close ?? [], zoneOf(bResult));
+    const pts = alignByMonth(stockBars, benchBars);
 
     if (pts.length < 2) {
       return NextResponse.json({ error: 'Insufficient data for the chosen period.' }, { status: 404 });
@@ -104,8 +95,6 @@ export async function GET(req: NextRequest) {
     const timeline: BacktestTimelinePoint[] = [];
     let stockShares = 0, benchShares = 0, totalInvested = 0;
 
-    const monthlyReturns: number[] = [];
-
     if (type === 'sip') {
       for (let i = 0; i < pts.length; i++) {
         const { date, sp, bp } = pts[i];
@@ -114,7 +103,6 @@ export async function GET(req: NextRequest) {
         totalInvested += amount;
         const val = stockShares * sp;
         timeline.push({ date, value: val, invested: totalInvested, benchValue: benchShares * bp });
-        if (i > 0) monthlyReturns.push(((val - timeline[i - 1].value) / timeline[i - 1].value) * 100);
       }
     } else {
       // Lump sum: buy everything at first month
@@ -125,7 +113,6 @@ export async function GET(req: NextRequest) {
         const { date, sp, bp } = pts[i];
         const val = stockShares * sp;
         timeline.push({ date, value: val, invested: totalInvested, benchValue: benchShares * bp });
-        if (i > 0) monthlyReturns.push(((val - timeline[i - 1].value) / timeline[i - 1].value) * 100);
       }
     }
 
@@ -133,9 +120,20 @@ export async function GET(req: NextRequest) {
     const benchFinal = timeline.at(-1)!.benchValue;
     const benchInvested = type === 'sip' ? totalInvested : amount;
 
-    const years       = pts.length / 12;
-    const cagr        = years > 0 ? (Math.pow(finalValue / totalInvested, 1 / years) - 1) * 100 : 0;
-    const benchCagr   = years > 0 ? (Math.pow(benchFinal / benchInvested,  1 / years) - 1) * 100 : 0;
+    // A month's return is measured on the money already in, so a new SIP instalment is not counted as growth.
+    const monthlyReturns = priceReturns(pts.map(pt => pt.sp));
+    const monthly = pts.slice(1).map((pt, i) => ({ date: pt.date, change: monthlyReturns[i] }));
+
+    // Annualised return from the real cash flow dates. For a SIP each instalment has been invested for a
+    // different time, which a single CAGR over the whole period does not allow for.
+    const flowsFor = (final: number): CashFlow[] => [
+      ...(type === 'sip'
+        ? pts.map(pt => ({ date: pt.date, amount: -amount }))
+        : [{ date: pts[0].date, amount: -amount }]),
+      { date: pts[pts.length - 1].date, amount: final },
+    ];
+    const cagr      = xirr(flowsFor(finalValue)) ?? 0;
+    const benchCagr = xirr(flowsFor(benchFinal)) ?? 0;
     const totalReturn = ((finalValue - totalInvested) / totalInvested) * 100;
     const benchReturn = ((benchFinal - benchInvested)  / benchInvested)  * 100;
 
@@ -150,6 +148,7 @@ export async function GET(req: NextRequest) {
       cagr,
       bestMonth:  monthlyReturns.length ? Math.max(...monthlyReturns) : 0,
       worstMonth: monthlyReturns.length ? Math.min(...monthlyReturns) : 0,
+      monthly,
       benchmark: {
         symbol:      benchLabel,
         finalValue:  benchFinal,
