@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Menu, Moon, Sun, X } from 'lucide-react';
+import { useThemeTransition } from '@/hooks/use-theme-transition';
 
 const LINKS = [
   { label: 'Home', href: '/' },
@@ -23,6 +24,8 @@ export function Wordmark() {
 
 export default function LandingNav() {
   const [open, setOpen] = useState(false);
+  const { theme, toggleTheme } = useThemeTransition();
+  const themeLabel = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
 
   return (
     <header className="nav">
@@ -34,6 +37,10 @@ export default function LandingNav() {
         <div className="nav-actions">
           <Link className="nav-signin" href="/login">Sign In</Link>
           <Link className="btn btn-primary btn-small" href="/signup">Get Started</Link>
+          <button type="button" className="nav-theme" aria-label={themeLabel} title={themeLabel} onClick={event => toggleTheme(event.currentTarget)}>
+            <Sun className="icon-sun" aria-hidden="true" />
+            <Moon className="icon-moon" aria-hidden="true" />
+          </button>
           <button
             type="button"
             className="nav-toggle"

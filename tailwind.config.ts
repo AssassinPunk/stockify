@@ -6,6 +6,7 @@ export default {
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/lib/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -17,6 +18,8 @@ export default {
       colors: {
         up: 'hsl(var(--up))',
         down: 'hsl(var(--down))',
+        warn: 'hsl(var(--warn))',
+        high: 'hsl(var(--high))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {

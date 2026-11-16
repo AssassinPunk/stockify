@@ -10,10 +10,10 @@ const R  = 82;
 const SW = 11; // zone arc stroke-width
 
 const ZONES = [
-  { from: 0,  to: 13, color: '#10b981' },
-  { from: 13, to: 18, color: '#facc15' },
-  { from: 18, to: 25, color: '#fb923c' },
-  { from: 25, to: 40, color: '#ef4444' },
+  { from: 0,  to: 13, color: 'hsl(var(--up))' },
+  { from: 13, to: 18, color: 'hsl(var(--warn))' },
+  { from: 18, to: 25, color: 'hsl(var(--high))' },
+  { from: 25, to: 40, color: 'hsl(var(--down))' },
 ] as const;
 
 const BOUNDARY_TICKS = [13, 18, 25];
@@ -89,22 +89,22 @@ export default function VixGauge({
         </filter>
         {/* Subtle inner shadow for track depth */}
         <filter id="vix-track-shadow">
-          <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#000" floodOpacity="0.6" />
+          <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#000" style={{ floodOpacity: 'var(--shadow-strength)' }} />
         </filter>
       </defs>
 
       {/* ── Deep background track ── */}
       <path d={arc(0, MAX_VIX)} fill="none"
-        stroke="#111" strokeWidth={SW + 6} strokeLinecap="round"
+        strokeWidth={SW + 6} strokeLinecap="round" style={{ stroke: 'hsl(var(--background))' }}
         filter="url(#vix-track-shadow)" />
       <path d={arc(0, MAX_VIX)} fill="none"
-        stroke="#1e1e1e" strokeWidth={SW + 2} strokeLinecap="round" />
+        strokeWidth={SW + 2} strokeLinecap="round" style={{ stroke: 'hsl(var(--secondary))' }} />
 
       {/* ── Coloured zone arcs ── */}
       {ZONES.map((z, i) => (
         <path key={z.color}
           d={arc(z.from, z.to)} fill="none"
-          stroke={z.color} strokeWidth={SW} strokeOpacity={0.85}
+          style={{ stroke: z.color }} strokeWidth={SW} strokeOpacity={0.85}
           strokeLinecap={i === 0 || i === ZONES.length - 1 ? 'round' : 'butt'} />
       ))}
 
@@ -114,7 +114,7 @@ export default function VixGauge({
         const [ox, oy] = polar(a, R + SW / 2 + 5);
         const [ix, iy] = polar(a, R + SW / 2 + 1);
         return <line key={vix} x1={ox} y1={oy} x2={ix} y2={iy}
-          stroke="#444" strokeWidth={1} strokeLinecap="round" />;
+          strokeWidth={1} strokeLinecap="round" style={{ stroke: 'hsl(var(--muted-foreground))' }} strokeOpacity={0.6} />;
       })}
 
       {/* ── Zone boundary ticks (notches through the arc) ── */}
@@ -123,7 +123,7 @@ export default function VixGauge({
         const [ox, oy] = polar(a, R + SW / 2 + 1);
         const [ix, iy] = polar(a, R - SW / 2 - 1);
         return <line key={vix} x1={ox} y1={oy} x2={ix} y2={iy}
-          stroke="#000" strokeWidth={2.5} strokeLinecap="round" />;
+          strokeWidth={2.5} strokeLinecap="round" style={{ stroke: 'hsl(var(--card))' }} />;
       })}
 
       {/* ── Animated needle ── */}
@@ -134,18 +134,18 @@ export default function VixGauge({
       }}>
         {/* Needle shadow */}
         <line x1={0} y1={6} x2={0} y2={-needleR + 4}
-          stroke="rgba(0,0,0,0.5)" strokeWidth={4} strokeLinecap="round" />
+          stroke="#000" strokeWidth={4} strokeLinecap="round" style={{ strokeOpacity: 'var(--shadow-strength)' }} />
         {/* Main needle shaft */}
         <line x1={0} y1={6} x2={0} y2={-needleR}
-          stroke="white" strokeWidth={2} strokeLinecap="round" />
+          strokeWidth={2} strokeLinecap="round" style={{ stroke: 'hsl(var(--foreground))' }} />
         {/* Glowing tip */}
         <circle cx={0} cy={-needleR} r={3.5}
-          fill={risk.hex} filter="url(#vix-tip-glow)" />
+          style={{ fill: risk.hex }} filter="url(#vix-tip-glow)" />
       </g>
 
       {/* ── Pivot ── */}
-      <circle cx={CX} cy={CY} r={8} fill="#0a0a0a" stroke="#2a2a2a" strokeWidth={1.5} />
-      <circle cx={CX} cy={CY} r={4} fill={risk.hex} opacity={0.9} />
+      <circle cx={CX} cy={CY} r={8} strokeWidth={1.5} style={{ fill: 'hsl(var(--card))', stroke: 'hsl(var(--border))' }} />
+      <circle cx={CX} cy={CY} r={4} style={{ fill: risk.hex }} opacity={0.9} />
 
       {/* ── Zone edge labels (always shown, small) ── */}
       {size !== 'sm' && (() => {
@@ -154,9 +154,9 @@ export default function VixGauge({
         return (
           <>
             <text x={lx} y={ly + 3} textAnchor="middle"
-              fontSize={11} fill="#10b981">Low</text>
+              fontSize={11} style={{ fill: 'hsl(var(--up))' }}>Low</text>
             <text x={rx} y={ry + 3} textAnchor="middle"
-              fontSize={11} fill="#ef4444">Extreme</text>
+              fontSize={11} style={{ fill: 'hsl(var(--down))' }}>Extreme</text>
           </>
         );
       })()}

@@ -6,7 +6,6 @@ import {
   CandlestickSeries,
   AreaSeries,
   LineSeries,
-  ColorType,
   CrosshairMode,
   IChartApi,
 } from 'lightweight-charts';
@@ -19,16 +18,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMe
 import { calculateADL, calculateMA, calculateRSI } from '@/lib/indicators';
 import { cn } from '@/lib/utils';
 import ChartUnavailable from './chart-unavailable';
+import { chartTheme } from '@/lib/chart-theme';
 
-const CHART_BG    = '#000000';
-const GRID_COLOR  = '#1f1f1f';
-
-const CHART_OPTS = {
-  layout: { background: { type: ColorType.Solid, color: CHART_BG }, textColor: '#888' },
-  grid:   { vertLines: { color: GRID_COLOR }, horzLines: { color: GRID_COLOR } },
-  rightPriceScale: { borderColor: GRID_COLOR },
-  crosshair: { mode: CrosshairMode.Normal },
-};
 
 const toTime = (date: string): number => Math.floor(new Date(date).getTime() / 1000);
 function last<T>(arr: T[]): T | undefined { return arr.length ? arr[arr.length - 1] : undefined; }
@@ -82,8 +73,11 @@ export default function FullChartDialog({
 
     let destroyed = false;
     let initOnce  = false;
+    let themed: ReturnType<typeof chartTheme> | null = null;
 
     const cleanupCharts = () => {
+      themed?.dispose();
+      themed = null;
       animTokenRef.current++;
       chartsRef.current.forEach(c => c.remove());
       chartsRef.current     = [];
@@ -118,15 +112,19 @@ export default function FullChartDialog({
 
       const charts: IChartApi[] = [];
 
-      const mainChart = createChart(el, {
+      const ct = chartTheme('ground');
+      themed = ct;
+      const CHART_OPTS = { ...ct.frame, crosshair: { mode: CrosshairMode.Normal } };
+
+      const mainChart = ct.chart(createChart(el, {
         ...CHART_OPTS,
         autoSize: true,
         timeScale: {
-          borderColor: GRID_COLOR,
+          ...ct.frame.timeScale,
           timeVisible: timeframe === '1D' || timeframe === '5D',
           secondsVisible: false,
         },
-      });
+      }));
       charts.push(mainChart);
       mainChartRef.current = mainChart;
 
@@ -135,53 +133,46 @@ export default function FullChartDialog({
         const candlesData = dataPoints.map(d => ({
           time: toTime(d.date), open: d.open, high: d.high, low: d.low, close: d.close,
         }));
-        const series = mainChart.addSeries(CandlestickSeries, {
-          upColor:       '#10b981',
-          downColor:     '#ef4444',
+        const series = ct.series(mainChart.addSeries(CandlestickSeries, {
           borderVisible: false,
-          wickUpColor:   '#10b981',
-          wickDownColor: '#ef4444',
-        } as any);
+        } as any), p => ({ upColor: p.up, downColor: p.down, wickUpColor: p.up, wickDownColor: p.down }));
         series.setData(candlesData as any);
         candleSeriesRef.current = series;
         liveBarRef.current      = last(candlesData) ?? null;
       } else {
         const areaData = dataPoints.map(d => ({ time: toTime(d.date), value: d.value }));
-        const series   = mainChart.addSeries(AreaSeries, {
-          lineColor:   '#d4d4d4',
-          topColor:    'rgba(99,102,241,0.35)',
-          bottomColor: 'rgba(99,102,241,0)',
+        const series   = ct.series(mainChart.addSeries(AreaSeries, {
           lineWidth:   2,
           crosshairMarkerVisible: true,
-        } as any);
+        } as any), p => ({ lineColor: p.line, topColor: p.areaTop, bottomColor: p.areaBottom }));
         series.setData(areaData as any);
         candleSeriesRef.current = series;
         liveBarRef.current = last(areaData) ? { ...(last(areaData) as any), open: 0, high: 0, low: 0, close: (last(areaData) as any).value } : null;
       }
 
       if (showMA) {
-        const maSeries = mainChart.addSeries(LineSeries, {
-          color: 'rgba(251,191,36,0.9)', lineWidth: 1,
+        const maSeries = ct.series(mainChart.addSeries(LineSeries, {
+          lineWidth: 1,
           crosshairMarkerVisible: false, lastValueVisible: false, priceLineVisible: false,
-        } as any);
+        } as any), p => ({ color: p.average }));
         maSeries.setData(maData as any);
       }
 
       // ── RSI pane ──
       let rsiChart: IChartApi | null = null;
       if (showRSI && rsiContainerRef.current) {
-        rsiChart = createChart(rsiContainerRef.current, { ...CHART_OPTS, autoSize: true });
+        rsiChart = ct.chart(createChart(rsiContainerRef.current, { ...CHART_OPTS, autoSize: true }));
         charts.push(rsiChart);
-        const rsiSeries = rsiChart.addSeries(LineSeries, { color: '#d4d4d4', lineWidth: 1.5 } as any);
+        const rsiSeries = ct.series(rsiChart.addSeries(LineSeries, { lineWidth: 1.5 } as any), p => ({ color: p.line }));
         rsiSeries.setData(rsiData as any);
       }
 
       // ── ADL pane ──
       let adlChart: IChartApi | null = null;
       if (showADL && adlContainerRef.current) {
-        adlChart = createChart(adlContainerRef.current, { ...CHART_OPTS, autoSize: true });
+        adlChart = ct.chart(createChart(adlContainerRef.current, { ...CHART_OPTS, autoSize: true }));
         charts.push(adlChart);
-        const adlSeries = adlChart.addSeries(LineSeries, { color: '#facc15', lineWidth: 1.5 } as any);
+        const adlSeries = ct.series(adlChart.addSeries(LineSeries, { lineWidth: 1.5 } as any), p => ({ color: p.average }));
         adlSeries.setData(adlData as any);
       }
 
@@ -303,17 +294,17 @@ export default function FullChartDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] w-[95vw] h-[95vh] rounded-2xl bg-[#000000] border-white/5 p-0 flex flex-col overflow-hidden">
+      <DialogContent className="max-w-[95vw] w-[95vw] h-[95vh] rounded-2xl bg-background border-foreground/5 p-0 flex flex-col overflow-hidden">
         <DialogTitle className="sr-only">Full Chart</DialogTitle>
         <DialogDescription className="sr-only">Detailed stock analysis chart</DialogDescription>
 
         {/* ── toolbar ──────────────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-[#050505] shrink-0">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-foreground/5 bg-background shrink-0">
           <div className="flex items-center gap-3">
-            <h2 className="text-lg font-bold text-white tracking-tight">{ticker.symbol}</h2>
-            <div className="h-4 w-px bg-white/20" />
+            <h2 className="text-lg font-bold text-foreground tracking-tight">{ticker.symbol}</h2>
+            <div className="h-4 w-px bg-foreground/20" />
             {lastPoint ? (
-              <span className="text-sm font-medium text-white tabular-nums">
+              <span className="text-sm font-medium text-foreground tabular-nums">
                 {formatNumber(lastPoint.close)}
                 {periodChange !== null && (
                   <span className={cn('ml-2', periodChange >= 0 ? 'text-up' : 'text-down')}>
@@ -328,12 +319,12 @@ export default function FullChartDialog({
 
           <div className="flex items-center gap-2">
             {/* Chart type toggle */}
-            <div className="flex items-center rounded-lg border border-white/10 bg-black/30 p-0.5">
+            <div className="flex items-center rounded-lg border border-foreground/10 bg-background/60 p-0.5">
               <button
                 onClick={() => setChartType('candle')}
                 className={cn(
                   'flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold transition-colors',
-                  chartType === 'candle' ? 'bg-white/15 text-white' : 'text-white/50 hover:text-white',
+                  chartType === 'candle' ? 'bg-foreground/15 text-foreground' : 'text-foreground/50 hover:text-foreground',
                 )}
               >
                 <CandlestickChart className="h-3.5 w-3.5" />
@@ -343,7 +334,7 @@ export default function FullChartDialog({
                 onClick={() => setChartType('area')}
                 className={cn(
                   'flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold transition-colors',
-                  chartType === 'area' ? 'bg-white/15 text-white' : 'text-white/50 hover:text-white',
+                  chartType === 'area' ? 'bg-foreground/15 text-foreground' : 'text-foreground/50 hover:text-foreground',
                 )}
               >
                 <AreaChartIcon className="h-3.5 w-3.5" />
@@ -352,14 +343,14 @@ export default function FullChartDialog({
             </div>
 
             {/* Timeframe */}
-            <div className="flex items-center rounded-xl border border-white/10 bg-black/30 p-1">
+            <div className="flex items-center rounded-xl border border-foreground/10 bg-background/60 p-1">
               {(['1D', '5D', '1M', '6M', '1Y'] as (keyof MainChartData)[]).map(tf => (
                 <button
                   key={tf}
                   onClick={() => setTimeframe(tf)}
                   className={cn(
                     'px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors',
-                    tf === timeframe ? 'bg-white/15 text-white' : 'text-white/60 hover:text-white hover:bg-white/10',
+                    tf === timeframe ? 'bg-foreground/15 text-foreground' : 'text-foreground/60 hover:text-foreground hover:bg-foreground/10',
                   )}
                 >
                   {tf}
@@ -370,41 +361,41 @@ export default function FullChartDialog({
             {/* Indicators dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 bg-transparent text-white border-white/20 hover:bg-white/10 hover:text-white">
+                <Button variant="outline" size="sm" className="h-8 bg-transparent text-foreground border-foreground/20 hover:bg-foreground/10 hover:text-foreground">
                   <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
                   Indicators
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-[#050505] border-[#1f1f1f] text-white" align="end">
-                <DropdownMenuCheckboxItem checked={showMA}  onCheckedChange={setShowMA}  className="focus:bg-white/10 focus:text-white cursor-pointer">Moving Average (MA 20)</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem checked={showRSI} onCheckedChange={setShowRSI} className="focus:bg-white/10 focus:text-white cursor-pointer">Relative Strength Index (RSI 14)</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem checked={showADL} onCheckedChange={setShowADL} className="focus:bg-white/10 focus:text-white cursor-pointer">Accum/Dist Line (ADL)</DropdownMenuCheckboxItem>
+              <DropdownMenuContent className="w-56 bg-background border-border text-foreground" align="end">
+                <DropdownMenuCheckboxItem checked={showMA}  onCheckedChange={setShowMA}  className="focus:bg-foreground/10 focus:text-foreground cursor-pointer">Moving Average (MA 20)</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem checked={showRSI} onCheckedChange={setShowRSI} className="focus:bg-foreground/10 focus:text-foreground cursor-pointer">Relative Strength Index (RSI 14)</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem checked={showADL} onCheckedChange={setShowADL} className="focus:bg-foreground/10 focus:text-foreground cursor-pointer">Accum/Dist Line (ADL)</DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="text-white/60 hover:bg-white/10 hover:text-white rounded-xl">
+            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="text-foreground/60 hover:bg-foreground/10 hover:text-foreground rounded-xl">
               <XIcon className="h-5 w-5" />
             </Button>
           </div>
         </div>
 
         {/* ── chart area ────────────────────────────────────────────────────── */}
-        <div className="flex-1 w-full bg-[#000000] flex flex-col overflow-hidden min-h-0">
+        <div className="flex-1 w-full bg-background flex flex-col overflow-hidden min-h-0">
           <div className="flex-1 w-full relative min-h-0">
             <div className="absolute inset-0" ref={setChartEl} />
             {!chartData[timeframe]?.length && <ChartUnavailable />}
           </div>
 
           {showRSI && (
-            <div className="h-40 w-full border-t border-[#1f1f1f] relative flex flex-col shrink-0">
-              <span className="absolute top-2 left-4 z-10 text-[#d4d4d4] text-xs font-semibold">RSI (14)</span>
+            <div className="h-40 w-full border-t border-border relative flex flex-col shrink-0">
+              <span className="absolute top-2 left-4 z-10 text-foreground/80 text-xs font-semibold">RSI (14)</span>
               <div className="flex-1 w-full" ref={rsiContainerRef} />
             </div>
           )}
 
           {showADL && (
-            <div className="h-40 w-full border-t border-[#1f1f1f] relative flex flex-col shrink-0">
-              <span className="absolute top-2 left-4 z-10 text-[#facc15] text-xs font-semibold">Accum/Dist (ADL)</span>
+            <div className="h-40 w-full border-t border-border relative flex flex-col shrink-0">
+              <span className="absolute top-2 left-4 z-10 text-warn text-xs font-semibold">Accum/Dist (ADL)</span>
               <div className="flex-1 w-full" ref={adlContainerRef} />
             </div>
           )}

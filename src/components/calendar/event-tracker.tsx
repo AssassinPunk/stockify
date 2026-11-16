@@ -29,7 +29,7 @@ const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ?
 const whenTone = (event: TrackedEvent) =>
   event.diff > URGENT_DAYS
     ? 'text-muted-foreground'
-    : event.impact === 'High' ? 'font-medium text-amber-400' : 'font-medium text-foreground';
+    : event.impact === 'High' ? 'font-medium text-warn' : 'font-medium text-foreground';
 
 function Description({ text }: { text?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -106,7 +106,7 @@ function NextUp({ events, region }: { events: TrackedEvent[]; region: RegionFilt
         <h2 className="text-base font-semibold">Next high-impact event</h2>
         <div className="mt-3 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-[auto_minmax(0,1fr)]">
           <div className="flex items-baseline gap-3 sm:block">
-            <p className={cn('text-[32px] font-semibold leading-9 tracking-tight tabular-nums', lead.diff <= URGENT_DAYS && 'text-amber-400')}>
+            <p className={cn('text-[32px] font-semibold leading-9 tracking-tight tabular-nums', lead.diff <= URGENT_DAYS && 'text-warn')}>
               {countdownFigure(lead.diff)}
             </p>
             <p className="text-sm tabular-nums text-muted-foreground sm:mt-1">{formatDay(lead.date)}</p>

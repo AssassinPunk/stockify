@@ -269,3 +269,40 @@
   .why-list { grid-template-columns: minmax(0, 1fr); }
   .footer-top { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Light theme: the room turns to paper, and the product's own screens stay lit dark, the way a
+   screenshot of the app would. The FinPilot field keeps its own dark teal for the same reason. */
+html:not(.dark) .landing {
+  --bg: #f4f6f5;
+  --surface: #ffffff;
+  --surface-2: #e7ebe9;
+  --ink: #0c1210;
+  --muted: #4b5852;
+  --accent: #059669;
+  --up: #15803d;
+  --down: #b91c1c;
+  --risk: #a16207;
+}
+html:not(.dark) .landing [data-ui],
+html:not(.dark) .landing .field-pilot,
+html:not(.dark) .landing .journey-self {
+  --bg: #060807;
+  --surface: #0f1312;
+  --surface-2: #171c1a;
+  --ink: #f3f6f4;
+  --muted: #aeb8b3;
+  --accent: #10b981;
+  --up: #22c55e;
+  --down: #f87171;
+  --risk: #facc15;
+  color: var(--ink);
+}
+html:not(.dark) .landing .btn-quiet:hover { background: #d8dedb; }
+html:not(.dark) .landing .field-pilot .btn-quiet:hover { background: #232a27; }
+
+/* Theme switch in the nav */
+.nav-theme { display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; background: var(--surface-2); color: var(--ink); border: 0; border-radius: 999px; cursor: pointer; }
+.nav-theme svg { width: 20px; height: 20px; }
+.nav-theme .icon-sun { display: none; }
+.dark .nav-theme .icon-sun { display: block; }
+.dark .nav-theme .icon-moon { display: none; }

@@ -6,7 +6,6 @@ import {
   CandlestickSeries,
   AreaSeries,
   LineSeries,
-  ColorType,
   CrosshairMode,
   IChartApi,
 } from 'lightweight-charts';
@@ -16,9 +15,8 @@ import { cn } from '@/lib/utils';
 import type { MainChartData } from '@/lib/types';
 import ChartUnavailable from './chart-unavailable';
 import { mergeChartData } from '@/lib/chart-data';
+import { chartTheme } from '@/lib/chart-theme';
 
-const CHART_BG   = '#050505';
-const GRID_COLOR = '#1c1c1c';
 
 const TIMEFRAMES = ['1D', '5D', '1M', '6M', '1Y'] as const;
 type TF = typeof TIMEFRAMES[number];
@@ -75,8 +73,11 @@ export default function CommodityChart({
 
     let destroyed = false;
     let initDone  = false;
+    let themed: ReturnType<typeof chartTheme> | null = null;
 
     const cleanup = () => {
+      themed?.dispose();
+      themed = null;
       chartRef.current?.remove();
       chartRef.current  = null;
       seriesRef.current = null;
@@ -92,41 +93,36 @@ export default function CommodityChart({
       const points = [...(data[timeframe] ?? [])]
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-      const chart = createChart(el, {
+      const ct = chartTheme('well');
+      themed = ct;
+      const chart = ct.chart(createChart(el, {
+        ...ct.frame,
         autoSize: true,
-        layout: { background: { type: ColorType.Solid, color: CHART_BG }, textColor: '#888' },
-        grid: { vertLines: { color: GRID_COLOR }, horzLines: { color: GRID_COLOR } },
-        rightPriceScale: { borderColor: GRID_COLOR },
         crosshair: { mode: CrosshairMode.Normal },
         timeScale: {
-          borderColor: GRID_COLOR,
+          ...ct.frame.timeScale,
           timeVisible: timeframe === '1D' || timeframe === '5D',
           secondsVisible: false,
           fixLeftEdge: true,
           fixRightEdge: true,
         },
-      });
+      }));
       chartRef.current = chart;
 
       if (chartType === 'candle') {
         const candles = points.map(d => ({
           time: toTime(d.date), open: d.open, high: d.high, low: d.low, close: d.close,
         }));
-        const s = chart.addSeries(CandlestickSeries, {
-          upColor: '#10b981', downColor: '#ef4444',
+        const s = ct.series(chart.addSeries(CandlestickSeries, {
           borderVisible: false,
-          wickUpColor: '#10b981', wickDownColor: '#ef4444',
-        } as any);
+        } as any), p => ({ upColor: p.up, downColor: p.down, wickUpColor: p.up, wickDownColor: p.down }));
         s.setData(candles as any);
         seriesRef.current = s;
       } else {
         const areaData = points.map(d => ({ time: toTime(d.date), value: d.value }));
-        const s = chart.addSeries(AreaSeries, {
-          lineColor: '#d4d4d4',
-          topColor: 'rgba(99,102,241,0.35)',
-          bottomColor: 'rgba(99,102,241,0)',
+        const s = ct.series(chart.addSeries(AreaSeries, {
           lineWidth: 2,
-        } as any);
+        } as any), p => ({ lineColor: p.line, topColor: p.areaTop, bottomColor: p.areaBottom }));
         s.setData(areaData as any);
         seriesRef.current = s;
       }
@@ -190,11 +186,11 @@ export default function CommodityChart({
 
       <CardContent className="flex-1 p-0 min-h-0">
         {loading ? (
-          <div className="flex h-[500px] items-center justify-center" style={{ background: CHART_BG }}>
+          <div className="flex h-[500px] items-center justify-center bg-[hsl(var(--chart-well))]">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <div className="relative w-full rounded-b-2xl" style={{ height: 500, background: CHART_BG }}>
+          <div className="relative w-full rounded-b-2xl bg-[hsl(var(--chart-well))]" style={{ height: 500 }}>
             <div ref={containerRef} className="h-full w-full" />
             {!data?.[timeframe]?.length && <ChartUnavailable />}
           </div>

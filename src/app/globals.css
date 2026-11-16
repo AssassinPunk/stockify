@@ -3,7 +3,67 @@
 @tailwind utilities;
 
 @layer base {
-  :root, .dark {
+  /* Light theme. Same roles as the dark theme below: a tinted ground, cards one step lighter than it,
+     ink for the accents. Greens, reds and ambers are darker here so they still read as text on white. */
+  :root {
+    color-scheme: light;
+
+    --background: 0 0% 96%;
+    --foreground: 0 0% 9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 91%;
+    --secondary-foreground: 0 0% 9%;
+
+    --muted: 0 0% 91%;
+    --muted-foreground: 0 0% 38%;
+
+    --accent: 0 0% 93%;
+    --accent-foreground: 0 0% 9%;
+
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 87%;
+    --input: 0 0% 84%;
+    --ring: 0 0% 30%;
+
+    --radius: 0.75rem;
+
+    --up: 142 72% 27%;
+    --down: 0 72% 43%;
+    --warn: 26 90% 37%;
+    --high: 17 88% 40%;
+
+    /* Fear & Greed: the two milder bands and the middle one */
+    --zone-fear: 0 45% 42%;
+    --zone-neutral: 0 0% 40%;
+    --zone-greed: 142 40% 30%;
+
+    --chart-well: 0 0% 98%;     /* the plot area inside a chart card */
+    --shadow-strength: 0.14;    /* drawn shadows in the VIX gauge */
+
+    --sidebar-background: 0 0% 96%;
+    --sidebar-foreground: 0 0% 9%;
+    --sidebar-primary: 0 0% 9%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 90%;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 87%;
+    --sidebar-ring: 0 0% 30%;
+  }
+
+  .dark {
+    color-scheme: dark;
+
     --background: 0 0% 0%; /* Pure pitch black */
     --foreground: 0 0% 98%;
 
@@ -34,8 +94,17 @@
     
     --radius: 0.75rem;
 
-    --up: 142 71% 45%; 
+    --up: 142 71% 45%;
     --down: 0 84% 60%;
+    --warn: 43 96% 56%;
+    --high: 27 96% 61%;
+
+    --zone-fear: 0 45% 62%;
+    --zone-neutral: 0 0% 62%;
+    --zone-greed: 142 35% 55%;
+
+    --chart-well: 0 0% 2%;
+    --shadow-strength: 0.55;
 
     /* Sidebar specific integration */
     --sidebar-background: 0 0% 0%;
@@ -66,4 +135,68 @@
 @keyframes ticker-scroll-h {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+/* People who ask their system for less motion get none of the decorative kind: animations and transitions
+   finish at once, and nothing loops. Written once here so it covers every page and anything added later. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* A loading spinner still has to read as loading, so it keeps turning, slowly. */
+  .animate-spin {
+    animation-duration: 3s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+/* Theme switch: the "price-line reveal" (see src/hooks/use-theme-transition.ts).
+   The browser's default cross-fade is switched off; the new theme sits on top and is uncovered by a
+   clip-path that the hook animates. The accent line is its own layer so the clip never cuts it. */
+html[data-theme-transition]::view-transition-old(root),
+html[data-theme-transition]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html[data-theme-transition]::view-transition-old(root) { z-index: 0; }
+html[data-theme-transition]::view-transition-new(root) { z-index: 1; }
+
+.theme-reveal-line {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  view-transition-name: theme-reveal-line;
+}
+::view-transition-group(theme-reveal-line),
+::view-transition-old(theme-reveal-line),
+::view-transition-new(theme-reveal-line) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-group(theme-reveal-line) { z-index: 2; }
+
+.theme-reveal-line path {
+  fill: none;
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+.theme-reveal-line .theme-reveal-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: theme-reveal-pulse 0.9s ease-out infinite;
+}
+@keyframes theme-reveal-pulse {
+  0%   { transform: scale(1);   opacity: 0.55; }
+  100% { transform: scale(3.2); opacity: 0; }
 }

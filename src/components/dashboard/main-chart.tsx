@@ -6,7 +6,6 @@ import {
   CandlestickSeries,
   AreaSeries,
   LineSeries,
-  ColorType,
   CrosshairMode,
   IChartApi,
 } from 'lightweight-charts';
@@ -33,24 +32,9 @@ import ChartUnavailable from './chart-unavailable';
 import { mergeChartData } from '@/lib/chart-data';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { calculateMA, calculateRSI } from '@/lib/indicators';
+import { chartPalette, chartTheme } from '@/lib/chart-theme';
+import { useTheme } from '@/lib/theme';
 
-const CHART_BG = '#111111';
-const GRID_COLOR = '#1c1c1c';
-
-const BASE_CHART_OPTS = {
-  layout: {
-    background: { type: ColorType.Solid, color: CHART_BG },
-    textColor: '#888888',
-  },
-  grid: {
-    vertLines: { color: GRID_COLOR },
-    horzLines: { color: GRID_COLOR },
-  },
-  rightPriceScale: { borderColor: GRID_COLOR },
-  crosshair: { mode: CrosshairMode.Normal },
-};
-
-const COMPARE_COLORS = ['#3b82f6', '#f59e0b', '#22d3ee', '#ec4899', '#14b8a6'];
 
 const toTime = (date: string): number => Math.floor(new Date(date).getTime() / 1000);
 function last<T>(arr: T[]): T | undefined { return arr.length ? arr[arr.length - 1] : undefined; }
@@ -62,6 +46,7 @@ export default function MainChart({
   ticker: Ticker;
   chartData: MainChartData;
 }) {
+  const compareColors = chartPalette(useTheme()).compare;
   const allTickers = useMemo(() => getAllTickers(), []);
 
   const [currentTicker, setCurrentTicker] = useState<Ticker>(initialTicker);
@@ -106,8 +91,12 @@ export default function MainChart({
 
     let destroyed = false;
     let initDone  = false;
+    // Hands out this theme's colours and re-colours the chart when the theme changes.
+    let themed: ReturnType<typeof chartTheme> | null = null;
 
     const cleanUp = () => {
+      themed?.dispose();
+      themed = null;
       chartRef.current?.remove();
       rsiChartRef.current?.remove();
       chartRef.current    = null;
@@ -128,42 +117,38 @@ export default function MainChart({
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
       // ── main chart ──
-      const chart = createChart(el, {
-        ...BASE_CHART_OPTS,
+      const ct = chartTheme('card');
+      themed = ct;
+      const chart = ct.chart(createChart(el, {
+        ...ct.frame,
+        crosshair: { mode: CrosshairMode.Normal },
         autoSize: true,
         timeScale: {
-          borderColor: GRID_COLOR,
+          ...ct.frame.timeScale,
           timeVisible: timeframe === '1D' || timeframe === '5D',
           secondsVisible: false,
           fixLeftEdge: true,
           fixRightEdge: true,
         },
-      });
+      }));
       chartRef.current = chart;
 
       if (chartType === 'candle') {
         const candles = dataPoints.map(d => ({
           time: toTime(d.date), open: d.open, high: d.high, low: d.low, close: d.close,
         }));
-        const series = chart.addSeries(CandlestickSeries, {
-          upColor:       '#10b981',
-          downColor:     '#ef4444',
-          wickUpColor:   '#10b981',
-          wickDownColor: '#ef4444',
+        const series = ct.series(chart.addSeries(CandlestickSeries, {
           borderVisible: false,
-        } as any);
+        } as any), p => ({ upColor: p.up, downColor: p.down, wickUpColor: p.up, wickDownColor: p.down }));
         series.setData(candles as any);
         mainSeriesRef.current = series;
         liveBarRef.current    = last(candles) ?? null;
       } else {
         const areaData = dataPoints.map(d => ({ time: toTime(d.date), value: d.value }));
-        const series   = chart.addSeries(AreaSeries, {
-          lineColor:       '#d4d4d4',
-          topColor:        'rgba(99,102,241,0.35)',
-          bottomColor:     'rgba(99,102,241,0)',
+        const series   = ct.series(chart.addSeries(AreaSeries, {
           lineWidth:       2,
           crosshairMarkerVisible: true,
-        } as any);
+        } as any), p => ({ lineColor: p.line, topColor: p.areaTop, bottomColor: p.areaBottom }));
         series.setData(areaData as any);
         mainSeriesRef.current = series;
         liveBarRef.current    = last(areaData) ?? null;
@@ -174,13 +159,12 @@ export default function MainChart({
         const maData = calculateMA(dataPoints, 20)
           .filter(d => d.value !== null)
           .map(d => ({ time: toTime(d.date), value: d.value as number }));
-        const maSeries = chart.addSeries(LineSeries, {
-          color: 'rgba(251,191,36,0.9)',
+        const maSeries = ct.series(chart.addSeries(LineSeries, {
           lineWidth: 1,
           crosshairMarkerVisible: false,
           lastValueVisible: false,
           priceLineVisible: false,
-        } as any);
+        } as any), p => ({ color: p.average }));
         maSeries.setData(maData as any);
       }
 
@@ -190,32 +174,32 @@ export default function MainChart({
         if (!compData?.length) return;
         const sorted = [...compData].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         const lineData = sorted.map(d => ({ time: toTime(d.date), value: d.value }));
-        const compSeries = chart.addSeries(LineSeries, {
-          color:     COMPARE_COLORS[idx % COMPARE_COLORS.length],
+        const compSeries = ct.series(chart.addSeries(LineSeries, {
           lineWidth: 1.5,
           crosshairMarkerVisible: false,
           lastValueVisible: false,
           priceLineVisible: false,
-        } as any);
+        } as any), p => ({ color: p.compare[idx % p.compare.length] }));
         compSeries.setData(lineData as any);
       });
 
       // ── RSI pane ──
       if (showRSI && rsiContainerRef.current) {
-        const rsiChart = createChart(rsiContainerRef.current, {
-          ...BASE_CHART_OPTS,
+        const rsiChart = ct.chart(createChart(rsiContainerRef.current, {
+          ...ct.frame,
+          crosshair: { mode: CrosshairMode.Normal },
           autoSize: true,
-          timeScale: { borderColor: GRID_COLOR, timeVisible: false, secondsVisible: false },
-        });
+          timeScale: { ...ct.frame.timeScale, timeVisible: false, secondsVisible: false },
+        }));
         rsiChartRef.current = rsiChart;
 
         const rsiData = calculateRSI(dataPoints, 14)
           .filter(d => d.value !== null)
           .map(d => ({ time: toTime(d.date), value: d.value as number }));
 
-        const rsiSeries = rsiChart.addSeries(LineSeries, {
-          color: '#d4d4d4', lineWidth: 1.5,
-        } as any);
+        const rsiSeries = ct.series(rsiChart.addSeries(LineSeries, {
+          lineWidth: 1.5,
+        } as any), p => ({ color: p.line }));
         rsiSeries.setData(rsiData as any);
 
         // sync time scales
@@ -400,7 +384,7 @@ export default function MainChart({
               <span
                 key={s}
                 className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
-                style={{ borderColor: COMPARE_COLORS[i % COMPARE_COLORS.length], color: COMPARE_COLORS[i % COMPARE_COLORS.length] }}
+                style={{ borderColor: compareColors[i % compareColors.length], color: compareColors[i % compareColors.length] }}
               >
                 {s}
                 <button onClick={() => handleRemoveComparison(s)}>
@@ -414,12 +398,12 @@ export default function MainChart({
 
       {/* ── chart area ──────────────────────────────────────────────────────── */}
       <CardContent className="p-0 flex flex-col overflow-hidden rounded-b-2xl">
-        <div className="relative h-[280px] w-full xl:h-[400px]" style={{ background: CHART_BG }}>
+        <div className="relative h-[280px] w-full bg-card xl:h-[400px]">
           <div className="h-full w-full" ref={chartContainerRef} />
           {!currentData[timeframe]?.length && <ChartUnavailable />}
         </div>
         {showRSI && (
-          <div className="h-28 shrink-0 border-t border-[#1c1c1c] relative">
+          <div className="h-28 shrink-0 border-t border-border relative">
             <span className="absolute top-1.5 left-3 z-10 text-xs font-medium text-muted-foreground">RSI (14)</span>
             <div className="h-full w-full" ref={rsiContainerRef} />
           </div>

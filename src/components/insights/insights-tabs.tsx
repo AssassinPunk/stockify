@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Globe, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatChange, formatNumber } from '@/lib/format';
-import { getRiskLevel } from '@/lib/vix';
+import { getRiskLevel, riskTint } from '@/lib/vix';
 import AiBriefCard from './ai-brief-card';
 import IntlAiBriefCard from './intl-ai-brief-card';
 import SectorCard from './sector-card';
@@ -54,7 +54,7 @@ function VixChip({ vix }: { vix: VixData }) {
         {hasData && (
           <span
             className="shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold uppercase"
-            style={{ color: risk.hex, backgroundColor: `${risk.hex}20` }}
+            style={{ color: risk.hex, backgroundColor: riskTint(risk, 0.125) }}
           >
             {risk.level}
           </span>

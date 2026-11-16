@@ -5,7 +5,7 @@ import { regionOf } from '@/lib/calendar';
 type Impact = CalendarEvent['impact'];
 
 const LEVEL: Record<Impact, number> = { High: 3, Medium: 2, Low: 1 };
-const FILL: Record<Impact, string> = { High: 'bg-amber-400', Medium: 'bg-amber-400/70', Low: 'bg-muted-foreground' };
+const FILL: Record<Impact, string> = { High: 'bg-warn', Medium: 'bg-warn/70', Low: 'bg-muted-foreground' };
 
 // Impact reads from the number of bars and the word as well as the colour. Amber keeps green and red
 // for gains and losses, as on the rest of Stockify.
@@ -33,8 +33,8 @@ export function ImpactTick({ impact, dim = false }: { impact: Impact; dim?: bool
       aria-hidden="true"
       className={cn(
         'block h-3.5 w-1 flex-none rounded-[1px]',
-        impact === 'High' && 'bg-amber-400',
-        impact === 'Medium' && 'border border-amber-400',
+        impact === 'High' && 'bg-warn',
+        impact === 'Medium' && 'border border-warn',
         impact === 'Low' && 'border border-muted-foreground',
         dim && 'opacity-25',
       )}

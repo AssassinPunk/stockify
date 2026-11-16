@@ -5,7 +5,6 @@ import {
   createChart,
   LineSeries,
   CandlestickSeries,
-  ColorType,
   CrosshairMode,
   IChartApi,
 } from 'lightweight-charts';
@@ -18,14 +17,12 @@ import { getAllTickers } from '@/lib/data';
 import type { Ticker, MainChartData, ChartDataPoint } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import ChartUnavailable from './chart-unavailable';
+import { chartPalette, chartTheme } from '@/lib/chart-theme';
+import { useTheme } from '@/lib/theme';
 
 type Timeframe = '1M' | '6M' | '1Y';
 type ChartType = 'line' | 'candle';
 
-const COLOR_A = '#ffffff';
-const COLOR_B = '#f59e0b';
-const CHART_BG   = '#050505';
-const GRID_COLOR = '#1c1c1c';
 
 // ── Normalise to base-100 at period start ────────────────────────────────────
 function getBase(data: ChartDataPoint[]) {
@@ -113,8 +110,11 @@ export default function CompareChart({ ticker }: { ticker: Ticker }) {
 
     let destroyed = false;
     let initDone  = false;
+    let themed: ReturnType<typeof chartTheme> | null = null;
 
     const cleanup = () => {
+      themed?.dispose();
+      themed = null;
       chartRef.current?.remove();
       chartRef.current = null;
     };
@@ -129,22 +129,23 @@ export default function CompareChart({ ticker }: { ticker: Ticker }) {
       const rawA = dataA[timeframe];
       const rawB = dataB ? dataB[timeframe] : null;
 
-      const chart = createChart(el, {
+      const ct = chartTheme('well');
+      themed = ct;
+      const chart = ct.chart(createChart(el, {
+        ...ct.frame,
         autoSize: true,
-        layout: { background: { type: ColorType.Solid, color: CHART_BG }, textColor: '#888' },
-        grid:   { vertLines: { color: GRID_COLOR }, horzLines: { color: GRID_COLOR } },
         rightPriceScale: {
-          borderColor: GRID_COLOR,
+          ...ct.frame.rightPriceScale,
           // Format Y-axis as +X% / -X%
           mode: 0,
         },
         crosshair: { mode: CrosshairMode.Normal },
         timeScale: {
-          borderColor: GRID_COLOR,
+          ...ct.frame.timeScale,
           timeVisible: false,
           secondsVisible: false,
         },
-      });
+      }));
       chartRef.current = chart;
 
       // Custom price formatter: show (value - 100) as %
@@ -158,38 +159,32 @@ export default function CompareChart({ ticker }: { ticker: Ticker }) {
       });
 
       if (chartType === 'line') {
-        const serA = chart.addSeries(LineSeries, {
-          color: COLOR_A, lineWidth: 2,
+        const serA = ct.series(chart.addSeries(LineSeries, {
+          lineWidth: 2,
           priceLineVisible: false, lastValueVisible: false,
-        } as any);
+        } as any), p => ({ color: p.line }));
         serA.setData(normLine(rawA) as any);
 
         if (rawB) {
-          const serB = chart.addSeries(LineSeries, {
-            color: COLOR_B, lineWidth: 2,
+          const serB = ct.series(chart.addSeries(LineSeries, {
+            lineWidth: 2,
             priceLineVisible: false, lastValueVisible: false,
-          } as any);
+          } as any), p => ({ color: p.average }));
           serB.setData(normLine(rawB) as any);
         }
       } else {
-        const serA = chart.addSeries(CandlestickSeries, {
-          upColor: '#10b981', downColor: '#ef4444',
+        const serA = ct.series(chart.addSeries(CandlestickSeries, {
           borderVisible: false,
-          wickUpColor: '#10b981', wickDownColor: '#ef4444',
           priceLineVisible: false, lastValueVisible: false,
-        } as any);
+        } as any), p => ({ upColor: p.up, downColor: p.down, wickUpColor: p.up, wickDownColor: p.down }));
         serA.setData(normCandle(rawA) as any);
 
         if (rawB) {
-          const serB = chart.addSeries(CandlestickSeries, {
+          const serB = ct.series(chart.addSeries(CandlestickSeries, {
             upColor:         'transparent',
             downColor:       'transparent',
-            borderUpColor:   COLOR_B,
-            borderDownColor: COLOR_B,
-            wickUpColor:     COLOR_B,
-            wickDownColor:   COLOR_B,
             priceLineVisible: false, lastValueVisible: false,
-          } as any);
+          } as any), p => ({ borderUpColor: p.average, borderDownColor: p.average, wickUpColor: p.average, wickDownColor: p.average }));
           serB.setData(normCandle(rawB) as any);
         }
       }
@@ -203,6 +198,8 @@ export default function CompareChart({ ticker }: { ticker: Ticker }) {
 
     return () => { destroyed = true; ro.disconnect(); cleanup(); };
   }, [dataA, dataB, timeframe, chartType, symbolB]);
+
+  const palette = chartPalette(useTheme());
 
   // ── return values for badges ─────────────────────────────────────────────
   const { retA, retB } = useMemo(() => {
@@ -276,11 +273,11 @@ export default function CompareChart({ ticker }: { ticker: Ticker }) {
 
         {symbolB && (
           <div className="flex flex-wrap items-center gap-2 pt-1">
-            <ReturnBadge symbol={ticker.symbol} ret={retA} color={COLOR_A} />
-            {retB !== null && <ReturnBadge symbol={symbolB} ret={retB} color={COLOR_B} />}
+            <ReturnBadge symbol={ticker.symbol} ret={retA} color={palette.line} />
+            {retB !== null && <ReturnBadge symbol={symbolB} ret={retB} color={palette.average} />}
             {chartType === 'candle' && (
               <span className="text-[10px] text-muted-foreground">
-                White candles = {ticker.symbol} · Amber outline = {symbolB}
+                Filled candles = {ticker.symbol} · Outlined = {symbolB}
               </span>
             )}
           </div>
@@ -297,7 +294,7 @@ export default function CompareChart({ ticker }: { ticker: Ticker }) {
             <p className="text-[11px] opacity-60">Both stocks normalised to 100 at period start</p>
           </div>
         ) : (
-          <div className="relative w-full rounded-b-2xl" style={{ height: 280, background: CHART_BG }}>
+          <div className="relative w-full rounded-b-2xl bg-[hsl(var(--chart-well))]" style={{ height: 280 }}>
             <div ref={containerRef} className="h-full w-full" />
             {(!dataA?.[timeframe]?.length || !dataB?.[timeframe]?.length) && <ChartUnavailable />}
           </div>

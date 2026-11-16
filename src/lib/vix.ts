@@ -15,13 +15,19 @@ export function calculateVixMoves(vixValue: number) {
 export function getRiskLevel(vixValue: number): {
   level: 'Low' | 'Moderate' | 'High' | 'Extreme';
   color: string;
-  hex: string;
+  hex: string; // a CSS colour that follows the theme, not a literal hex any more
+  tone: string;
 } {
-  if (vixValue < 13)  return { level: 'Low',      color: 'text-up',          hex: '#10b981' };
-  if (vixValue < 18)  return { level: 'Moderate',  color: 'text-yellow-400',  hex: '#facc15' };
-  if (vixValue < 25)  return { level: 'High',       color: 'text-orange-400',  hex: '#fb923c' };
-  return               { level: 'Extreme',   color: 'text-down',        hex: '#ef4444' };
+  const level = (name: 'Low' | 'Moderate' | 'High' | 'Extreme', color: string, tone: string) =>
+    ({ level: name, color, tone, hex: `hsl(var(${tone}))` });
+  if (vixValue < 13)  return level('Low',      'text-up',   '--up');
+  if (vixValue < 18)  return level('Moderate', 'text-warn', '--warn');
+  if (vixValue < 25)  return level('High',     'text-high', '--high');
+  return level('Extreme', 'text-down', '--down');
 }
+
+// The risk colour at a given strength, for tinted backgrounds and borders.
+export const riskTint = (risk: { tone: string }, alpha: number) => `hsl(var(${risk.tone}) / ${alpha})`;
 
 export function getVixAnchors(data: ChartDataPoint[]) {
   if (!data.length) return { high: 0, low: 0, avg: 0 };

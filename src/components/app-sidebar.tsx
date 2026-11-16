@@ -105,7 +105,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader className="h-16 flex items-center justify-center border-b border-sidebar-border" onClick={closeOnLink}>
         <Link
           href="/"
-          className="flex items-center gap-2 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring rounded-md px-2 py-1 hover:text-white transition-colors"
+          className="flex items-center gap-2 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring rounded-md px-2 py-1 hover:text-sidebar-accent-foreground transition-colors"
           aria-label="Go to Stockify home"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">

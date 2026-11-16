@@ -4,14 +4,14 @@ import type { FearGreedData } from '@/app/api/fear-greed/route';
 // Red and green at two strengths with grey between, so the extremes read loudest and no extra hues appear.
 export const ZONES = [
   { name: 'Extreme Fear',  range: '0–20',   from: 0,  to: 20,  color: 'hsl(var(--down))' },
-  { name: 'Fear',          range: '21–40',  from: 20, to: 40,  color: 'hsl(0 45% 62%)' },
-  { name: 'Neutral',       range: '41–60',  from: 40, to: 60,  color: 'hsl(0 0% 62%)' },
-  { name: 'Greed',         range: '61–80',  from: 60, to: 80,  color: 'hsl(142 35% 55%)' },
+  { name: 'Fear',          range: '21–40',  from: 20, to: 40,  color: 'hsl(var(--zone-fear))' },
+  { name: 'Neutral',       range: '41–60',  from: 40, to: 60,  color: 'hsl(var(--zone-neutral))' },
+  { name: 'Greed',         range: '61–80',  from: 60, to: 80,  color: 'hsl(var(--zone-greed))' },
   { name: 'Extreme Greed', range: '81–100', from: 80, to: 100, color: 'hsl(var(--up))' },
 ] as const;
 
 export const zoneColor = (label: string) =>
-  ZONES.find(zone => zone.name === label)?.color ?? 'hsl(0 0% 62%)';
+  ZONES.find(zone => zone.name === label)?.color ?? 'hsl(var(--zone-neutral))';
 
 // Exact to two decimals, because a score is a whole number and a weight a whole percent.
 export const points = (score: number, weight: number) => (score * weight) / 100;

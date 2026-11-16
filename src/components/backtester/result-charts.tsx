@@ -10,7 +10,7 @@ const GRID = 'hsl(var(--border))';
 const TICK = { fill: 'hsl(var(--muted-foreground))', fontSize: 12 };
 const UP = 'hsl(var(--up))';
 const DOWN = 'hsl(var(--down))';
-const BENCHMARK = '#fbbf24';
+const BENCHMARK = 'hsl(var(--warn))';
 const INVESTED = 'hsl(var(--muted-foreground))';
 
 function TooltipBox({ title, rows }: { title: string; rows: { name: string; color: string; value: string }[] }) {
